@@ -30,7 +30,9 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
 
     	//////// CONSTANTS for sizes, positions etc.
-    	int rowOfSourceAndDest = 0;
+    	int rowOfSource = 0;
+    	int rowOfDestination = 1;
+    	int rowOfLogFileFolder = 2;
     	int sceneWidth = 800;
     	int sceneHeight = 100;
     	
@@ -56,9 +58,20 @@ public class Main extends Application {
         grid.setHgap(5);
         
         //////// THE SOURCE
-        HBox hBox = Section1.createSectionWithSourceAndDest(grid, primaryStage, rowOfSourceAndDest);
-        grid.getChildren().addAll(hBox);
-
+        HBox sourceHBox = Section1.createHboxWithSource(grid, primaryStage);
+        grid.getChildren().addAll(sourceHBox);
+        GridPane.setConstraints(sourceHBox, 0, rowOfSource);
+        
+        ////// THE DESTINATION
+        HBox destinationHBox = Section1.createHboxWitDest(grid, primaryStage);
+        grid.getChildren().addAll(destinationHBox);
+        GridPane.setConstraints(sourceHBox, 0, rowOfDestination);
+        
+        ///// THE LOGFILEFOLDER
+        HBox logfileFolder = Section1.createHboxWitLogFileFolder(grid, primaryStage);
+        grid.getChildren().addAll(logfileFolder);
+        GridPane.setConstraints(logfileFolder, 0, rowOfLogFileFolder);
+        
         Scene scene = new Scene(grid, sceneWidth, sceneHeight);
         primaryStage.setScene(scene);
         primaryStage.show();

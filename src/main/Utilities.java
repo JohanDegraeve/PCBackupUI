@@ -20,10 +20,16 @@ package main;
 
 import java.io.File;
 
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -63,6 +69,34 @@ public class Utilities {
         
         return selectFolderButton;
 		
+	}
+	 
+	static HBox createHBoxToSelectFolder(GridPane gridPane, Stage primaryStage, String labelTextString, String labelTextWithExplanationString) {
+		
+        /// the HBox
+        HBox hBox = new HBox();
+        hBox.setSpacing(10);//  space between individual nodes in the Hbox
+        hBox.setAlignment(Pos.CENTER_LEFT);
+        GridPane.setHgrow(hBox, Priority.ALWAYS); // allows the Hbox to grow horizontally till the end of the grid
+  
+        /// the label to explain that source needs to be given
+        Label label = new Label(labelTextString ) ;
+        Utilities.addToolTip(label, labelTextString + labelTextWithExplanationString);
+        
+        /// the textfield that contains the selected source
+        TextField textField = new TextField();
+        textField.setPromptText("");
+        HBox.setHgrow(textField, Priority.ALWAYS); // Set HBox to always grow horizontally
+        textField.setMaxWidth(Double.MAX_VALUE); // Set max width to allow extension
+        
+        /// the button that allows selection of the source
+        VBox folderSelectionVBox = new VBox(Utilities.createButtonWithFileChooser("Kies", primaryStage, textField));
+
+        /// add the fields to the HBox
+        hBox.getChildren().addAll(label, folderSelectionVBox, textField);
+        
+        return hBox;
+
 	}
 	
 }

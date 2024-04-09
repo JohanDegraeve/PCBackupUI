@@ -18,18 +18,13 @@
  */
 package main;
 
-import javafx.geometry.Pos;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class Section1 {
 
-	static HBox createSectionWithSourceAndDest(GridPane gridPane, Stage primaryStage, int row) {
+	static HBox createHboxWithSource(GridPane gridPane, Stage primaryStage) {
 		
         //// texts used
         String labelTextString = "Waar bevinden zich de oorspronkelijke bestanden:\n";
@@ -37,30 +32,31 @@ public class Section1 {
         		+ " dus de bestanden en folders die gebackupped worden. Ook als je een restore doet of\n"
         		+ "als je wilt zoeken in de backup, dan blijft dit de folder met de bron bestanden.\n";
   
-        /// the HBox
-        HBox hBox = new HBox();
-        hBox.setSpacing(10);//  space between individual nodes in the Hbox
-        hBox.setAlignment(Pos.CENTER_LEFT);
-        GridPane.setHgrow(hBox, Priority.ALWAYS); // allows the Hbox to grow horizontally till the end of the grid
-  
-        /// the label to explain that source needs to be given
-        Label sourceLabel = new Label(labelTextString ) ;
-        Utilities.addToolTip(sourceLabel, labelTextString + labelTextWithExplanationString);
+        return Utilities.createHBoxToSelectFolder(gridPane, primaryStage, labelTextString, labelTextWithExplanationString);
         
-        /// the textfield that contains the selected source
-        TextField sourceTextField = new TextField();
-        sourceTextField.setPromptText("");
-        HBox.setHgrow(sourceTextField, Priority.ALWAYS); // Set HBox to always grow horizontally
-        sourceTextField.setMaxWidth(Double.MAX_VALUE); // Set max width to allow extension
-        
-        /// the button that allows selection of the source
-        VBox sourceSelectionVBox = new VBox(Utilities.createButtonWithFileChooser("Kies", primaryStage, sourceTextField));
-
-        /// add the fields to the HBox
-        hBox.getChildren().addAll(sourceLabel, sourceSelectionVBox, sourceTextField);
-        
-        return hBox;
-		
 	}
 	
+	static HBox createHboxWitDest(GridPane gridPane, Stage primaryStage) {
+		
+        //// texts used
+        String labelTextString = "Waar bevinden zich de backup folders:\n";
+        String labelTextWithExplanationString = "Dit is de folder waar de bacups komen."
+        		+ "Elke nieuwe incrementele of volledige backup komt in een subfolder van deze folder.\n"
+        		+ "Restores gebeuren vanuit deze backup folders. Zoeken naar bestanden gebeurt ook in deze backup folders.\n";
+  
+        return Utilities.createHBoxToSelectFolder(gridPane, primaryStage, labelTextString, labelTextWithExplanationString);
+        
+	}
+	
+	static HBox createHboxWitLogFileFolder(GridPane gridPane, Stage primaryStage) {
+		
+        //// texts used
+        String labelTextString = "In welke folder mogen de logs weggeschreven worden:\n";
+        String labelTextWithExplanationString = "Dit is de folder waar de logs komen."
+        		+ "De logs zijn tekst bestanden die info geven over het backup proces.\n";
+  
+        return Utilities.createHBoxToSelectFolder(gridPane, primaryStage, labelTextString, labelTextWithExplanationString);
+        
+	}
+
 }
