@@ -31,6 +31,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -42,7 +43,7 @@ public class Utilities {
         Tooltip.install(node, tooltip);
     }
 	
-	static Button createButtonWithFileChooser(String buttonTextString, Stage stage, TextField textField) {
+	static Button createButtonWithDirectoryChooser(String buttonTextString, Stage stage, TextField textField) {
 		
 		Button selectFolderButton = new Button(buttonTextString);
 
@@ -53,7 +54,7 @@ public class Utilities {
             DirectoryChooser directoryChooser = new DirectoryChooser();
 
             // Set title for the directory chooser dialog
-            directoryChooser.setTitle("Select Folder");
+            directoryChooser.setTitle("Kies map");
 
             // Show the dialog and wait for user input
             File selectedDirectory = directoryChooser.showDialog(stage);
@@ -71,7 +72,48 @@ public class Utilities {
 		
 	}
 	 
-	static HBox createHBoxToSelectFolder(GridPane gridPane, Stage primaryStage, String labelTextString, String labelTextWithExplanationString) {
+	static Button createButtonWithFileChooser(String buttonTextString, Stage stage, TextField textField) {
+		
+		Button selectFolderButton = new Button(buttonTextString);
+
+        // Add an action listener to the button
+        selectFolderButton.setOnAction(e -> {
+        	
+            // Create a DirectoryChooser
+        	FileChooser fileChooser = new FileChooser();
+
+            // Set title for the directory chooser dialog
+        	fileChooser.setTitle("Kies bestand");
+
+            // Show the dialog and wait for user input
+            File selectedFile = fileChooser.showOpenDialog(stage);
+
+            // Handle the selected directory
+            if (selectedFile != null) {
+                // Print the path of the selected directory
+                textField.setText(selectedFile.getAbsolutePath());
+            } else {
+                
+            }
+        });
+        
+        return selectFolderButton;
+		
+	}
+	 
+	static HBox createHBoxToSelectFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString) {
+		
+		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField) -> createButtonWithFileChooser(buttonTextString, stage, textField));
+		
+	}
+	
+	static HBox createHBoxToSelectFolder(Stage primaryStage, String labelTextString, String labelTextWithExplanationString) {
+
+		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField) -> createButtonWithDirectoryChooser(buttonTextString, stage, textField));
+
+	}
+	
+	private static HBox createHBoxToSelectFolderOrFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, String buttonTextString, ButtonCreator buttonCreator) {
 		
         /// the HBox
         HBox hBox = new HBox();
@@ -80,7 +122,7 @@ public class Utilities {
         GridPane.setHgrow(hBox, Priority.ALWAYS); // allows the Hbox to grow horizontally till the end of the grid
   
         /// the label to explain that source needs to be given
-        Label label = new Label(labelTextString ) ;
+        Label label = new Label(labelTextString );
         Utilities.addToolTip(label, labelTextString + labelTextWithExplanationString);
         
         /// the textfield that contains the selected source
@@ -90,7 +132,7 @@ public class Utilities {
         textField.setMaxWidth(Double.MAX_VALUE); // Set max width to allow extension
         
         /// the button that allows selection of the source
-        VBox folderSelectionVBox = new VBox(Utilities.createButtonWithFileChooser("Kies", primaryStage, textField));
+        VBox folderSelectionVBox = new VBox(buttonCreator.createButton(buttonTextString, primaryStage, textField));
 
         /// add the fields to the HBox
         hBox.getChildren().addAll(label, folderSelectionVBox, textField);
@@ -98,5 +140,10 @@ public class Utilities {
         return hBox;
 
 	}
+	
+	@FunctionalInterface
+	interface ButtonCreator {
+        Button createButton(String buttonTextString, Stage stage, TextField textField);
+    }
 	
 }

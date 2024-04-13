@@ -17,63 +17,53 @@
  * along with PCBackupUI. If not, see <https://www.gnu.org/licenses/>.
  */
 package main;
+import java.nio.channels.spi.AbstractInterruptibleChannel;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    VBox root = new VBox();
+    Stage primaryStage;
+    VBox sectionBackupParametersBox;
+
     @Override
     public void start(Stage primaryStage) {
-
-    	//////// CONSTANTS for sizes, positions etc.
-    	int rowOfSource = 0;
-    	int rowOfDestination = 1;
-    	int rowOfLogFileFolder = 2;
-    	int sceneWidth = 800;
-    	int sceneHeight = 100;
     	
-    	//////// THE TITLE
-        primaryStage.setTitle("Command Line Arguments GUI");
+    	this.primaryStage = primaryStage;
 
+    	int sceneWidth = 800;
+    	int sceneHeight = 400;
+
+    	// Create a VBox to hold all sections
+        root.setPadding(new Insets(10));
+        root.setSpacing(10);
+
+        // Create the first section
+        VBox section1 = Section1.createSection1(primaryStage);
+        root.getChildren().add(section1);
+
+        // Create a divider line between sections
+        Line divider1 = createDivider(sceneWidth);
+        root.getChildren().add(divider1);
+
+        // section2 is where user selects the action : full backup, incremental backup, restore or search
+        VBox section2 = Section2.createSection2(primaryStage, (action) -> addAndRemoveSection(action) );
+        root.getChildren().add(section2);
         
-        //////// THE GRID
-        
-        // Padding is the space between the edges of the grid and its children. 
-        // The Insets class specifies the padding from the top, right, bottom, and left edges respectively. 
-        // In this case, it sets 10 pixels of padding on all sides.
-        GridPane grid = new GridPane();
-        grid.setPadding(new Insets(10, 10, 10, 10));
-        
-        // This line sets the vertical gap between the rows of the grid. It specifies the amount of space between adjacent rows in pixels. 
-        // In this case, it sets the vertical gap to 5 pixels.
-        grid.setVgap(5);
-        
-        // This line sets the horizontal gap between the columns of the grid. Similar to setVgap(), 
-        // it specifies the amount of space between adjacent columns in pixels. Here, 
-        // it sets the horizontal gap to 5 pixels.
-        grid.setHgap(5);
-        
-        //////// THE SOURCE
-        HBox sourceHBox = Section1.createHboxWithSource(grid, primaryStage);
-        grid.getChildren().addAll(sourceHBox);
-        GridPane.setConstraints(sourceHBox, 0, rowOfSource);
-        
-        ////// THE DESTINATION
-        HBox destinationHBox = Section1.createHboxWitDest(grid, primaryStage);
-        grid.getChildren().addAll(destinationHBox);
-        GridPane.setConstraints(sourceHBox, 0, rowOfDestination);
-        
-        ///// THE LOGFILEFOLDER
-        HBox logfileFolder = Section1.createHboxWitLogFileFolder(grid, primaryStage);
-        grid.getChildren().addAll(logfileFolder);
-        GridPane.setConstraints(logfileFolder, 0, rowOfLogFileFolder);
-        
-        Scene scene = new Scene(grid, sceneWidth, sceneHeight);
+        // section backupParameters
+        sectionBackupParametersBox = SectionBackupParameters.createSectionBackupParameters(primaryStage);
+
+        // Create a scene with the VBox and set it on the primary stage
+        Scene scene = new Scene(root, sceneWidth, sceneHeight);
         primaryStage.setScene(scene);
+
+        // Show the primary stage
         primaryStage.show();
         
     }
@@ -88,6 +78,42 @@ public class Main extends Application {
             // Handle exception
         }
     }
+    
+    @FunctionalInterface
+    interface ActionHandler {
+        void handleAction(Action action);
+    }
+    
+    /**
+     * function that adds and or removes sections, depending on value of action
+     * @param action
+     */
+    private void addAndRemoveSection(Action action) {
+    	
+    	switch (action) {
+		case FULLBACKUP: {
+			
+			root.getChildren().add(sectionBackupParametersBox);
+			break;
+			
+		}
+		default:
+			throw new IllegalArgumentException("Unexpected value: " + action);
+		}
+    	
+    }
+    
+    private Line createDivider(int width) {
+        Line divider = new Line();
+        divider.setStartX(0);
+        divider.setStartY(0);
+        divider.setEndX(width - 20); // Adjust the length as needed
+        divider.setEndY(0);
+        divider.setStrokeWidth(1); // Adjust the thickness as needed
+        divider.setStyle("-fx-stroke: black;"); // Adjust the color as needed
+        return divider;
+    }
+
 
     public static void main(String[] args) {
         launch(args);
