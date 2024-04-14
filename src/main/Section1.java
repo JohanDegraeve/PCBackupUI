@@ -59,7 +59,6 @@ public class Section1 {
 		
         sourceHBoxWithFolderText = createHboxWithSource(primaryStage, sourceChanged);
         sourceHBoxWithFolderText.setSpacing(10);
-        
         completeSourceVBox.getChildren().add(sourceHBoxWithFolderText);
         section.getChildren().add(completeSourceVBox);
         
@@ -93,34 +92,11 @@ public class Section1 {
         return section;
     }
     
-    public static void addSourceWarning(String text) {addWarningToVBox(completeSourceVBox, sourceHBoxWithLabelHBox, text, sourceWarningLabel);}
+    public static void addSourceWarning(String text) {Utilities.addWarningToVBox(completeSourceVBox, sourceHBoxWithLabelHBox, text, sourceWarningLabel);}
     
-    public static void addDestWarning(String text) {addWarningToVBox(completeDestVBox, destHBoxWithLabelHBox, text, destWarningLabel);}
+    public static void addDestWarning(String text) {Utilities.addWarningToVBox(completeDestVBox, destHBoxWithLabelHBox, text, destWarningLabel);}
     
-    public static void addLogFolderWarning(String text) {addWarningToVBox(completeLogFolderVBox, logfolderHBoxWithLabelHBox, text, logFolderWarningLabel);}
-    
-    /**
-     * adds a HBox with a label  to the vBox, with red text<br>
-     * if vBox already has two nodes, then nothing is changed<br>
-     * if text = null or empty string then the label is removed
-     * @param vbox
-     * @param text
-     */
-    private static void addWarningToVBox(VBox vbox, HBox hboxWithLabel, String text, Label label) {
-    	
-    	if (text == null) {removeWarningFromVBox(vbox, hboxWithLabel);return;};
-    	if (text.length() == 0) {removeWarningFromVBox(vbox, hboxWithLabel);return;};
-    	
-    	if (vbox.getChildren().size() > 1) {return;}
-    	
-		label.setText(text);
-		vbox.getChildren().add(hboxWithLabel);
-    }
-	
-    private static void removeWarningFromVBox(VBox vBox, HBox hboxWithLabel) {
-    	if (vBox.getChildren().size() == 1) {return;}
-    	vBox.getChildren().remove(hboxWithLabel);
-    }
+    public static void addLogFolderWarning(String text) {Utilities.addWarningToVBox(completeLogFolderVBox, logfolderHBoxWithLabelHBox, text, logFolderWarningLabel);}
     
 	private static HBox createHboxWithSource(Stage primaryStage, TextFieldChanged textFieldChanged) {
 		

@@ -124,6 +124,29 @@ public class Utilities {
 
 	}
 	
+    /**
+     * adds a HBox with a label  to the vBox, with red text<br>
+     * if vBox already has two nodes, then nothing is changed<br>
+     * if text = null or empty string then the label is removed
+     * @param vbox
+     * @param text
+     */
+    static void addWarningToVBox(VBox vbox, HBox hboxWithLabel, String text, Label label) {
+    	
+    	if (text == null) {removeWarningFromVBox(vbox, hboxWithLabel);return;};
+    	if (text.length() == 0) {removeWarningFromVBox(vbox, hboxWithLabel);return;};
+    	
+    	if (vbox.getChildren().size() > 1) {return;}
+    	
+		label.setText(text);
+		vbox.getChildren().add(hboxWithLabel);
+    }
+	
+    private static void removeWarningFromVBox(VBox vBox, HBox hboxWithLabel) {
+    	if (vBox.getChildren().size() == 1) {return;}
+    	vBox.getChildren().remove(hboxWithLabel);
+    }
+	
 	private static HBox createHBoxToSelectFolderOrFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, String buttonTextString, ButtonCreator buttonCreator, TextFieldChanged textFieldChanged) {
 		
         /// the HBox
@@ -144,6 +167,7 @@ public class Utilities {
         
         // when user types something, then call textFieldChanged.handleChange(false);
         textField.addEventHandler(KeyEvent.KEY_RELEASED, event -> {
+        	String  test = textField.getText();
             textFieldChanged.handleChange(textField.getText());
         });
         

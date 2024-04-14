@@ -44,6 +44,9 @@ public class Main extends Application {
     private String sourceTextFieldTextString;
     private String destTextFieldTextString;
     private String logfileFolderTextFieldString;
+    private String excludedFileListTextFieldTextString;
+    private String excludedPathListTextFieldTextString;
+    private String folderNameMappingTextFieldTextString;
 
 	// Attributes for Section with additional backup parameters (like excluded file list)
     private VBox sectionBackupParametersBox;
@@ -73,7 +76,7 @@ public class Main extends Application {
         root.getChildren().add(section2);
         
         // section backupParameters
-        sectionBackupParametersBox = SectionBackupParameters.createSectionBackupParameters(primaryStage);
+        sectionBackupParametersBox = SectionBackupParameters.createSectionBackupParameters(primaryStage, (text) -> excludedFileListTextFieldChanged(text), (text) -> excludePathListTextFieldChanged(text), (text) -> folderNameMappingListTextFieldChanged(text));
         
         // add the submit button, initially disabled
         addSubmitButtonVBox(false);
@@ -204,6 +207,21 @@ public class Main extends Application {
     	verifySubmitButtonStatus();
     }
     
+    private void excludedFileListTextFieldChanged(String text) {
+    	excludedFileListTextFieldTextString = verifyIfFileExistsAndSetSubmitButton(text, (String textToProcess) -> SectionBackupParameters.addExcludedFileListWarning(textToProcess));
+    	verifySubmitButtonStatus();
+    }
+    
+    private void excludePathListTextFieldChanged(String text) {
+    	excludedPathListTextFieldTextString = verifyIfFileExistsAndSetSubmitButton(text, (String textToProcess) -> SectionBackupParameters.addExcludedPathListWarning(textToProcess));
+    	verifySubmitButtonStatus();
+    }
+
+    private void folderNameMappingListTextFieldChanged(String text) {
+    	folderNameMappingTextFieldTextString = verifyIfFileExistsAndSetSubmitButton(text, (String textToProcess) -> SectionBackupParameters.addFolerNameMappingListWarning(textToProcess));
+    	verifySubmitButtonStatus();
+    }
+
     /**
      * verifies if folderToVerify is a valid folder, and if yes calls processText with warning text and call verifySubmitButtonStatus
      * @param folderToVerify
@@ -231,6 +249,28 @@ public class Main extends Application {
     	return folderToVerify;
     }	
     
+    private String verifyIfFileExistsAndSetSubmitButton(String fileToVerify, ProcessText processText) {
+    	String fileDoesNotExistwarningTextString =  "Bestand niet gevonden.";
+    	String thisIsNotAFileTextString = "Dit is geen bestand.";
+    	
+    	if (fileToVerify == null || fileToVerify.length() == 0) {
+    		processText.process("");
+        	return fileToVerify;
+    	}
+    	
+    	File file = new File(fileToVerify);
+    	if (!file.exists()) {
+    		processText.process(fileDoesNotExistwarningTextString);
+    		return null;
+    	}
+    	if (!file.isFile()) {
+    		processText.process(thisIsNotAFileTextString);
+    		return null;
+    	}
+    	processText.process("");
+    	return fileToVerify;
+    }	
+    
     private void verifySubmitButtonStatus() {
     	
     	if (currentlySelectedAction == null) {
@@ -245,10 +285,13 @@ public class Main extends Application {
     				submitButton.setDisable(false);
     			} else {
     				submitButton.setDisable(true);
+    				break;
     			}
     		} else {
     			submitButton.setDisable(true);
+    			break;
     		}
+    		
     		break;
     	default:
     		break;

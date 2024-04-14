@@ -1,13 +1,28 @@
 package main;
 
+import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class SectionBackupParameters {
 
-	public static VBox createSectionBackupParameters(Stage primaryStage) {
+	private static VBox completeExcludedFileListVBox;
+	private static HBox excludedFileListHBoxWithFileText;
+	private static HBox excludedFileListHBoxWithLabelHBox;
+	private static Label excludedFileListWarningLabel;
+
+	private static VBox completeExcludedPathListVBox;
+	private static HBox excludedPathListHBoxWithFileText;
+	private static HBox excludedPathListHBoxWithLabelHBox;
+	private static Label excludedPathListWarningLabel;
+
+	private static VBox completeFolderNameMappingListVBox;
+	private static HBox folderNameMappingListHBoxWithFileText;
+	private static HBox folderNameMappingListHBoxWithLabelHBox;
+	private static Label folderNameMappingListWarningLabel;
+
+	public static VBox createSectionBackupParameters(Stage primaryStage, TextFieldChanged excludedFileListChanged, TextFieldChanged excludedPathListChanged, TextFieldChanged folderNameMappingListChanged) {
 
 		// texts for excluded file list
         String labelTextSelectExcludedFileList = "Selecteer bestand met uit te sluiten bestanden (optioneel):\n";
@@ -26,23 +41,51 @@ public class SectionBackupParameters {
 		VBox section = new VBox();
         section.setSpacing(5);
         
-        HBox hbox = Utilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedFileList, labelTextWithExplanationSelectExcludedFileList, null);
-        hbox.setSpacing(10);
-        hbox.getChildren().add(new Pane()); // Placeholder content
-        section.getChildren().add(hbox);
+        completeExcludedFileListVBox = new VBox();
+        completeExcludedPathListVBox = new VBox();
+        completeFolderNameMappingListVBox = new VBox();
+        
+        
+        excludedFileListHBoxWithFileText = Utilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedFileList, labelTextWithExplanationSelectExcludedFileList, excludedFileListChanged);
+        excludedFileListHBoxWithFileText.setSpacing(10);
+        completeExcludedFileListVBox.getChildren().add(excludedFileListHBoxWithFileText);
+        section.getChildren().add(completeExcludedFileListVBox);
 
-        hbox = Utilities.createHBoxToSelectFolder(primaryStage, labelTextSelectExcludedPathList, labelTextSelectWithExplanationExcludedPathList, null);
-        hbox.setSpacing(10);
-        hbox.getChildren().add(new Pane()); // Placeholder content
-        section.getChildren().add(hbox);
+        excludedPathListHBoxWithFileText = Utilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedPathList, labelTextSelectWithExplanationExcludedPathList, excludedPathListChanged);
+        excludedPathListHBoxWithFileText.setSpacing(10);
+        completeExcludedPathListVBox.getChildren().add(excludedPathListHBoxWithFileText);
+        section.getChildren().add(completeExcludedPathListVBox);
 
-        hbox = Utilities.createHBoxToSelectFolder(primaryStage, labelTextSelectedFolderNameMappingList, labelTextWithExplanationSelectedFolderNameMappingList, null);
-        hbox.setSpacing(10);
-        hbox.getChildren().add(new Pane()); // Placeholder content
-        section.getChildren().add(hbox);
+        folderNameMappingListHBoxWithFileText = Utilities.createHBoxToSelectFile(primaryStage, labelTextSelectedFolderNameMappingList, labelTextWithExplanationSelectedFolderNameMappingList, folderNameMappingListChanged);
+        folderNameMappingListHBoxWithFileText.setSpacing(10);
+        completeFolderNameMappingListVBox.getChildren().add(folderNameMappingListHBoxWithFileText);
+        section.getChildren().add(completeFolderNameMappingListVBox);
 
+        // intialize label and hbox that will contain the label
+        excludedFileListWarningLabel = new Label();
+        excludedFileListWarningLabel.setStyle("-fx-text-fill: red;");
+        excludedFileListHBoxWithLabelHBox = new HBox();
+        excludedFileListHBoxWithLabelHBox.getChildren().add(excludedFileListWarningLabel);
+        
+        excludedPathListWarningLabel = new Label();
+        excludedPathListWarningLabel.setStyle("-fx-text-fill: red;");
+        excludedPathListHBoxWithLabelHBox = new HBox();
+        excludedPathListHBoxWithLabelHBox.getChildren().add(excludedPathListWarningLabel);
+        
+        folderNameMappingListWarningLabel = new Label();
+        folderNameMappingListWarningLabel.setStyle("-fx-text-fill: red;");
+        folderNameMappingListHBoxWithLabelHBox = new HBox();
+        folderNameMappingListHBoxWithLabelHBox.getChildren().add(folderNameMappingListWarningLabel);
+        
+        
         return section;
         
 	}
 	
+    public static void addExcludedFileListWarning(String text) {Utilities.addWarningToVBox(completeExcludedFileListVBox, excludedFileListHBoxWithLabelHBox, text, excludedFileListWarningLabel);}
+
+    public static void addExcludedPathListWarning(String text) {Utilities.addWarningToVBox(completeExcludedPathListVBox, excludedPathListHBoxWithLabelHBox, text, excludedPathListWarningLabel);}
+
+    public static void addFolerNameMappingListWarning(String text) {Utilities.addWarningToVBox(completeFolderNameMappingListVBox, folderNameMappingListHBoxWithLabelHBox, text, folderNameMappingListWarningLabel);}
+
 }
