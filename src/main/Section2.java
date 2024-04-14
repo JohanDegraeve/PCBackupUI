@@ -5,7 +5,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import main.Main.ActionHandler;
 
 public class Section2 {
 
@@ -66,8 +65,20 @@ public class Section2 {
 			checkBox.setSelected(false);
 		}
 		
+		// this means all checkboxes are unchecked, call handleAction with action null
+		if (!clickedCheckBox.isSelected()) {
+			handleAction.handleAction(null);
+			return;
+		}
+		
 		if (clickedCheckBox.getText() == fullBackupOptionsString) {
 			handleAction.handleAction(Action.FULLBACKUP);
+		} else if (clickedCheckBox.getText() == incrementalBackupOptionString) {
+			handleAction.handleAction(Action.INCREMENTALBACKUP);
+		} else if (clickedCheckBox.getText() == searchOptionstrString) {
+			handleAction.handleAction(Action.SEARCH);
+		} else if (clickedCheckBox.getText() == restoreOptionsString) {
+			handleAction.handleAction(Action.RESTORE);
 		}
 		
 	}

@@ -20,71 +20,137 @@ package main;
 
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class Section1 {
 
-    public static VBox createSection1(Stage primaryStage) {
+	private static VBox completeSourceVBox;
+	private static HBox sourceHBoxWithFolderText;
+	private static HBox sourceHBoxWithLabelHBox;
+	private static Label sourceWarningLabel;
+	
+	private static VBox completeDestVBox;
+	private static HBox destHBoxWithFolderText;
+	private static HBox destHBoxWithLabelHBox;
+	private static Label destWarningLabel;
+	
+	private static VBox completeLogFolderVBox;
+	private static HBox logfolderHBoxWithFolderText;
+	private static HBox logfolderHBoxWithLabelHBox;
+	private static Label logFolderWarningLabel;
+	
+    public static VBox createSection1(Stage primaryStage, TextFieldChanged sourceChanged, TextFieldChanged destChanged, TextFieldChanged logfilefolderChanged) {
     	
         VBox section = new VBox();
         section.setSpacing(5);
 
 		HBox labelHBox = new HBox();
-		Label mainLabel = new Label("Specifieer de mappen. ");
+		Label mainLabel = new 
+				Label("Specifieer de mappen. ");
 		mainLabel.setStyle("-fx-font-weight: bold;");
 		Label additionalInfoLabel = new Label("(Beweeg met de muis over de teksten om meer uitleg te krijgen)");
 		labelHBox.getChildren().addAll(mainLabel, additionalInfoLabel);
 		section.getChildren().add(labelHBox);
 				
-        HBox hbox = createHboxWithSource(primaryStage);
-        hbox.setSpacing(10);
-        hbox.getChildren().add(new Pane()); // Placeholder content
-        section.getChildren().add(hbox);
+		completeSourceVBox = new VBox();
+		completeDestVBox = new VBox();
+		completeLogFolderVBox = new VBox();
+		
+        sourceHBoxWithFolderText = createHboxWithSource(primaryStage, sourceChanged);
+        sourceHBoxWithFolderText.setSpacing(10);
         
-        hbox = createHboxWitDest(primaryStage);
-        hbox.setSpacing(10);
-        hbox.getChildren().add(new Pane()); // Placeholder content
-        section.getChildren().add(hbox);
+        completeSourceVBox.getChildren().add(sourceHBoxWithFolderText);
+        section.getChildren().add(completeSourceVBox);
         
-        hbox = createHboxWitLogFileFolder(primaryStage);
-        hbox.setSpacing(10);
-        hbox.getChildren().add(new Pane()); // Placeholder content
-        section.getChildren().add(hbox);
+        destHBoxWithFolderText = createHboxWitDest(primaryStage, destChanged);
+        destHBoxWithFolderText.setSpacing(10);
+        completeDestVBox.getChildren().add(destHBoxWithFolderText);
+        section.getChildren().add(completeDestVBox);
+        
+        logfolderHBoxWithFolderText = createHboxWitLogFileFolder(primaryStage,logfilefolderChanged);
+        logfolderHBoxWithFolderText.setSpacing(10);
+        completeLogFolderVBox.getChildren().add(logfolderHBoxWithFolderText);
+        section.getChildren().add(completeLogFolderVBox);
+        
+        
+        // intialize label and hbox that will contain the label
+        sourceWarningLabel = new Label();
+        sourceWarningLabel.setStyle("-fx-text-fill: red;");
+        sourceHBoxWithLabelHBox = new HBox();
+        sourceHBoxWithLabelHBox.getChildren().add(sourceWarningLabel);
+
+        destWarningLabel = new Label();
+        destWarningLabel.setStyle("-fx-text-fill: red;");
+        destHBoxWithLabelHBox = new HBox();
+        destHBoxWithLabelHBox.getChildren().add(destWarningLabel);
+        
+        logFolderWarningLabel = new Label();
+        logFolderWarningLabel.setStyle("-fx-text-fill: red;");
+        logfolderHBoxWithLabelHBox = new HBox();
+        logfolderHBoxWithLabelHBox.getChildren().add(logFolderWarningLabel);
         
         return section;
     }
+    
+    public static void addSourceWarning(String text) {addWarningToVBox(completeSourceVBox, sourceHBoxWithLabelHBox, text, sourceWarningLabel);}
+    
+    public static void addDestWarning(String text) {addWarningToVBox(completeDestVBox, destHBoxWithLabelHBox, text, destWarningLabel);}
+    
+    public static void addLogFolderWarning(String text) {addWarningToVBox(completeLogFolderVBox, logfolderHBoxWithLabelHBox, text, logFolderWarningLabel);}
+    
+    /**
+     * adds a HBox with a label  to the vBox, with red text<br>
+     * if vBox already has two nodes, then nothing is changed<br>
+     * if text = null or empty string then the label is removed
+     * @param vbox
+     * @param text
+     */
+    private static void addWarningToVBox(VBox vbox, HBox hboxWithLabel, String text, Label label) {
+    	
+    	if (text == null) {removeWarningFromVBox(vbox, hboxWithLabel);return;};
+    	if (text.length() == 0) {removeWarningFromVBox(vbox, hboxWithLabel);return;};
+    	
+    	if (vbox.getChildren().size() > 1) {return;}
+    	
+		label.setText(text);
+		vbox.getChildren().add(hboxWithLabel);
+    }
 	
-	private static HBox createHboxWithSource(Stage primaryStage) {
+    private static void removeWarningFromVBox(VBox vBox, HBox hboxWithLabel) {
+    	if (vBox.getChildren().size() == 1) {return;}
+    	vBox.getChildren().remove(hboxWithLabel);
+    }
+    
+	private static HBox createHboxWithSource(Stage primaryStage, TextFieldChanged textFieldChanged) {
 		
-        String labelTextString = "Waar bevinden zich de oorspronkelijke bestanden:\n";
+        String labelTextString = "Waar bevinden zich de oorspronkelijke bestanden\u002A:\n";
         String labelTextWithExplanationString = "Dit is de folder met de bron bestanden en folders,"
         		+ " dus de bestanden en folders die gebackupped worden. Ook als je een restore doet of\n"
         		+ "als je wilt zoeken in de backup, dan blijft dit de folder met de bron bestanden.\n";
   
-        return Utilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString);
+        return Utilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged);
         
 	}
 	
-	private static HBox createHboxWitDest(Stage primaryStage) {
+	private static HBox createHboxWitDest(Stage primaryStage, TextFieldChanged textFieldChanged) {
 		
-        String labelTextString = "Waar bevinden zich de backup folders:\n";
+        String labelTextString = "Waar bevinden zich de backup folders\u002A:\n";
         String labelTextWithExplanationString = "Dit is de folder waar de backups komen."
         		+ "Elke nieuwe incrementele of volledige backup komt in een subfolder van deze folder.\n"
         		+ "Restores gebeuren vanuit deze backup folders. Zoeken naar bestanden gebeurt ook in deze backup folders.\n";
   
-        return Utilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString);
+        return Utilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged);
         
 	}
 	
-	private static HBox createHboxWitLogFileFolder(Stage primaryStage) {
+	private static HBox createHboxWitLogFileFolder(Stage primaryStage, TextFieldChanged textFieldChanged) {
 		
-        String labelTextString = "In welke folder mogen de logs weggeschreven worden:\n";
+        String labelTextString = "In welke folder mogen de logs weggeschreven worden\u002A:\n";
         String labelTextWithExplanationString = "Dit is de folder waar de logs komen."
         		+ "De logs zijn tekst bestanden die info geven over het backup proces.\n";
   
-        return Utilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString);
+        return Utilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged);
         
 	}
 

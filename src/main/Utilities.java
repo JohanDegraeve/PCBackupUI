@@ -26,6 +26,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -43,7 +44,7 @@ public class Utilities {
         Tooltip.install(node, tooltip);
     }
 	
-	static Button createButtonWithDirectoryChooser(String buttonTextString, Stage stage, TextField textField) {
+	static Button createButtonWithDirectoryChooser(String buttonTextString, Stage stage, TextField textField, TextFieldChanged textFieldChanged) {
 		
 		Button selectFolderButton = new Button(buttonTextString);
 
@@ -63,8 +64,13 @@ public class Utilities {
             if (selectedDirectory != null) {
                 // Print the path of the selected directory
                 textField.setText(selectedDirectory.getAbsolutePath());
+                if (textFieldChanged != null) {
+                    textFieldChanged.handleChange(selectedDirectory.getAbsolutePath());
+                }
             } else {
-                
+                if (textFieldChanged != null) {
+                    textFieldChanged.handleChange(null);
+                }
             }
         });
         
@@ -72,7 +78,7 @@ public class Utilities {
 		
 	}
 	 
-	static Button createButtonWithFileChooser(String buttonTextString, Stage stage, TextField textField) {
+	static Button createButtonWithFileChooser(String buttonTextString, Stage stage, TextField textField, TextFieldChanged textFieldChanged) {
 		
 		Button selectFolderButton = new Button(buttonTextString);
 
@@ -92,8 +98,13 @@ public class Utilities {
             if (selectedFile != null) {
                 // Print the path of the selected directory
                 textField.setText(selectedFile.getAbsolutePath());
+                if (textFieldChanged != null) {
+                    textFieldChanged.handleChange(selectedFile.getAbsolutePath());
+                }
             } else {
-                
+            	if (textFieldChanged != null) {
+                    textFieldChanged.handleChange(null);
+                }
             }
         });
         
@@ -101,19 +112,19 @@ public class Utilities {
 		
 	}
 	 
-	static HBox createHBoxToSelectFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString) {
+	static HBox createHBoxToSelectFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFileFieldChanged) {
 		
-		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField) -> createButtonWithFileChooser(buttonTextString, stage, textField));
+		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField, textFieldChanged) -> createButtonWithFileChooser(buttonTextString, stage, textField, textFieldChanged), selectFileFieldChanged);
 		
 	}
 	
-	static HBox createHBoxToSelectFolder(Stage primaryStage, String labelTextString, String labelTextWithExplanationString) {
+	static HBox createHBoxToSelectFolder(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFolderFieldChanged) {
 
-		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField) -> createButtonWithDirectoryChooser(buttonTextString, stage, textField));
+		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField, textFieldChanged) -> createButtonWithDirectoryChooser(buttonTextString, stage, textField, textFieldChanged), selectFolderFieldChanged);
 
 	}
 	
-	private static HBox createHBoxToSelectFolderOrFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, String buttonTextString, ButtonCreator buttonCreator) {
+	private static HBox createHBoxToSelectFolderOrFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, String buttonTextString, ButtonCreator buttonCreator, TextFieldChanged textFieldChanged) {
 		
         /// the HBox
         HBox hBox = new HBox();
@@ -131,8 +142,13 @@ public class Utilities {
         HBox.setHgrow(textField, Priority.ALWAYS); // Set HBox to always grow horizontally
         textField.setMaxWidth(Double.MAX_VALUE); // Set max width to allow extension
         
+        // when user types something, then call textFieldChanged.handleChange(false);
+        textField.addEventHandler(KeyEvent.KEY_RELEASED, event -> {
+            textFieldChanged.handleChange(textField.getText());
+        });
+        
         /// the button that allows selection of the source
-        VBox folderSelectionVBox = new VBox(buttonCreator.createButton(buttonTextString, primaryStage, textField));
+        VBox folderSelectionVBox = new VBox(buttonCreator.createButton(buttonTextString, primaryStage, textField, textFieldChanged));
 
         /// add the fields to the HBox
         hBox.getChildren().addAll(label, folderSelectionVBox, textField);
@@ -140,10 +156,5 @@ public class Utilities {
         return hBox;
 
 	}
-	
-	@FunctionalInterface
-	interface ButtonCreator {
-        Button createButton(String buttonTextString, Stage stage, TextField textField);
-    }
 	
 }
