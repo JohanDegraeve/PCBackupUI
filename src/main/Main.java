@@ -20,6 +20,8 @@ package main;
 
 import java.io.File;
 
+import Enumerations.Action;
+import Interfaces.ProcessText;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -90,15 +92,8 @@ public class Main extends Application {
         
     }
 
-    private void runExistingApplication(String arguments) {
-        try {
-            // Replace "java" with the path to your Java executable if not in the system path
-            // Replace "ExistingApplication.jar" with the name of your existing Java application's JAR file
-            //Runtime.getRuntime().exec("java -jar /Users/johandegraeve/Downloads/PCBackup.jar " + arguments);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            // Handle exception
-        }
+    private void startBackup() {
+        
     }
     
     /**
@@ -179,6 +174,7 @@ public class Main extends Application {
         // Add the submit button
         submitButton = new Button("Start");
         submitButton.setDisable(!enabled);
+        submitButton.setOnAction(e -> startBackup());
         
         // Create an HBox to hold the button
         HBox submitButtonHBox = new HBox(submitButton);

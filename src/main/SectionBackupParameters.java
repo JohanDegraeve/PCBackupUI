@@ -1,9 +1,11 @@
 package main;
 
+import Interfaces.TextFieldChanged;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import utilities.UIUtilities;
 
 public class SectionBackupParameters {
 
@@ -46,17 +48,17 @@ public class SectionBackupParameters {
         completeFolderNameMappingListVBox = new VBox();
         
         
-        excludedFileListHBoxWithFileText = Utilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedFileList, labelTextWithExplanationSelectExcludedFileList, excludedFileListChanged);
+        excludedFileListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedFileList, labelTextWithExplanationSelectExcludedFileList, excludedFileListChanged);
         excludedFileListHBoxWithFileText.setSpacing(10);
         completeExcludedFileListVBox.getChildren().add(excludedFileListHBoxWithFileText);
         section.getChildren().add(completeExcludedFileListVBox);
 
-        excludedPathListHBoxWithFileText = Utilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedPathList, labelTextSelectWithExplanationExcludedPathList, excludedPathListChanged);
+        excludedPathListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedPathList, labelTextSelectWithExplanationExcludedPathList, excludedPathListChanged);
         excludedPathListHBoxWithFileText.setSpacing(10);
         completeExcludedPathListVBox.getChildren().add(excludedPathListHBoxWithFileText);
         section.getChildren().add(completeExcludedPathListVBox);
 
-        folderNameMappingListHBoxWithFileText = Utilities.createHBoxToSelectFile(primaryStage, labelTextSelectedFolderNameMappingList, labelTextWithExplanationSelectedFolderNameMappingList, folderNameMappingListChanged);
+        folderNameMappingListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectedFolderNameMappingList, labelTextWithExplanationSelectedFolderNameMappingList, folderNameMappingListChanged);
         folderNameMappingListHBoxWithFileText.setSpacing(10);
         completeFolderNameMappingListVBox.getChildren().add(folderNameMappingListHBoxWithFileText);
         section.getChildren().add(completeFolderNameMappingListVBox);
@@ -82,10 +84,10 @@ public class SectionBackupParameters {
         
 	}
 	
-    public static void addExcludedFileListWarning(String text) {Utilities.addWarningToVBox(completeExcludedFileListVBox, excludedFileListHBoxWithLabelHBox, text, excludedFileListWarningLabel);}
+    public static void addExcludedFileListWarning(String text) {UIUtilities.addWarningToVBox(completeExcludedFileListVBox, excludedFileListHBoxWithLabelHBox, text, excludedFileListWarningLabel);}
 
-    public static void addExcludedPathListWarning(String text) {Utilities.addWarningToVBox(completeExcludedPathListVBox, excludedPathListHBoxWithLabelHBox, text, excludedPathListWarningLabel);}
+    public static void addExcludedPathListWarning(String text) {UIUtilities.addWarningToVBox(completeExcludedPathListVBox, excludedPathListHBoxWithLabelHBox, text, excludedPathListWarningLabel);}
 
-    public static void addFolerNameMappingListWarning(String text) {Utilities.addWarningToVBox(completeFolderNameMappingListVBox, folderNameMappingListHBoxWithLabelHBox, text, folderNameMappingListWarningLabel);}
+    public static void addFolerNameMappingListWarning(String text) {UIUtilities.addWarningToVBox(completeFolderNameMappingListVBox, folderNameMappingListHBoxWithLabelHBox, text, folderNameMappingListWarningLabel);}
 
 }

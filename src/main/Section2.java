@@ -1,10 +1,13 @@
 package main;
 
+import Enumerations.Action;
+import Interfaces.ActionHandler;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import utilities.UIUtilities;
 
 public class Section2 {
 
@@ -31,16 +34,16 @@ public class Section2 {
      
         // Create three CheckBoxes for the options
         CheckBox fullBackupOption = new CheckBox(fullBackupOptionsString);
-        Utilities.addToolTip(fullBackupOption, "Alle bestanden en mappen worden gekopieerd.");
+        UIUtilities.addToolTip(fullBackupOption, "Alle bestanden en mappen worden gekopieerd.");
         
         CheckBox incrementalBackupOption = new CheckBox(incrementalBackupOptionString);
-        Utilities.addToolTip(incrementalBackupOption, "Enkel de bestanden en mappen die nieuw zijn of gewijzigd zijn sinds de vorige backup, worden gekopieerd.");
+        UIUtilities.addToolTip(incrementalBackupOption, "Enkel de bestanden en mappen die nieuw zijn of gewijzigd zijn sinds de vorige backup, worden gekopieerd.");
 
         CheckBox restoreOption = new CheckBox(restoreOptionsString);
-        Utilities.addToolTip(restoreOption, "Mappen en de bestanden in die mappen worden hersteld.");
+        UIUtilities.addToolTip(restoreOption, "Mappen en de bestanden in die mappen worden hersteld.");
 
         CheckBox searchOption = new CheckBox(searchOptionstrString);
-        Utilities.addToolTip(searchOption, "Zoek naar bestanden en mappen die een specifieke tekst in de naam van de map of bestand hebben.");
+        UIUtilities.addToolTip(searchOption, "Zoek naar bestanden en mappen die een specifieke tekst in de naam van de map of bestand hebben.");
         
         // Add event handlers to the CheckBoxes
         fullBackupOption.setOnAction(e -> handleCheckBox(fullBackupOption, handleAction, incrementalBackupOption, restoreOption, searchOption));

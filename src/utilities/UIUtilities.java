@@ -16,10 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with PCBackupUI. If not, see <https://www.gnu.org/licenses/>.
  */
-package main;
+package utilities;
 
 import java.io.File;
 
+import Interfaces.ButtonCreator;
+import Interfaces.TextFieldChanged;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -36,15 +38,15 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-public class Utilities {
+public class UIUtilities {
 
-	static void addToolTip(Node node, String toolTipTextString) {
+	public static void addToolTip(Node node, String toolTipTextString) {
         Tooltip tooltip = new Tooltip(toolTipTextString);
         tooltip.setShowDuration(new Duration(60000));
         Tooltip.install(node, tooltip);
     }
 	
-	static Button createButtonWithDirectoryChooser(String buttonTextString, Stage stage, TextField textField, TextFieldChanged textFieldChanged) {
+	public static Button createButtonWithDirectoryChooser(String buttonTextString, Stage stage, TextField textField, TextFieldChanged textFieldChanged) {
 		
 		Button selectFolderButton = new Button(buttonTextString);
 
@@ -78,7 +80,7 @@ public class Utilities {
 		
 	}
 	 
-	static Button createButtonWithFileChooser(String buttonTextString, Stage stage, TextField textField, TextFieldChanged textFieldChanged) {
+	public static Button createButtonWithFileChooser(String buttonTextString, Stage stage, TextField textField, TextFieldChanged textFieldChanged) {
 		
 		Button selectFolderButton = new Button(buttonTextString);
 
@@ -112,13 +114,13 @@ public class Utilities {
 		
 	}
 	 
-	static HBox createHBoxToSelectFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFileFieldChanged) {
+	public static HBox createHBoxToSelectFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFileFieldChanged) {
 		
 		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField, textFieldChanged) -> createButtonWithFileChooser(buttonTextString, stage, textField, textFieldChanged), selectFileFieldChanged);
 		
 	}
 	
-	static HBox createHBoxToSelectFolder(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFolderFieldChanged) {
+	public static HBox createHBoxToSelectFolder(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFolderFieldChanged) {
 
 		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField, textFieldChanged) -> createButtonWithDirectoryChooser(buttonTextString, stage, textField, textFieldChanged), selectFolderFieldChanged);
 
@@ -131,7 +133,7 @@ public class Utilities {
      * @param vbox
      * @param text
      */
-    static void addWarningToVBox(VBox vbox, HBox hboxWithLabel, String text, Label label) {
+	public static void addWarningToVBox(VBox vbox, HBox hboxWithLabel, String text, Label label) {
     	
     	if (text == null) {removeWarningFromVBox(vbox, hboxWithLabel);return;};
     	if (text.length() == 0) {removeWarningFromVBox(vbox, hboxWithLabel);return;};
@@ -157,7 +159,7 @@ public class Utilities {
   
         /// the label to explain that source needs to be given
         Label label = new Label(labelTextString );
-        Utilities.addToolTip(label, labelTextString + labelTextWithExplanationString);
+        UIUtilities.addToolTip(label, labelTextString + labelTextWithExplanationString);
         
         /// the textfield that contains the selected source
         TextField textField = new TextField();
@@ -167,7 +169,6 @@ public class Utilities {
         
         // when user types something, then call textFieldChanged.handleChange(false);
         textField.addEventHandler(KeyEvent.KEY_RELEASED, event -> {
-        	String  test = textField.getText();
             textFieldChanged.handleChange(textField.getText());
         });
         
