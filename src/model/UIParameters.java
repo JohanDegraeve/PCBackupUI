@@ -34,7 +34,15 @@ public class UIParameters {
 	}
 
 	public void setCurrentlySelectedAction(Action action) {
-		keyValueMap.put(currentlySelectedActionKey, action.getStringValue());
+		
+		if (action == null) {
+			if (keyValueMap.containsKey(currentlySelectedActionKey)) {
+				keyValueMap.remove(currentlySelectedActionKey);
+			}
+		} else {
+			keyValueMap.put(currentlySelectedActionKey, action.getStringValue());
+		}
+		
 		writeHashMapToFile();
 	}
 
