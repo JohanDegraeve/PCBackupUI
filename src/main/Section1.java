@@ -42,7 +42,7 @@ public class Section1 {
 	private static HBox logfolderHBoxWithLabelHBox;
 	private static Label logFolderWarningLabel;
 	
-    public static VBox createSection1(Stage primaryStage, TextFieldChanged sourceChanged, TextFieldChanged destChanged, TextFieldChanged logfilefolderChanged) {
+    public static VBox createSection1(Stage primaryStage, TextFieldChanged sourceChanged, TextFieldChanged destChanged, TextFieldChanged logfilefolderChanged, String initialTextSource, String initialTextDest, String initialTextLogFile) {
     	
         VBox section = new VBox();
         section.setSpacing(5);
@@ -59,17 +59,17 @@ public class Section1 {
 		completeDestVBox = new VBox();
 		completeLogFolderVBox = new VBox();
 		
-        sourceHBoxWithFolderText = createHboxWithSource(primaryStage, sourceChanged);
+        sourceHBoxWithFolderText = createHboxWithSource(primaryStage, sourceChanged, initialTextSource);
         sourceHBoxWithFolderText.setSpacing(10);
         completeSourceVBox.getChildren().add(sourceHBoxWithFolderText);
         section.getChildren().add(completeSourceVBox);
         
-        destHBoxWithFolderText = createHboxWitDest(primaryStage, destChanged);
+        destHBoxWithFolderText = createHboxWitDest(primaryStage, destChanged, initialTextDest);
         destHBoxWithFolderText.setSpacing(10);
         completeDestVBox.getChildren().add(destHBoxWithFolderText);
         section.getChildren().add(completeDestVBox);
         
-        logfolderHBoxWithFolderText = createHboxWitLogFileFolder(primaryStage,logfilefolderChanged);
+        logfolderHBoxWithFolderText = createHboxWitLogFileFolder(primaryStage,logfilefolderChanged, initialTextLogFile);
         logfolderHBoxWithFolderText.setSpacing(10);
         completeLogFolderVBox.getChildren().add(logfolderHBoxWithFolderText);
         section.getChildren().add(completeLogFolderVBox);
@@ -100,35 +100,35 @@ public class Section1 {
     
     public static void addLogFolderWarning(String text) {UIUtilities.addWarningToVBox(completeLogFolderVBox, logfolderHBoxWithLabelHBox, text, logFolderWarningLabel);}
     
-	private static HBox createHboxWithSource(Stage primaryStage, TextFieldChanged textFieldChanged) {
+	private static HBox createHboxWithSource(Stage primaryStage, TextFieldChanged textFieldChanged, String initialText) {
 		
         String labelTextString = "Waar bevinden zich de oorspronkelijke bestanden\u002A:\n";
         String labelTextWithExplanationString = "Dit is de folder met de bron bestanden en folders,"
         		+ " dus de bestanden en folders die gebackupped worden. Ook als je een restore doet of\n"
         		+ "als je wilt zoeken in de backup, dan blijft dit de folder met de bron bestanden.\n";
   
-        return UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged);
+        return UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged, initialText);
         
 	}
 	
-	private static HBox createHboxWitDest(Stage primaryStage, TextFieldChanged textFieldChanged) {
+	private static HBox createHboxWitDest(Stage primaryStage, TextFieldChanged textFieldChanged, String initialText) {
 		
         String labelTextString = "Waar bevinden zich de backup folders\u002A:\n";
         String labelTextWithExplanationString = "Dit is de folder waar de backups komen."
         		+ "Elke nieuwe incrementele of volledige backup komt in een subfolder van deze folder.\n"
         		+ "Restores gebeuren vanuit deze backup folders. Zoeken naar bestanden gebeurt ook in deze backup folders.\n";
   
-        return UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged);
+        return UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged, initialText);
         
 	}
 	
-	private static HBox createHboxWitLogFileFolder(Stage primaryStage, TextFieldChanged textFieldChanged) {
+	private static HBox createHboxWitLogFileFolder(Stage primaryStage, TextFieldChanged textFieldChanged, String initialText) {
 		
         String labelTextString = "In welke folder mogen de logs weggeschreven worden\u002A:\n";
         String labelTextWithExplanationString = "Dit is de folder waar de logs komen."
         		+ "De logs zijn tekst bestanden die info geven over het backup proces.\n";
   
-        return UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged);
+        return UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged, initialText);
         
 	}
 

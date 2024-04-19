@@ -57,7 +57,7 @@ public class CreateFullBackup {
 		copyFilesAndFoldersFromSourceToDest(listOfFilesAndFoldersInSourceFolder.getFileOrFolderList(), sourceFolderPath, destinationFolderPath, true);
 		
 		// do the foldername mapping
-		OtherUtilities.doFolderNameMapping(listOfFilesAndFoldersInSourceFolder, commandLineArguments, destinationFolderPath);
+		OtherUtilities.doFolderNameMapping(listOfFilesAndFoldersInSourceFolder, commandLineArguments, destinationFolderPath, commandLineArguments.processText);
 
 		// store folderlist.json on disk
 		try {
@@ -68,8 +68,6 @@ public class CreateFullBackup {
         	Logger.log("Failed to write json file folderlist.json to  " + destinationFolderPath.toString());
 			System.exit(1);
         }
-
-		System.out.println("Backup finished, see " + destinationFolderPath.toString());
 
 	}
 	
@@ -139,9 +137,8 @@ public class CreateFullBackup {
 		    File subfolder = new File(path.toString());
 
 		    if (subfolder.mkdirs()) {
-		        Logger.log("in createSubFolderIfNotExisting, backup folder created successfully: " + subfolder.getAbsolutePath());
 		    } else {
-		    	Logger.log("in createSubFolderIfNotExisting, Subfolder already exists or creation failed: " + subfolder.getAbsolutePath());
+		    	Logger.log("Subfolder already exists or creation failed: " + subfolder.getAbsolutePath());
 		    }
 			
 		}

@@ -114,15 +114,15 @@ public class UIUtilities {
 		
 	}
 	 
-	public static HBox createHBoxToSelectFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFileFieldChanged) {
+	public static HBox createHBoxToSelectFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFileFieldChanged, String initialText) {
 		
-		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField, textFieldChanged) -> createButtonWithFileChooser(buttonTextString, stage, textField, textFieldChanged), selectFileFieldChanged);
+		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField, textFieldChanged) -> createButtonWithFileChooser(buttonTextString, stage, textField, textFieldChanged), selectFileFieldChanged, initialText);
 		
 	}
 	
-	public static HBox createHBoxToSelectFolder(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFolderFieldChanged) {
+	public static HBox createHBoxToSelectFolder(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFolderFieldChanged, String initialText) {
 
-		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField, textFieldChanged) -> createButtonWithDirectoryChooser(buttonTextString, stage, textField, textFieldChanged), selectFolderFieldChanged);
+		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField, textFieldChanged) -> createButtonWithDirectoryChooser(buttonTextString, stage, textField, textFieldChanged), selectFolderFieldChanged, initialText);
 
 	}
 	
@@ -149,7 +149,7 @@ public class UIUtilities {
     	vBox.getChildren().remove(hboxWithLabel);
     }
 	
-	private static HBox createHBoxToSelectFolderOrFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, String buttonTextString, ButtonCreator buttonCreator, TextFieldChanged textFieldChanged) {
+	private static HBox createHBoxToSelectFolderOrFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, String buttonTextString, ButtonCreator buttonCreator, TextFieldChanged textFieldChanged, String initialText) {
 		
         /// the HBox
         HBox hBox = new HBox();
@@ -163,7 +163,7 @@ public class UIUtilities {
         
         /// the textfield that contains the selected source
         TextField textField = new TextField();
-        textField.setPromptText("");
+        textField.setText(initialText);
         HBox.setHgrow(textField, Priority.ALWAYS); // Set HBox to always grow horizontally
         textField.setMaxWidth(Double.MAX_VALUE); // Set max width to allow extension
         

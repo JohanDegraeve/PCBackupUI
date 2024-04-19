@@ -30,6 +30,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import Interfaces.ProcessText;
 import model.AFileOrAFolder;
 import model.AFileOrAFolderForFullPath;
 import model.AFileWithLastModified;
@@ -54,7 +55,7 @@ public class FileAndFolderUtilities {
      * @param addpathlength for testing only
      * @throws IOException
      */
-    public static AFileOrAFolder createAFileOrAFolder(Path folderOrStringPath, String backupFolderName, List<String> excludefilelist, List<String> excludedpathlist, boolean addpathlength) throws IOException {
+    public static AFileOrAFolder createAFileOrAFolder(Path folderOrStringPath, String backupFolderName, List<String> excludefilelist, List<String> excludedpathlist, boolean addpathlength, ProcessText processText) throws IOException {
 
     	String fileOrFolderNameWithoutFullPath = folderOrStringPath.getFileName().toString();
 
@@ -87,14 +88,14 @@ public class FileAndFolderUtilities {
                 		for (String excludedPath : excludedpathlist) {
                 			
                 			if (path.toString().trim().equals(excludedPath.trim())) {
-                				Logger.log("      Excluding folder '" + excludedPath + "' because " + excludedPath + " is in the file excludedpathlist");
+                				processText.process("      Excluding folder '" + excludedPath + "' because " + excludedPath + " is in the file excludedpathlist");
                 				continue directoryLoop;
                 			}
                 		}
                 		
                 	}
                 	
-                	returnValue.addFileOrFolder(createAFileOrAFolder(path, backupFolderName, excludefilelist, excludedpathlist, addpathlength));
+                	returnValue.addFileOrFolder(createAFileOrAFolder(path, backupFolderName, excludefilelist, excludedpathlist, addpathlength, processText));
                 		
                 }
                 
@@ -142,9 +143,9 @@ public class FileAndFolderUtilities {
                 // Compare and update folders
                 compareAndUpdateFolders((AFolder) sourceFileOrFolder, (AFolder) destFileOrFolder, sourceFolderPath, destBackupFolderPath, OtherUtilities.addString(subfolders, sourceFileOrFolder.getName()), backupFolderName, level, commandLineArguments);
             } else {
-            	Logger.log("In compareAndUpdate(AFileOrAFolder source, AFileOrAFolder dest), not both File and not both Folder");
-            	Logger.log("   this is a difficult situation. It looks like an item that was previously a file is now a folder with the same name, or vice versa.");
-            	Logger.log("   Backup interrupted");
+            	commandLineArguments.processText.process("In compareAndUpdate(AFileOrAFolder source, AFileOrAFolder dest), not both File and not both Folder");
+            	commandLineArguments.processText.process("   this is a difficult situation. It looks like an item that was previously a file is now a folder with the same name, or vice versa.");
+            	commandLineArguments.processText.process("   Backup interrupted");
             	System.exit(1);
             }
         }
@@ -154,7 +155,7 @@ public class FileAndFolderUtilities {
          * @param folderlistPath Path for the folderlist.json
          * @return
          */
-        public static AFileOrAFolder fromFolderlistDotJsonToAFileOrAFolder(Path folderlistPath) {
+        public static AFileOrAFolder fromFolderlistDotJsonToAFileOrAFolder(Path folderlistPath, ProcessText processText) {
         	
             // declare and init listOfFilesAndFoldersInPreviousBackupFolder
             // it's null, but we assume that it will be set to non nul value, or an exception will occur causing a crash
@@ -168,8 +169,8 @@ public class FileAndFolderUtilities {
             } catch (IOException e) {
                 // Handle IOException (e.g., file not found or permission issues)
             	e.printStackTrace();
-                Logger.log("Exception while converting file " + folderlistPath.toString() + " to json");
-                Logger.log(e.toString());
+            	processText.process("Exception while converting file " + folderlistPath.toString() + " to json");
+                processText.process(e.toString());
                 System.exit(1);
             }
             
@@ -251,7 +252,7 @@ public class FileAndFolderUtilities {
             	
                 // Update destFile with the new timestamp
                 destFile.setts(sourceFile.getts());
-                Logger.log("   Copying updated file " + OtherUtilities.concatenateStrings(OtherUtilities.addString(subfolders, sourceFile.getName())));
+                commandLineArguments.processText.process("   Copying updated file " + OtherUtilities.concatenateStrings(OtherUtilities.addString(subfolders, sourceFile.getName())));
                 
                 // set also the backup foldername
                 destFile.setPathToBackup(backupFolderName);
@@ -261,8 +262,8 @@ public class FileAndFolderUtilities {
 					Files.createDirectories(PathUtilities.concatenatePaths(destBackupFolderPath, subfolders));
 				} catch (IOException e) {
 					e.printStackTrace();
-		            Logger.log("Exception in compareAndUpdateFiles(AFile,AFile) while creating the directory " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders).toString());
-		            Logger.log(e.toString());
+					commandLineArguments.processText.process("Exception in compareAndUpdateFiles(AFile,AFile) while creating the directory " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders).toString());
+					commandLineArguments.processText.process(e.toString());
 		            System.exit(1);
 				}
                 
@@ -276,8 +277,8 @@ public class FileAndFolderUtilities {
 
 				} catch (IOException e) {
 					e.printStackTrace();
-		            Logger.log("Exception in compareAndUpdateFiles(AFile,AFile) while copying a file from " + PathUtilities.concatenatePaths(sourceFolderPath, subfolders).toString() + " to " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders));
-		            Logger.log(e.toString());
+					commandLineArguments.processText.process("Exception in compareAndUpdateFiles(AFile,AFile) while copying a file from " + PathUtilities.concatenatePaths(sourceFolderPath, subfolders).toString() + " to " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders));
+					commandLineArguments.processText.process(e.toString());
 		            System.exit(1);
 				}
                 
@@ -318,15 +319,15 @@ public class FileAndFolderUtilities {
                     destContents.add(sourceItem);
                 	if (sourceItem instanceof AFile) {
 
-                    	Logger.log("   Adding new file : " + OtherUtilities.concatenateStrings(OtherUtilities.addString(subfolders, originalSourceItemName)));
+                		commandLineArguments.processText.process("   Adding new file : " + OtherUtilities.concatenateStrings(OtherUtilities.addString(subfolders, originalSourceItemName)));
                     	
                         // create the folder in the destination if it doesn't exist yet
                         try {
         					Files.createDirectories(PathUtilities.concatenatePaths(destBackupFolderPath, subfolders));
         				} catch (IOException e) {
         					e.printStackTrace();
-        		            Logger.log("Exception in compareAndUpdateFiles(AFileOrAFolder, AFileOrAFolder.. while creating the directory " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders).toString());
-        		            Logger.log(e.toString());
+        					commandLineArguments.processText.process("Exception in compareAndUpdateFiles(AFileOrAFolder, AFileOrAFolder.. while creating the directory " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders).toString());
+        					commandLineArguments.processText.process(e.toString());
         		            System.exit(1);
         				}
                         
@@ -341,23 +342,23 @@ public class FileAndFolderUtilities {
 
         				} catch (IOException e) {
         					e.printStackTrace();
-        		            Logger.log("Exception in compareAndUpdateFiles(AFileOrAFolder, AFileOrAFolder.. while copying a file from " + PathUtilities.concatenatePaths(sourceFolderPath, subfolders).toString() + " to " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders));
-        		            Logger.log(e.toString());
+        					commandLineArguments.processText.process("Exception in compareAndUpdateFiles(AFileOrAFolder, AFileOrAFolder.. while copying a file from " + PathUtilities.concatenatePaths(sourceFolderPath, subfolders).toString() + " to " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders));
+        					commandLineArguments.processText.process(e.toString());
         		            System.exit(1);
         				}
 
 
                 	} else if (sourceItem instanceof AFolder) {// it has to be an instance of AFolder but let's check anyway
                 		
-                    	Logger.log("   Adding new folder and it's contents : " + OtherUtilities.concatenateStrings(OtherUtilities.addString(subfolders, originalSourceItemName)));
+                		commandLineArguments.processText.process("   Adding new folder and it's contents : " + OtherUtilities.concatenateStrings(OtherUtilities.addString(subfolders, originalSourceItemName)));
 
                 		// we need to copy the complete contents of the folder from source to dest
                 		try {
-							OtherUtilities.copyFolder(PathUtilities.concatenatePaths(sourceFolderPath, OtherUtilities.addString(subfolders, originalSourceItemName)), PathUtilities.concatenatePaths(destBackupFolderPath, OtherUtilities.addString(subfolders, originalSourceItemName)), commandLineArguments);
+							OtherUtilities.copyFolder(PathUtilities.concatenatePaths(sourceFolderPath, OtherUtilities.addString(subfolders, originalSourceItemName)), PathUtilities.concatenatePaths(destBackupFolderPath, OtherUtilities.addString(subfolders, originalSourceItemName)), commandLineArguments, commandLineArguments.processText);
 						} catch (IOException e) {
 							e.printStackTrace();
-        		            Logger.log("Exception in compareAndUpdateFiles(AFileOrAFolder, AFileOrAFolder.. while copying a folder from " + PathUtilities.concatenatePaths(sourceFolderPath, subfolders).toString() + " to " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders));
-        		            Logger.log(e.toString());
+							commandLineArguments.processText.process("Exception in compareAndUpdateFiles(AFileOrAFolder, AFileOrAFolder.. while copying a folder from " + PathUtilities.concatenatePaths(sourceFolderPath, subfolders).toString() + " to " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders));
+							commandLineArguments.processText.process(e.toString());
         		            System.exit(1);
 						}
                 		
@@ -393,9 +394,9 @@ public class FileAndFolderUtilities {
                     	destContents.remove(cntr);
                     	String fullPathString = OtherUtilities.concatenateStrings(OtherUtilities.addString(subfolders, destItem.getName()));
                     	if (destItem instanceof AFolder) {
-                        	Logger.log("   Removed folder " + fullPathString);
+                    		commandLineArguments.processText.process("   Removed folder " + fullPathString);
                     	} else {
-                    		Logger.log("   Removed file " + fullPathString);
+                    		commandLineArguments.processText.process("   Removed file " + fullPathString);
                     	}
                     } else {
                     	cntr = cntr +1;

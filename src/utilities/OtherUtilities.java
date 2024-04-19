@@ -18,11 +18,14 @@
  */
 package utilities;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -35,10 +38,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import Interfaces.ProcessText;
 import model.AFileOrAFolder;
 import model.AFolder;
 import model.CommandLineArguments;
@@ -113,7 +118,7 @@ public class OtherUtilities {
 	 * @param commandLineArguments
 	 * @throws IOException
 	 */
-	public static void copyFolder(Path source, Path destination, CommandLineArguments commandLineArguments) throws IOException {
+	public static void copyFolder(Path source, Path destination, CommandLineArguments commandLineArguments, ProcessText processText) throws IOException {
         Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
@@ -121,7 +126,7 @@ public class OtherUtilities {
                 Path targetDir = destination.resolve(source.relativize(dir));
                 Files.createDirectories(targetDir);
                 if (commandLineArguments.addpathlengthforfolderswithnewormodifiedcontent) {
-                    System.out.println("path length = " + String.format("%5s", targetDir.toString().length()) + "; path = " + targetDir.toString());
+                    processText.process("path length = " + String.format("%5s", targetDir.toString().length()) + "; path = " + targetDir.toString());
                 }
                 return FileVisitResult.CONTINUE;
             }
@@ -144,7 +149,7 @@ public class OtherUtilities {
                 // Copy each file to the destination
                 Files.copy(file, destinationPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
                 if (commandLineArguments.addpathlengthforfolderswithnewormodifiedcontent) {
-                    System.out.println("path length = " + String.format("%5s", destinationPath.toString().length()) + "; path = " + destinationPath.toString());
+                    processText.process("path length = " + String.format("%5s", destinationPath.toString().length()) + "; path = " + destinationPath.toString());
                 }
                 return FileVisitResult.CONTINUE;
             }
@@ -158,7 +163,7 @@ public class OtherUtilities {
 	 * @param sourceFolderPath
 	 * @param destinationFolderPath must include the backup foldername
 	 */
-	public static void doFolderNameMapping(AFolder listOfFilesAndFoldersInSourceFolder, CommandLineArguments commandLineArguments, Path destinationFolderPath) {
+	public static void doFolderNameMapping(AFolder listOfFilesAndFoldersInSourceFolder, CommandLineArguments commandLineArguments, Path destinationFolderPath, ProcessText processText) {
 		// now we will do foldername mapping
 		// if one of the main folders in the source is fond in the foldername mapping list, then we update it in folderlist.json and we also rename the actual foldername in the backup
 		for (AFileOrAFolder aFileOrAFolder: listOfFilesAndFoldersInSourceFolder.getFileOrFolderList()) {
@@ -189,8 +194,8 @@ public class OtherUtilities {
 							Files.move(sourcePath, targetPath);
 						}
 					} catch (IOException e) {
-						e.printStackTrace();
-						Logger.log("Exception occurred while renaming from " + sourcePath.toString() + " to " + targetPath.toString());
+						processText.process("Exception occurred while renaming from " + sourcePath.toString() + " to " + targetPath.toString());
+						processText.process(e.toString());
 						System.exit(1);
 
 					}
@@ -228,7 +233,7 @@ public class OtherUtilities {
 	 * @param backupName eg backupName = 2024-03-19 23;06;08 (Incremental)
 	 * @return date, in this example 2024-03-19 23;06;08 local time in Date object
 	 */
-	public static Date getBackupDate(String backupName) {
+	public static Date getBackupDate(String backupName, ProcessText processText) {
 		
 		if (backupName == null) {return new Date(0);}
 		
@@ -239,8 +244,8 @@ public class OtherUtilities {
 		try {
 			return dateFormat.parse(dateAsString);
 		} catch (ParseException e) {
-			e.printStackTrace();
-			Logger.log("");
+			processText.process(e.toString());
+			processText.process("");
 			System.exit(1);
 		}
 		
@@ -304,5 +309,79 @@ public class OtherUtilities {
         }
 		return value;
 	}
+	
+	/**
+	 * opens file and reads line by line and creates List with each line in it
+	 * @param listPath
+	 * @param processText
+	 * @return
+	 */
+	public static List<String> getListFromFileList(String listPath, ProcessText processText) {
+		
+		List<String> returnValue = new ArrayList<>();
+		
+		if (listPath != null) {
+			Path folderPath = Paths.get(listPath);
+	    	if (!(Files.exists(folderPath))) {
+	    		processText.process("You specified file " + listPath + " but it does not exist.");
+	    	}
+			if (Files.isDirectory(folderPath)) {
+				processText.process("You specified file " + listPath + " but it is a directory, not a file");
+			}
+	    	try (BufferedReader reader = new BufferedReader(new FileReader(listPath))) {
+	            String line;
+	            while ((line = reader.readLine()) != null) {
+	            	returnValue.add(line);
+	            }
+	        } catch (IOException e) {
+	            processText.process(e.toString());
+	            processText.process("IOException while opening file " + listPath);
+	        }
+		}
+		
+		return returnValue;
+	}
+	
+	/**
+	 * opens file and reads line by line, splits by "=" and creates hash may with key = left side of "=", value right side of "="
+	 * @param listPath
+	 * @return
+	 */
+    public static HashMap<String, String> readKeyValuePairFromFile(String listPath, ProcessText processText) {
+    	
+    	HashMap<String, String> returnValue = new HashMap<>();
 
+    	if (listPath == null) {return returnValue;}
+    	
+    	// Read the file line by line and process each line
+        try (BufferedReader br = new BufferedReader(new FileReader(listPath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                // Split the line by "="
+                String[] parts = line.split("=");
+
+                // Ensure there are two parts (key and value)
+                if (parts.length == 2) {
+                    String key = parts[0].trim();
+                    String value = parts[1].trim();
+
+                    // Store key-value pair in the HashMap
+                    returnValue.put(key, value);
+                } else {
+                    // Handle invalid lines if necessary
+                    processText.process("Invalid line: " + line + " in file " + listPath);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            processText.process("Failed to read file "  + listPath);
+           System.exit(1);
+        }
+        
+        return returnValue;
+        
+    }
+    
+
+	
 }

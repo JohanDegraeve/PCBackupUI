@@ -18,24 +18,15 @@
  */
 package model;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
+import Interfaces.ProcessText;
 import utilities.OtherUtilities;
 
 /**
@@ -85,12 +76,6 @@ public class CommandLineArguments {
      * user will search through the backups, if true then backup value is ignored
      */
     public boolean search = false;
-    
-    /**
-     *  Folder where logfile should be written<br>
-     *  can be null, in that case log to System.out
-     */
-    private String logfilefolder;
     
     /**
      * path for logging, this includes the filename
@@ -149,13 +134,22 @@ public class CommandLineArguments {
 	 * for testing only
 	 */
 	public boolean addpathlengthforfolderswithnewormodifiedcontent = false;
+	
+	/**
+	 * is called with log text, this is an interface defined by process that created CommandLineArguments
+	 */
+	public ProcessText processText;
 
+	/**
+	 * constructor
+	 * @param processText logging info will be pass with processText
+	 */
 	public CommandLineArguments(Date startSearchDate, Date endSearchDate, String source, String destination,
 			String restoreto, boolean fullBackup, boolean backup, boolean search, String logfilefolder,
-			List<String> excludedFiles, List<String> excludedPaths, Date restoreDate, String subfolderToRestore,
-			HashMap<String, String> folderNameMapping, boolean overwrite, String writesearchto,
+			String excludedFiles, String excludedPaths, Date restoreDate, String subfolderToRestore,
+			String folderNameMapping, boolean overwrite, String writesearchto,
 			Pattern searchTextPattern, boolean addpathlengthforallfolders,
-			boolean addpathlengthforfolderswithnewormodifiedcontent, String searchText) {
+			boolean addpathlengthforfolderswithnewormodifiedcontent, String searchText, ProcessText processText) {
 		super();
 		this.startSearchDate = startSearchDate;
 		this.endSearchDate = endSearchDate;
@@ -165,20 +159,23 @@ public class CommandLineArguments {
 		this.fullBackup = fullBackup;
 		this.backup = backup;
 		this.search = search;
-		this.logfilefolder = logfilefolder;
-		this.excludedFiles = excludedFiles;
-		this.excludedPaths = excludedPaths;
+		this.excludedFiles = OtherUtilities.getListFromFileList(excludedFiles, processText);
+		this.excludedPaths = OtherUtilities.getListFromFileList(excludedPaths, processText);
 		this.restoreDate = restoreDate;
 		this.subfolderToRestore = subfolderToRestore;
-		this.folderNameMapping = folderNameMapping;
+		this.folderNameMapping = OtherUtilities.readKeyValuePairFromFile(folderNameMapping, processText);
 		this.overwrite = overwrite;
 		this.writesearchto = writesearchto;
 		this.searchTextPattern = searchTextPattern;
 		this.addpathlengthforallfolders = addpathlengthforallfolders;
 		this.addpathlengthforfolderswithnewormodifiedcontent = addpathlengthforfolderswithnewormodifiedcontent;
+		this.processText = processText;
+		
+		configureLogFile(logfilefolder, processText);
+		
 	}
 
-    private static void configureLogFile(String logFilePath) {
+    private static void configureLogFile(String logFilePath, ProcessText processText) {
     	
     	// create filename
     	String logfileNameString = "PCBackup-" + OtherUtilities.dateToString(new Date(), Constants.LOGFILEDATEFORMAT_STRING) + ".log";
@@ -186,42 +183,8 @@ public class CommandLineArguments {
     	// create the Path
     	logFilePathAsPath = Paths.get(logFilePath, logfileNameString);
     	
-        System.out.println("Logging to file " + logFilePathAsPath);
+        processText.process("Logging to file " + logFilePathAsPath);
         
     }
-    
-    private static HashMap<String, String> readFolderNameMappings(String folderNameMappingPath) {
-    	
-    	HashMap<String, String> replacementMap = new HashMap<>();
-
-    	if (folderNameMappingPath == null) {return replacementMap;}
-    	
-    	// Read the file line by line and process each line
-        try (BufferedReader br = new BufferedReader(new FileReader(folderNameMappingPath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                // Split the line by "="
-                String[] parts = line.split("=");
-
-                // Ensure there are two parts (key and value)
-                if (parts.length == 2) {
-                    String key = parts[0].trim();
-                    String value = parts[1].trim();
-
-                    // Store key-value pair in the HashMap
-                    replacementMap.put(key, value);
-                } else {
-                    // Handle invalid lines if necessary
-                    System.out.println("Invalid line: " + line);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Failed to read  folderNameMapping "  + folderNameMappingPath);
-        }
         
-        return replacementMap;
-        
-    }
-    
 }

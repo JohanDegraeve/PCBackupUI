@@ -38,7 +38,6 @@ import utilities.CreateFullBackup;
 import utilities.CreateSubFolder;
 import utilities.FileAndFolderUtilities;
 import utilities.ListBackupsInFolder;
-import utilities.Logger;
 import utilities.OtherUtilities;
 import utilities.WriteToFile;
 
@@ -65,15 +64,15 @@ public class Backup {
     		mostRecentBackupPath = ListBackupsInFolder.getMostRecentBackup(destinationFolderPath);
 		} catch (IOException e) {
 			e.printStackTrace();
-            Logger.log("Exception in main, while getting list of backups");
-            Logger.log(e.toString());
+			commandLineArguments.processText.process("Exception in main, while getting list of backups");
+			commandLineArguments.processText.process(e.toString());
             System.exit(1);
 		}
     	if (mostRecentBackupPath == null && !commandLineArguments.fullBackup) {
-    		Logger.log("You're asking an incremental backup but there's no previous backup. Start with a full backup or check the destination folder."); 
+    		commandLineArguments.processText.process("You're asking an incremental backup but there's no previous backup. Start with a full backup or check the destination folder."); 
     		System.exit(1);
     	} else if (mostRecentBackupPath != null && !commandLineArguments.fullBackup) {
-    		Logger.log("Latest backup = " + mostRecentBackupPath.toString() + ". Only the new or modified files and folders since this latest backup will be copied.");
+    		commandLineArguments.processText.process("Latest backup = " + mostRecentBackupPath.toString() + ". Only the new or modified files and folders since this latest backup will be copied.");
     	}
 
 
@@ -97,8 +96,8 @@ public class Backup {
          */
         Path destinationFolderPathSubFolder = CreateSubFolder.createSubFolder(commandLineArguments.destination, backupfoldername);
         
-        Logger.log("New backup folder created: " + backupfoldername);
-        Logger.log("Reading all files and folders in the source and building the folder structure");// in other words create an instance of AFolder
+        commandLineArguments.processText.process("New backup folder created: " + backupfoldername);
+        commandLineArguments.processText.process("Reading all files and folders in the source and building the folder structure");// in other words create an instance of AFolder
 
     	// first we make a list of files and folder in the sourceFolderPath,
         // for each file or folder we create an instance of AFileOrAFolder
@@ -132,7 +131,7 @@ public class Backup {
                 		// check if folder is in excludedPaths
                 		for (String excludedPath : commandLineArguments.excludedPaths) {
                 			if (path.getFileName().toString().trim().equals(excludedPath.trim())) {
-                				Logger.log("      Excluding folder '" + excludedPath + "' because " + excludedPath + " is in the file excludedpathlist");
+                				commandLineArguments.processText.process("      Excluding folder '" + excludedPath + "' because " + excludedPath + " is in the file excludedpathlist");
                 				continue directoryLoop;
                 			}
                 		}
@@ -140,10 +139,10 @@ public class Backup {
                 	}
                 	
                 	if (Files.isDirectory(path)) {
-                		Logger.log("   Reading files in folder \"" + path.getFileName().toString() + "\"");
+                		commandLineArguments.processText.process("   Reading files in folder \"" + path.getFileName().toString() + "\"");
                 	}
                 	
-                	listOfFilesAndFoldersInSourceFolder.getFileOrFolderList().add(FileAndFolderUtilities.createAFileOrAFolder(path, backupfoldername, commandLineArguments.excludedFiles, commandLineArguments.excludedPaths, commandLineArguments.addpathlengthforallfolders));
+                	listOfFilesAndFoldersInSourceFolder.getFileOrFolderList().add(FileAndFolderUtilities.createAFileOrAFolder(path, backupfoldername, commandLineArguments.excludedFiles, commandLineArguments.excludedPaths, commandLineArguments.addpathlengthforallfolders, commandLineArguments.processText));
                 	
                 }
                 
@@ -151,55 +150,54 @@ public class Backup {
 
         } catch (IOException e) {
             e.printStackTrace();
-            Logger.log("Exception in main, while creating list of folders");
-            Logger.log(e.toString());
+            commandLineArguments.processText.process("Exception in main, while creating list of folders");
+            commandLineArguments. processText.process(e.toString());
             System.exit(1);
         }
         
         //if option is F, then create full backup
         if (commandLineArguments.fullBackup) {
-        	Logger.log("Starting full backup");
+        	commandLineArguments.processText.process("Starting full backup");
             CreateFullBackup.createFullBackup(listOfFilesAndFoldersInSourceFolder, sourceFolderPath, destinationFolderPathSubFolder, commandLineArguments);
-            Logger.log("Backup finished");
-            System.out.println("Backup finished");
+            commandLineArguments.processText.process("Backup finished");
         } else {
         	
-        	Logger.log("Parsing the json file from previous backup " + mostRecentBackupPath.resolve("folderlist.json").toString()); 
-        	Logger.log("   "); 
+        	commandLineArguments.processText.process("Parsing the json file from previous backup " + mostRecentBackupPath.resolve("folderlist.json").toString()); 
+        	commandLineArguments.processText.process("   "); 
             // convert folderlist.json in most recent backup path to AFileOrAFolder
-            AFileOrAFolder listOfFilesAndFoldersInPreviousBackupFolder = FileAndFolderUtilities.fromFolderlistDotJsonToAFileOrAFolder(mostRecentBackupPath.resolve("folderlist.json"));
+            AFileOrAFolder listOfFilesAndFoldersInPreviousBackupFolder = FileAndFolderUtilities.fromFolderlistDotJsonToAFileOrAFolder(mostRecentBackupPath.resolve("folderlist.json"), commandLineArguments.processText);
             
-            Logger.log("Starting incremental backup");
+            commandLineArguments.processText.process("Starting incremental backup");
             
             // we know for sure that both listOfFilesAndFoldersInSourceFolder and listOfFilesAndFoldersInPreviousBackupFolder are instance of AFolder
             // let's check anyway
-            if (!(listOfFilesAndFoldersInSourceFolder instanceof AFolder)) {Logger.log("listOfFilesAndFoldersInSourceFolder is not an instance of AFolder");System.exit(1);} 
-            if (!(listOfFilesAndFoldersInPreviousBackupFolder instanceof AFolder)) {Logger.log("listOfFilesAndFoldersInPreviousBackupFolder is not an instance of AFolder");System.exit(1);}
+            if (!(listOfFilesAndFoldersInSourceFolder instanceof AFolder)) {commandLineArguments.processText.process("listOfFilesAndFoldersInSourceFolder is not an instance of AFolder");System.exit(1);} 
+            if (!(listOfFilesAndFoldersInPreviousBackupFolder instanceof AFolder)) {commandLineArguments.processText.process("listOfFilesAndFoldersInPreviousBackupFolder is not an instance of AFolder");System.exit(1);}
             // set the name of the first folder to "", because this may be the original main folder name which we don't need
             listOfFilesAndFoldersInSourceFolder.setName("");
             listOfFilesAndFoldersInPreviousBackupFolder.setName("");
             FileAndFolderUtilities.compareAndUpdate(listOfFilesAndFoldersInSourceFolder, listOfFilesAndFoldersInPreviousBackupFolder, sourceFolderPath, destinationFolderPathSubFolder, new ArrayList<String>(), backupfoldername, 1, commandLineArguments);
             
     		// do the foldername mapping
-    		OtherUtilities.doFolderNameMapping((AFolder)listOfFilesAndFoldersInPreviousBackupFolder, commandLineArguments, destinationFolderPath.resolve(backupfoldername));
+    		OtherUtilities.doFolderNameMapping((AFolder)listOfFilesAndFoldersInPreviousBackupFolder, commandLineArguments, destinationFolderPath.resolve(backupfoldername), commandLineArguments.processText);
             
     		// store folderlist.json on disk
     		try {
     			
-    			Logger.log("Writing folderlist.json to " + destinationFolderPathSubFolder.toString());
+    			commandLineArguments.processText.process("Writing folderlist.json to " + destinationFolderPathSubFolder.toString());
     			
         		// write the json file to the destination folder
         		WriteToFile.writeToFile((new ObjectMapper()).writeValueAsString(listOfFilesAndFoldersInPreviousBackupFolder), destinationFolderPathSubFolder.toString() + File.separator + "folderlist.json");
             	
             } catch (IOException e) {
-            	Logger.log("Failed to write json file folderlist.json to  " + destinationFolderPath.toString());
+            	commandLineArguments.processText.process("Failed to write json file folderlist.json to  " + destinationFolderPath.toString());
     			System.exit(1);
             }
     		
     		// store folderlist-withfullpaths.json. This json file has the same contents, but the 'name' is the full path of a file or folder. Makes it easier to find it in the backup folder.
     		try {
     			
-    			Logger.log("Writing folderlist-withfullpaths.json to " + destinationFolderPathSubFolder.toString());
+    			commandLineArguments.processText.process("Writing folderlist-withfullpaths.json to " + destinationFolderPathSubFolder.toString());
     			
     			String jsonString = (new ObjectMapper()).writeValueAsString(FileAndFolderUtilities.createAFileOrAFolderWithFullPath(listOfFilesAndFoldersInPreviousBackupFolder, new ArrayList<>(), null));
 
@@ -207,11 +205,11 @@ public class Backup {
         		WriteToFile.writeToFile(OtherUtilities.removeDoubleBackSlashes(jsonString), destinationFolderPathSubFolder.toString() + File.separator + "folderlist-withfullpaths.json");
             	
             } catch (IOException e) {
-            	Logger.log("Failed to write json file folderlist-withfullpaths.json to  " + destinationFolderPath.toString());
+            	commandLineArguments.processText.process("Failed to write json file folderlist-withfullpaths.json to  " + destinationFolderPath.toString());
     			System.exit(1);
             }
     		
-    		Logger.log("Backup finished");
+    		commandLineArguments.processText.process("Backup finished");
 
 
         }

@@ -21,6 +21,7 @@ package main;
 import java.io.File;
 
 import Enumerations.Action;
+
 import Interfaces.ProcessText;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -32,6 +33,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 
+import model.CommandLineArguments;
+import model.UIParameters;
+import pcbackup.Backup;
+
 public class Main extends Application {
 
 	// screen parameters
@@ -42,14 +47,6 @@ public class Main extends Application {
 	// Attributes for root VBox
     private VBox root = new VBox();
 
-    // Attributes for Section with source, dest and logfile folder 
-    private String sourceTextFieldTextString;
-    private String destTextFieldTextString;
-    private String logfileFolderTextFieldString;
-    private String excludedFileListTextFieldTextString;
-    private String excludedPathListTextFieldTextString;
-    private String folderNameMappingTextFieldTextString;
-
 	// Attributes for Section with additional backup parameters (like excluded file list)
     private VBox sectionBackupParametersBox;
 
@@ -57,8 +54,8 @@ public class Main extends Application {
     private VBox submitButtonVBox;
     private Button submitButton;
 	
-    private Action currentlySelectedAction = null;
-
+    UIParameters uiparam = UIParameters.getInstance();
+    
     @Override
     public void start(Stage primaryStage) {
     	
@@ -67,7 +64,7 @@ public class Main extends Application {
         root.setSpacing(spacingBetweenSections);
 
         // Create the first section
-        VBox section1 = Section1.createSection1(primaryStage, (text) -> sourceTextFieldChanged(text), (text) -> destTextFieldChanged(text), (text) -> logFileFolderTextFieldChanged(text));
+        VBox section1 = Section1.createSection1(primaryStage, (text) -> sourceTextFieldChanged(text), (text) -> destTextFieldChanged(text), (text) -> logFileFolderTextFieldChanged(text), uiparam.getSourceTextFieldTextString(), uiparam.getDestTextFieldTextString(), uiparam.getLogfileFolderTextFieldString());
         root.getChildren().add(section1);
 
         // Create a divider line between sections
@@ -78,7 +75,7 @@ public class Main extends Application {
         root.getChildren().add(section2);
         
         // section backupParameters
-        sectionBackupParametersBox = SectionBackupParameters.createSectionBackupParameters(primaryStage, (text) -> excludedFileListTextFieldChanged(text), (text) -> excludePathListTextFieldChanged(text), (text) -> folderNameMappingListTextFieldChanged(text));
+        sectionBackupParametersBox = SectionBackupParameters.createSectionBackupParameters(primaryStage, (text) -> excludedFileListTextFieldChanged(text), (text) -> excludePathListTextFieldChanged(text), (text) -> folderNameMappingListTextFieldChanged(text), uiparam.getExcludedFileListTextFieldTextString(), uiparam.getExcludedPathListTextFieldTextString(), uiparam.getFolderNameMappingTextFieldTextString());
         
         // add the submit button, initially disabled
         addSubmitButtonVBox(false);
@@ -92,8 +89,27 @@ public class Main extends Application {
         
     }
 
-    private void startBackup() {
-        
+    private void startPCBackup() {
+    	
+    	if (uiparam.getCurrentlySelectedAction() == null) {
+    		System.out.println("in startPCBackup, but currentlySelectedAction == null, looks like a coding error");
+    	}
+    	
+    	switch (uiparam.getCurrentlySelectedAction()) {
+    	case FULLBACKUP, INCREMENTALBACKUP:
+    		
+    		CommandLineArguments commandLineArguments = new CommandLineArguments(
+    				null, null, uiparam.getSourceTextFieldTextString(), uiparam.getDestTextFieldTextString(), null, uiparam.getCurrentlySelectedAction() == Action.FULLBACKUP ? true:false, 
+    						true, false, uiparam.getLogfileFolderTextFieldString(), uiparam.getExcludedFileListTextFieldTextString(), 
+    						uiparam.getExcludedPathListTextFieldTextString(), null, null, uiparam.getFolderNameMappingTextFieldTextString(), false, null, null, 
+    						false, false, null, (logtext) -> {utilities.Logger.log(logtext);});
+    	
+    		Backup.backup(commandLineArguments);
+    		
+    		break;
+    	default:
+    		break;
+    	} 
     }
     
     /**
@@ -102,11 +118,11 @@ public class Main extends Application {
      */
     private void addAndRemoveSection(Action action) {
     	
-    	currentlySelectedAction = action;
+    	uiparam.setCurrentlySelectedAction(action);
     	
     	if (action == null) {
     		root.getChildren().remove(sectionBackupParametersBox);
-    		currentlySelectedAction = null;
+    		uiparam.setCurrentlySelectedAction(null);
     		verifySubmitButtonStatus();
     		return;
     	}
@@ -174,7 +190,7 @@ public class Main extends Application {
         // Add the submit button
         submitButton = new Button("Start");
         submitButton.setDisable(!enabled);
-        submitButton.setOnAction(e -> startBackup());
+        submitButton.setOnAction(e -> startPCBackup());
         
         // Create an HBox to hold the button
         HBox submitButtonHBox = new HBox(submitButton);
@@ -189,32 +205,32 @@ public class Main extends Application {
     }
     
     private void sourceTextFieldChanged(String text) {
-    	sourceTextFieldTextString = verifyIfFolderExistsAndSetSubmitButton(text, (String textToProcess) -> Section1.addSourceWarning(textToProcess));
+    	uiparam.setSourceTextFieldTextString(verifyIfFolderExistsAndSetSubmitButton(text, (String textToProcess) -> Section1.addSourceWarning(textToProcess)));
     	verifySubmitButtonStatus();
     }
     
     private void destTextFieldChanged(String text) {
-    	destTextFieldTextString = verifyIfFolderExistsAndSetSubmitButton(text, (String textToProcess) -> Section1.addDestWarning(textToProcess));
+    	uiparam.setDestTextFieldTextString(verifyIfFolderExistsAndSetSubmitButton(text, (String textToProcess) -> Section1.addDestWarning(textToProcess)));
     	verifySubmitButtonStatus();
     }
     
     private void logFileFolderTextFieldChanged(String text) {
-    	logfileFolderTextFieldString = verifyIfFolderExistsAndSetSubmitButton(text, (String textToProcess) -> Section1.addLogFolderWarning(textToProcess));
+    	uiparam.setLogfileFolderTextFieldString(verifyIfFolderExistsAndSetSubmitButton(text, (String textToProcess) -> Section1.addLogFolderWarning(textToProcess)));
     	verifySubmitButtonStatus();
     }
     
     private void excludedFileListTextFieldChanged(String text) {
-    	excludedFileListTextFieldTextString = verifyIfFileExistsAndSetSubmitButton(text, (String textToProcess) -> SectionBackupParameters.addExcludedFileListWarning(textToProcess));
+    	uiparam.setExcludedFileListTextFieldTextString(verifyIfFileExistsAndSetSubmitButton(text, (String textToProcess) -> SectionBackupParameters.addExcludedFileListWarning(textToProcess)));
     	verifySubmitButtonStatus();
     }
     
     private void excludePathListTextFieldChanged(String text) {
-    	excludedPathListTextFieldTextString = verifyIfFileExistsAndSetSubmitButton(text, (String textToProcess) -> SectionBackupParameters.addExcludedPathListWarning(textToProcess));
+    	uiparam.setExcludedPathListTextFieldTextString(verifyIfFileExistsAndSetSubmitButton(text, (String textToProcess) -> SectionBackupParameters.addExcludedPathListWarning(textToProcess)));
     	verifySubmitButtonStatus();
     }
 
     private void folderNameMappingListTextFieldChanged(String text) {
-    	folderNameMappingTextFieldTextString = verifyIfFileExistsAndSetSubmitButton(text, (String textToProcess) -> SectionBackupParameters.addFolerNameMappingListWarning(textToProcess));
+    	uiparam.setFolderNameMappingTextFieldTextString(verifyIfFileExistsAndSetSubmitButton(text, (String textToProcess) -> SectionBackupParameters.addFolerNameMappingListWarning(textToProcess)));
     	verifySubmitButtonStatus();
     }
 
@@ -269,15 +285,15 @@ public class Main extends Application {
     
     private void verifySubmitButtonStatus() {
     	
-    	if (currentlySelectedAction == null) {
+    	if (uiparam.getCurrentlySelectedAction() == null) {
     		submitButton.setDisable(true);
     		return;
     	}
     	
-    	switch (currentlySelectedAction) {
+    	switch (uiparam.getCurrentlySelectedAction()) {
     	case FULLBACKUP, INCREMENTALBACKUP:
-    		if (sourceTextFieldTextString != null && destTextFieldTextString != null && logfileFolderTextFieldString != null) {
-    			if (sourceTextFieldTextString.length() > 0 && destTextFieldTextString.length() > 0 && logfileFolderTextFieldString.length() > 0) {
+    		if (uiparam.getSourceTextFieldTextString() != null && uiparam.getDestTextFieldTextString() != null && uiparam.getLogfileFolderTextFieldString() != null) {
+    			if (uiparam.getSourceTextFieldTextString().length() > 0 && uiparam.getDestTextFieldTextString().length() > 0 && uiparam.getLogfileFolderTextFieldString().length() > 0) {
     				submitButton.setDisable(false);
     			} else {
     				submitButton.setDisable(true);

@@ -23,6 +23,7 @@ import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import Interfaces.ProcessText;
 import model.AFile;
 import model.AFileOrAFolder;
 import model.AFolder;
@@ -30,7 +31,6 @@ import model.CommandLineArguments;
 import model.Constants;
 import utilities.FileAndFolderUtilities;
 import utilities.ListBackupsInFolder;
-import utilities.Logger;
 import utilities.OtherUtilities;
 import utilities.PathUtilities;
 
@@ -53,38 +53,38 @@ public class Restore {
 			String latestBackupFolderName = ListBackupsInFolder.getMostRecentBackup(sourceFolderPath, commandLineArguments.restoreDate);
 			
 			if (latestBackupFolderName == null) {
-                Logger.log("No backups are found that were created before " + (new SimpleDateFormat(Constants.OUTPUTDATEFORMAT_STRING)).format(commandLineArguments.restoreDate));
+                commandLineArguments.processText.process("No backups are found that were created before " + (new SimpleDateFormat(Constants.OUTPUTDATEFORMAT_STRING)).format(commandLineArguments.restoreDate));
                 System.exit(1);
 			}
 			
-			Logger.log("Found backup " + latestBackupFolderName + " created before " + (new SimpleDateFormat(Constants.OUTPUTDATEFORMAT_STRING).format(commandLineArguments.restoreDate)));
+			commandLineArguments.processText.process("Found backup " + latestBackupFolderName + " created before " + (new SimpleDateFormat(Constants.OUTPUTDATEFORMAT_STRING).format(commandLineArguments.restoreDate)));
 			
 			// get list of all older backup folders, to support the case were we don't find a specific file in the specified folder, we can start searching in older backups,
 			List<String> olderBackups = ListBackupsInFolder.getAllBackupFoldersAsStrings(sourceFolderPath, latestBackupFolderName);
 			
 			// get the file folderlist.json as AFileOrAFolder
 			Path pathWithJsonFile = sourceFolderPath.resolve(latestBackupFolderName).resolve("folderlist.json");
-			Logger.log("Parsing " + pathWithJsonFile.toString());
-			AFileOrAFolder listOfFilesAndFoldersInLastBackup = FileAndFolderUtilities.fromFolderlistDotJsonToAFileOrAFolder(pathWithJsonFile);
+			commandLineArguments.processText.process("Parsing " + pathWithJsonFile.toString());
+			AFileOrAFolder listOfFilesAndFoldersInLastBackup = FileAndFolderUtilities.fromFolderlistDotJsonToAFileOrAFolder(pathWithJsonFile, commandLineArguments.processText);
 			
 			if (listOfFilesAndFoldersInLastBackup instanceof AFolder) {
 				
 		    	// if subfolderToRestore is specified, then we need to search within folderToBackup for an instance of AFileOrAFolder that matches that subfolder
-		    	AFolder folderToStart =  getSubFolderAsAFolder((AFolder)listOfFilesAndFoldersInLastBackup, Paths.get(commandLineArguments.subfolderToRestore));
+		    	AFolder folderToStart =  getSubFolderAsAFolder((AFolder)listOfFilesAndFoldersInLastBackup, Paths.get(commandLineArguments.subfolderToRestore), commandLineArguments.processText);
 
-		    	Logger.log("Restoring folders and files ...");
+		    	commandLineArguments.processText.process("Restoring folders and files ...");
 				restore(folderToStart, destinationFolderPath, sourceFolderPath, Paths.get(commandLineArguments.subfolderToRestore), olderBackups, commandLineArguments, 1);
 				
 			} else {
-				Logger.log("First element in folderlist.json is not a folder, looks like a coding error");
+				commandLineArguments.processText.process("First element in folderlist.json is not a folder, looks like a coding error");
 	            System.exit(1);
 			}
 			
 			System.out.println("Restore finished, see " + destinationFolderPath.toString());
 			
 		} catch (IOException e) {
-			Logger.log("Exception in restore");
-            Logger.log(e.toString());
+			commandLineArguments.processText.process("Exception in restore");
+            commandLineArguments.processText.process(e.toString());
             System.exit(1);
 		}
         
@@ -136,8 +136,8 @@ public class Restore {
 					
 				} catch (IOException e) {
 					e.printStackTrace();
-					Logger.log("Exception in restore, while creating the directory " + folderToCreate.getFileName().toString());
-		            Logger.log(e.toString());
+					commandLineArguments.processText.process("Exception in restore, while creating the directory " + folderToCreate.getFileName().toString());
+		            commandLineArguments.processText.process(e.toString());
 		            System.exit(1);
 				}
     			
@@ -151,35 +151,35 @@ public class Restore {
 					copyFile(sourceToCopy, destination, commandLineArguments);
 					
 				} catch (NoSuchFileException e) {
-					Logger.log("   could not find the file " + sourceToCopy.toString());
-					Logger.log("      Will try to find it in older bacups");
+					commandLineArguments.processText.process("   could not find the file " + sourceToCopy.toString());
+					commandLineArguments.processText.process("      Will try to find it in older bacups");
 					String olderBackup = tryToFindInOlderBackups((AFile)sourceItem, subfolder, olderBackups, sourceBackupRootFolder);
 					if (olderBackup == null) {
-						Logger.log("      Did not find the missing file in previous backups");
+						commandLineArguments.processText.process("      Did not find the missing file in previous backups");
 					} else {
-						Logger.log("      Found the missing file in backup \"" + olderBackup + "\"");
+						commandLineArguments.processText.process("      Found the missing file in backup \"" + olderBackup + "\"");
 						try {
 							sourceToCopy = sourceBackupRootFolder.resolve(olderBackup).resolve(subfolder).resolve(sourceItem.getName());
 							copyFile(sourceToCopy, destination, commandLineArguments);
-							Logger.log("      and successfully copied to restore folder");
+							commandLineArguments.processText.process("      and successfully copied to restore folder");
 						} catch (FileAlreadyExistsException e2) {
-							Logger.log("The file " + sourceToCopy.toString() + " already exists in the destination folder");
-							Logger.log("If you want to restore with overwrite, add the optional argument --overwrite=true");
-							Logger.log("Restore interrupted");
+							commandLineArguments.processText.process("The file " + sourceToCopy.toString() + " already exists in the destination folder");
+							commandLineArguments.processText.process("If you want to restore with overwrite, add the optional argument --overwrite=true");
+							commandLineArguments.processText.process("Restore interrupted");
 				            System.exit(1);
 						} catch (IOException e1) {
-							Logger.log("      but copy failed. Exception occurred : ");
-							Logger.log(e1.toString());
+							commandLineArguments.processText.process("      but copy failed. Exception occurred : ");
+							commandLineArguments.processText.process(e1.toString());
 						}
 					}
 				} catch (FileAlreadyExistsException e) {
-					Logger.log("The file " + sourceToCopy.toString() + " already exists in the destination folder");
-					Logger.log("If you want to restore with overwrite, add the optional argument --overwrite=true");
-					Logger.log("Restore interrupted");
+					commandLineArguments.processText.process("The file " + sourceToCopy.toString() + " already exists in the destination folder");
+					commandLineArguments.processText.process("If you want to restore with overwrite, add the optional argument --overwrite=true");
+					commandLineArguments.processText.process("Restore interrupted");
 		            System.exit(1);
 				} catch (IOException e) {
-					Logger.log("Exception in restore, while copying the file " + sourceToCopy.toString() + " to " + destination.toString());
-		            Logger.log(e.toString());
+					commandLineArguments.processText.process("Exception in restore, while copying the file " + sourceToCopy.toString() + " to " + destination.toString());
+		            commandLineArguments.processText.process(e.toString());
 		            System.exit(1);
 				}
     		}
@@ -230,7 +230,7 @@ public class Restore {
      * @param subfolder
      * @return the folder
      */
-    private static AFolder getSubFolderAsAFolder(AFolder folderToSearchIn, Path subfolder) {
+    private static AFolder getSubFolderAsAFolder(AFolder folderToSearchIn, Path subfolder, ProcessText processText) {
     	
     	// split subfolder, because it can be a concatentation of paths, in other words split by "/" or "\" (depending on os)
     	Path[] subfolders = PathUtilities.splitPath(subfolder);
@@ -250,13 +250,13 @@ public class Restore {
         	AFileOrAFolder folderFound = FileAndFolderUtilities.findMatchingItem(new AFolder(subfolders[subfoldersCounter].toString(), ""), deeperAFileOrAFolder.getFileOrFolderList());
         	
         	if (folderFound == null) {
-        		Logger.log("You specified " + subfolder + " as subfoldertorestore, but it does not exist in backup.");
+        		processText.process("You specified " + subfolder + " as subfoldertorestore, but it does not exist in backup.");
                 System.exit(1);
         	}
         	
         	// folderFound must be a directory, if not, it's a file, and user made some mistake
         	if (folderFound instanceof AFile) {
-        		Logger.log("You specified " + subfolder + " as subfoldertorestore, but this seems to be a file, not a folder");
+        		processText.process("You specified " + subfolder + " as subfoldertorestore, but this seems to be a file, not a folder");
                 System.exit(1);
         	}
 

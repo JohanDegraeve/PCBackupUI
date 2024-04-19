@@ -24,7 +24,7 @@ public class SectionBackupParameters {
 	private static HBox folderNameMappingListHBoxWithLabelHBox;
 	private static Label folderNameMappingListWarningLabel;
 
-	public static VBox createSectionBackupParameters(Stage primaryStage, TextFieldChanged excludedFileListChanged, TextFieldChanged excludedPathListChanged, TextFieldChanged folderNameMappingListChanged) {
+	public static VBox createSectionBackupParameters(Stage primaryStage, TextFieldChanged excludedFileListChanged, TextFieldChanged excludedPathListChanged, TextFieldChanged folderNameMappingListChanged, String initialTextExcludedFile, String initialTextExclucedPath, String initialTextFolderNameMapping) {
 
 		// texts for excluded file list
         String labelTextSelectExcludedFileList = "Selecteer bestand met uit te sluiten bestanden (optioneel):\n";
@@ -48,17 +48,17 @@ public class SectionBackupParameters {
         completeFolderNameMappingListVBox = new VBox();
         
         
-        excludedFileListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedFileList, labelTextWithExplanationSelectExcludedFileList, excludedFileListChanged);
+        excludedFileListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedFileList, labelTextWithExplanationSelectExcludedFileList, excludedFileListChanged, initialTextExcludedFile);
         excludedFileListHBoxWithFileText.setSpacing(10);
         completeExcludedFileListVBox.getChildren().add(excludedFileListHBoxWithFileText);
         section.getChildren().add(completeExcludedFileListVBox);
 
-        excludedPathListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedPathList, labelTextSelectWithExplanationExcludedPathList, excludedPathListChanged);
+        excludedPathListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedPathList, labelTextSelectWithExplanationExcludedPathList, excludedPathListChanged, initialTextExclucedPath);
         excludedPathListHBoxWithFileText.setSpacing(10);
         completeExcludedPathListVBox.getChildren().add(excludedPathListHBoxWithFileText);
         section.getChildren().add(completeExcludedPathListVBox);
 
-        folderNameMappingListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectedFolderNameMappingList, labelTextWithExplanationSelectedFolderNameMappingList, folderNameMappingListChanged);
+        folderNameMappingListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectedFolderNameMappingList, labelTextWithExplanationSelectedFolderNameMappingList, folderNameMappingListChanged, initialTextFolderNameMapping);
         folderNameMappingListHBoxWithFileText.setSpacing(10);
         completeFolderNameMappingListVBox.getChildren().add(folderNameMappingListHBoxWithFileText);
         section.getChildren().add(completeFolderNameMappingListVBox);

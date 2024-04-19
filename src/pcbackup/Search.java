@@ -37,7 +37,6 @@ import model.CommandLineArguments;
 import model.Constants;
 import utilities.FileAndFolderUtilities;
 import utilities.ListBackupsInFolder;
-import utilities.Logger;
 import utilities.OtherUtilities;
 import utilities.WriteToFile;
 
@@ -61,8 +60,8 @@ public class Search {
 			allBackups.add(0, latestBackupFolderName);
         } catch (IOException e) {
 			e.printStackTrace();
-			Logger.log("Exception in search, while reading backup folder ");
-            Logger.log(e.toString());
+			commandLineArguments.processText.process("Exception in search, while reading backup folder ");
+            commandLineArguments.processText.process(e.toString());
         }
         
         // will have search results after calling iterateThroughFolderOrFile 
@@ -71,13 +70,13 @@ public class Search {
 		// iterate through all backups older than startSearchDate and search for the text
 		for (String backupFolderName: allBackups) {
 			
-			if (OtherUtilities.getBackupDate(backupFolderName).compareTo(commandLineArguments.startSearchDate) < 0) {
+			if (OtherUtilities.getBackupDate(backupFolderName, commandLineArguments.processText).compareTo(commandLineArguments.startSearchDate) < 0) {
 				continue;
 			}
 			
 			Path pathWithJsonFile = sourceFolderPath.resolve(backupFolderName).resolve("folderlist.json");
-			Logger.log("Parsing " + pathWithJsonFile.toString());
-			AFileOrAFolder listOfFilesAndFoldersInBackup = FileAndFolderUtilities.fromFolderlistDotJsonToAFileOrAFolder(pathWithJsonFile);
+			commandLineArguments.processText.process("Parsing " + pathWithJsonFile.toString());
+			AFileOrAFolder listOfFilesAndFoldersInBackup = FileAndFolderUtilities.fromFolderlistDotJsonToAFileOrAFolder(pathWithJsonFile, commandLineArguments.processText);
 			
 			iterateThroughFolderOrFile(listOfFilesAndFoldersInBackup, commandLineArguments.searchTextPattern, backupFolderName, Paths.get(""), results);
 			
@@ -167,10 +166,10 @@ public class Search {
 		
 		try {
 			WriteToFile.writeToFile(textToWrite, pathToWriteTo.toString());
-			Logger.log("Search results written to " + pathToWriteTo.toString());
+			commandLineArguments.processText.process("Search results written to " + pathToWriteTo.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
-        	Logger.log("Failed to write search results to  " + pathToWriteTo.toString());
+        	commandLineArguments.processText.process("Failed to write search results to  " + pathToWriteTo.toString());
 			System.exit(1);
 		}
 
