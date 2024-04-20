@@ -31,6 +31,7 @@ import model.CommandLineArguments;
 import model.Constants;
 import utilities.FileAndFolderUtilities;
 import utilities.ListBackupsInFolder;
+import utilities.Logger;
 import utilities.OtherUtilities;
 import utilities.PathUtilities;
 
@@ -80,7 +81,7 @@ public class Restore {
 	            System.exit(1);
 			}
 			
-			System.out.println("Restore finished, see " + destinationFolderPath.toString());
+			Logger.log("Restore finished, see " + destinationFolderPath.toString());
 			
 		} catch (IOException e) {
 			commandLineArguments.processText.process("Exception in restore");
