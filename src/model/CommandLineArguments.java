@@ -175,7 +175,7 @@ public class CommandLineArguments {
 		
 	}
 
-    private static void configureLogFile(String logFilePath, ProcessText processText) {
+    public static void configureLogFile(String logFilePath, ProcessText processText) {
     	
     	// create filename
     	String logfileNameString = "PCBackup-" + OtherUtilities.dateToString(new Date(), Constants.LOGFILEDATEFORMAT_STRING) + ".log";

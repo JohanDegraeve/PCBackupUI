@@ -19,10 +19,13 @@
 package main;
 
 import java.io.File;
+import java.util.Date;
+import java.util.regex.Pattern;
 
 import Enumerations.Action;
-
+import Interfaces.FolderChangedHolder;
 import Interfaces.ProcessText;
+import Interfaces.TextFieldChanged;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -36,6 +39,7 @@ import javafx.stage.Stage;
 import model.CommandLineArguments;
 import model.UIParameters;
 import pcbackup.Backup;
+import utilities.OtherUtilities;
 
 public class Main extends Application {
 
@@ -49,15 +53,28 @@ public class Main extends Application {
 
 	// Attributes for Section with additional backup parameters (like excluded file list)
     private VBox sectionBackupParametersBox;
+    
+    // Attributes for Section with additional restore parameters
+    private VBox sectionRestoreParametersBox;
 
     // Attributes for Section with submit button
     private VBox submitButtonVBox;
     private Button submitButton;
+    
+    private static Stage primaryStage;
 	
-    UIParameters uiparam = UIParameters.getInstance();
+    private UIParameters uiparam = UIParameters.getInstance();
+    
+    private ProcessText processText;
+    
+    private FolderChangedHolder destFolderChangedHolder = new FolderChangedHolder();
     
     @Override
     public void start(Stage primaryStage) {
+    	
+    	Main.primaryStage = primaryStage;
+    	
+    	processText = (logtext) -> {utilities.Logger.log(logtext);};
     	
     	// Create a VBox to hold all sections
         root.setPadding(new Insets(10));
@@ -74,7 +91,7 @@ public class Main extends Application {
         VBox section2 = Section2.createSection2(primaryStage, (action) -> addAndRemoveSection(action) );
         root.getChildren().add(section2);
         
-        // section backupParameters
+        // section backupParameters - don't add it yet to the root, it will be shown only when user selects Full or Incremental backup
         sectionBackupParametersBox = SectionBackupParameters.createSectionBackupParameters(primaryStage, (text) -> excludedFileListTextFieldChanged(text), (text) -> excludePathListTextFieldChanged(text), (text) -> folderNameMappingListTextFieldChanged(text), uiparam.getExcludedFileListTextFieldTextString(), uiparam.getExcludedPathListTextFieldTextString(), uiparam.getFolderNameMappingTextFieldTextString());
         
         // add the submit button, initially disabled
@@ -98,14 +115,42 @@ public class Main extends Application {
     	switch (uiparam.getCurrentlySelectedAction()) {
     	case FULLBACKUP, INCREMENTALBACKUP:
     		
-    		CommandLineArguments commandLineArguments = new CommandLineArguments(
+    		CommandLineArguments commandLineArgumentsForBackup = new CommandLineArguments(
     				null, null, uiparam.getSourceTextFieldTextString(), uiparam.getDestTextFieldTextString(), null, uiparam.getCurrentlySelectedAction() == Action.FULLBACKUP ? true:false, 
     						true, false, uiparam.getLogfileFolderTextFieldString(), uiparam.getExcludedFileListTextFieldTextString(), 
     						uiparam.getExcludedPathListTextFieldTextString(), null, null, uiparam.getFolderNameMappingTextFieldTextString(), false, null, null, 
-    						false, false, null, (logtext) -> {utilities.Logger.log(logtext);});
+    						false, false, null, processText);
     	
-    		Backup.backup(commandLineArguments);
+    		Backup.backup(commandLineArgumentsForBackup);
     		
+    		break;
+    	case RESTORE:
+
+    		// create list of parameters for constructor CommandLineArguments
+    		// just for clarity because the number of arguments is so long
+    		Date startSearchDate = null;
+    		Date endSearchDate = null;
+    		String source = uiparam.getSourceTextFieldTextString();
+    		String destination = uiparam.getDestTextFieldTextString();
+			String restoreto = uiparam.getFolderNameRestoreToTextFieldTextString();
+			boolean fullBackup = false;
+			boolean backup = false;
+			boolean search = false;
+			String logfilefolder = uiparam.getLogfileFolderTextFieldString();
+			String excludedFiles = uiparam.getExcludedFileListTextFieldTextString();
+			String excludedPaths = uiparam.getExcludedPathListTextFieldTextString();
+			Date restoreDate = uiparam.getBackupFolderName().equalsIgnoreCase(SectionRestoreParameters.defaultBackupFolderTextString) ? new Date():OtherUtilities.getBackupDate(uiparam.getBackupFolderName(), processText);
+			String subfolderToRestore = uiparam.getSubfolderToRestore();
+			String folderNameMapping = uiparam.getFolderNameMappingTextFieldTextString();
+			boolean overwrite = true;
+			String writesearchto = null;
+			Pattern searchTextPattern = null;
+			boolean addpathlengthforallfolders = false;
+			boolean addpathlengthforfolderswithnewormodifiedcontent = false;
+			String searchText = null;
+    		
+    		CommandLineArguments commandLineArguments = new CommandLineArguments(startSearchDate, endSearchDate, source, destination, restoreto, fullBackup, backup, search, logfilefolder, excludedFiles, excludedPaths, restoreDate, subfolderToRestore, folderNameMapping, overwrite, writesearchto, searchTextPattern, addpathlengthforallfolders, addpathlengthforfolderswithnewormodifiedcontent, searchText, processText);
+			
     		break;
     	default:
     		break;
@@ -122,6 +167,7 @@ public class Main extends Application {
     	
     	if (action == null) {
     		root.getChildren().remove(sectionBackupParametersBox);
+    		root.getChildren().remove(sectionRestoreParametersBox);
     		uiparam.setCurrentlySelectedAction(null);
     		verifySubmitButtonStatus();
     		return;
@@ -129,13 +175,35 @@ public class Main extends Application {
     	
     	// backup parameters box
     	if (action == Action.FULLBACKUP || action == Action.INCREMENTALBACKUP) {
+    		
+    		// remove any other boxes that might be there, but need to be removed because other option is chosen
+    		root.getChildren().remove(sectionRestoreParametersBox);
+    		
+    		// add sectionBackupParametersBox if it's currently not present
     		if (!root.getChildren().contains(sectionBackupParametersBox)) {
     			boolean enabled = removeSubmitButtonVBox();
         		root.getChildren().add(sectionBackupParametersBox);
         		addSubmitButtonVBox(enabled);
     		}
+    		
     	} else {
+    		
+    		// remove any other boxes that might be there, but need to be removed because other option is chosen
     		root.getChildren().remove(sectionBackupParametersBox);
+    		
+    		// add sectionBackupParametersBox if it's currently not present
+    		if (!root.getChildren().contains(sectionRestoreParametersBox)) {
+    			boolean enabled = removeSubmitButtonVBox();
+    			if (sectionRestoreParametersBox == null) {
+    	    		TextFieldChanged restoreToFolderChanged = (text) -> restoreToFolderTextFieldChanged(text);
+    	    		String initialTextRestoreToFolder = "";
+        			// (Stage primaryStage, TextFieldChanged excludedFileListChanged, TextFieldChanged excludedPathListChanged, TextFieldChanged folderNameMappingListChanged, String initialTextExcludedFile, String initialTextExclucedPath, String initialTextFolderNameMapping) {
+                    sectionRestoreParametersBox = SectionRestoreParameters.createSectionRestoreParameters(primaryStage, processText, restoreToFolderChanged, initialTextRestoreToFolder, destFolderChangedHolder);
+        		}
+        		root.getChildren().add(sectionRestoreParametersBox);
+        		addSubmitButtonVBox(enabled);
+    		}
+    		
     	}
     	
     	verifySubmitButtonStatus();
@@ -205,32 +273,38 @@ public class Main extends Application {
     }
     
     private void sourceTextFieldChanged(String text) {
-    	uiparam.setSourceTextFieldTextString(verifyIfFolderExistsAndSetSubmitButton(text, (String textToProcess) -> Section1.addSourceWarning(textToProcess)));
+    	uiparam.setSourceTextFieldTextString(verifyIfFolderExists(text, (String textToProcess) -> Section1.addSourceWarning(textToProcess)));
     	verifySubmitButtonStatus();
     }
     
     private void destTextFieldChanged(String text) {
-    	uiparam.setDestTextFieldTextString(verifyIfFolderExistsAndSetSubmitButton(text, (String textToProcess) -> Section1.addDestWarning(textToProcess)));
+    	uiparam.setDestTextFieldTextString(verifyIfFolderExists(text, (String textToProcess) -> Section1.addDestWarning(textToProcess)));
+    	destFolderChangedHolder.folderChanged.handleNewFolder(text);
     	verifySubmitButtonStatus();
     }
     
     private void logFileFolderTextFieldChanged(String text) {
-    	uiparam.setLogfileFolderTextFieldString(verifyIfFolderExistsAndSetSubmitButton(text, (String textToProcess) -> Section1.addLogFolderWarning(textToProcess)));
+    	uiparam.setLogfileFolderTextFieldString(verifyIfFolderExists(text, (String textToProcess) -> Section1.addLogFolderWarning(textToProcess)));
     	verifySubmitButtonStatus();
     }
     
     private void excludedFileListTextFieldChanged(String text) {
-    	uiparam.setExcludedFileListTextFieldTextString(verifyIfFileExistsAndSetSubmitButton(text, (String textToProcess) -> SectionBackupParameters.addExcludedFileListWarning(textToProcess)));
+    	uiparam.setExcludedFileListTextFieldTextString(verifyIfFileExists(text, (String textToProcess) -> SectionBackupParameters.addExcludedFileListWarning(textToProcess)));
     	verifySubmitButtonStatus();
     }
     
     private void excludePathListTextFieldChanged(String text) {
-    	uiparam.setExcludedPathListTextFieldTextString(verifyIfFileExistsAndSetSubmitButton(text, (String textToProcess) -> SectionBackupParameters.addExcludedPathListWarning(textToProcess)));
+    	uiparam.setExcludedPathListTextFieldTextString(verifyIfFileExists(text, (String textToProcess) -> SectionBackupParameters.addExcludedPathListWarning(textToProcess)));
     	verifySubmitButtonStatus();
     }
 
     private void folderNameMappingListTextFieldChanged(String text) {
-    	uiparam.setFolderNameMappingTextFieldTextString(verifyIfFileExistsAndSetSubmitButton(text, (String textToProcess) -> SectionBackupParameters.addFolerNameMappingListWarning(textToProcess)));
+    	uiparam.setFolderNameMappingTextFieldTextString(verifyIfFileExists(text, (String textToProcess) -> SectionBackupParameters.addFolerNameMappingListWarning(textToProcess)));
+    	verifySubmitButtonStatus();
+    }
+
+    private void restoreToFolderTextFieldChanged(String text) {
+    	uiparam.setFolderNameRestoreToTextFieldTextString(verifyIfFolderExists(text, (String textToProcess) -> SectionRestoreParameters.addRestoreToFolderWarning(textToProcess)));
     	verifySubmitButtonStatus();
     }
 
@@ -240,7 +314,7 @@ public class Main extends Application {
      * @param processText
      * @return null if verification failed
      */
-    private String verifyIfFolderExistsAndSetSubmitButton(String folderToVerify, ProcessText processText) {
+    private String verifyIfFolderExists(String folderToVerify, ProcessText processText) {
     	String warningTextString =  "Dit is geen geldige map";
     	
     	if (folderToVerify == null || folderToVerify.length() == 0) {
@@ -261,7 +335,7 @@ public class Main extends Application {
     	return folderToVerify;
     }	
     
-    private String verifyIfFileExistsAndSetSubmitButton(String fileToVerify, ProcessText processText) {
+    private String verifyIfFileExists(String fileToVerify, ProcessText processText) {
     	String fileDoesNotExistwarningTextString =  "Bestand niet gevonden.";
     	String thisIsNotAFileTextString = "Dit is geen bestand.";
     	

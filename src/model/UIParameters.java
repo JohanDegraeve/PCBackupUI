@@ -6,30 +6,43 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.HashMap;
 
 import Enumerations.Action;
 
 /**
- * to store parameters given in UI in a file and read them in a next test session
+ * to store parameters given in UI in a file and read them in a next test session<br>
+ * Not all parameters are stored in file:<br>
+ * Not stored:<br>
+ * - currentlySelectedActionKey<br>
+ * - backupFolderName<br> 
  */
 public class UIParameters {
 	
 	private static String parameterFileNameString = "pcbackup-parameters.txt";
 
 	static UIParameters instance;
-	
-    // Attributes for Section with source, dest and logfile folder 
+
+    // selected action
+    private String currentlySelectedActionKey = "currentlySelectedActionKey";
+
+    // Attributes for Section with source, dest and logfile folder  ...
     private String sourceTextFieldTextKey = "sourceTextFieldTextKey";
 	private String destTextFieldTextKey = "destTextFieldTextKey";
     private String logfileFolderTextFieldKey = "logfileFolderTextFieldKey";
+    
+    // additional Attributes needed for backup
     private String excludedFileListTextFieldTextKey = "excludedFileListTextFieldTextKey";
     private String excludedPathListTextFieldTextKey = "excludedPathListTextFieldTextKey";
     private String folderNameMappingTextFieldTextKey = "folderNameMappingTextFieldTextKey";
-    private String currentlySelectedActionKey = "currentlySelectedActionKey";
-
     
-    public Action getCurrentlySelectedAction() {
+    // restore parameters
+    private String restoreToTextFieldKey = "restoreToTextFieldKey";
+    private String backupFolderName = "";
+    private String subfolderToRestore = "";
+    
+	public Action getCurrentlySelectedAction() {
     	return Action.stringToEnum(keyValueMap.get(currentlySelectedActionKey));
 	}
 
@@ -93,9 +106,29 @@ public class UIParameters {
 	public void setFolderNameMappingTextFieldTextString(String folderNameMappingTextFieldTextString) {
 		storeInKeyValueMap(folderNameMappingTextFieldTextKey, folderNameMappingTextFieldTextString);
 	}
+	
+	public String getFolderNameRestoreToTextFieldTextString() {
+		return keyValueMap.get(restoreToTextFieldKey);
+	}
 
-	public void setInstance(UIParameters instance) {
-		UIParameters.instance = instance;
+	public void setFolderNameRestoreToTextFieldTextString(String folderNameRestoreToTextFieldTextString) {
+		storeInKeyValueMap(restoreToTextFieldKey, folderNameRestoreToTextFieldTextString);
+	}
+	
+    public String getBackupFolderName() {
+		return backupFolderName;
+	}
+
+	public void setBackupFolderName(String backupFolderName) {
+		this.backupFolderName = backupFolderName;
+	}
+
+	public String getSubfolderToRestore() {
+		return subfolderToRestore;
+	}
+
+	public void setSubfolderToRestore(String subfolderToRestore) {
+		this.subfolderToRestore = subfolderToRestore;
 	}
 
 	// Create a HashMap to store key-value pairs
