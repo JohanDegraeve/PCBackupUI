@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Date;
 import java.util.HashMap;
 
 import Enumerations.Action;
@@ -38,7 +37,7 @@ public class UIParameters {
     private String folderNameMappingTextFieldTextKey = "folderNameMappingTextFieldTextKey";
     
     // restore parameters
-    private String restoreToTextFieldKey = "restoreToTextFieldKey";
+    private String restoreToFolderName = "";
     private String backupFolderName = "";
     private String subfolderToRestore = "";
     
@@ -107,12 +106,12 @@ public class UIParameters {
 		storeInKeyValueMap(folderNameMappingTextFieldTextKey, folderNameMappingTextFieldTextString);
 	}
 	
-	public String getFolderNameRestoreToTextFieldTextString() {
-		return keyValueMap.get(restoreToTextFieldKey);
+	public String getRestoreToFolderName() {
+		return restoreToFolderName;
 	}
 
-	public void setFolderNameRestoreToTextFieldTextString(String folderNameRestoreToTextFieldTextString) {
-		storeInKeyValueMap(restoreToTextFieldKey, folderNameRestoreToTextFieldTextString);
+	public void setRestoreToFolderName(String backupFolderName) {
+		this.restoreToFolderName = backupFolderName;
 	}
 	
     public String getBackupFolderName() {

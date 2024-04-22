@@ -67,7 +67,15 @@ public class Main extends Application {
     
     private ProcessText processText;
     
+    /**
+     * destFolderChangedHolder is used to trigger change of dest folder, dest folder is the folder with all backups in
+     */
     private FolderChangedHolder destFolderChangedHolder = new FolderChangedHolder();
+    
+    /**
+     * backupFolderChangedHolder is used to trigger change of the backupfolder, backupfolder is the subfolder within destFolderChangedHolder
+     */
+    private FolderChangedHolder backupFolderChangedHolder = new FolderChangedHolder();
     
     @Override
     public void start(Stage primaryStage) {
@@ -132,7 +140,7 @@ public class Main extends Application {
     		Date endSearchDate = null;
     		String source = uiparam.getSourceTextFieldTextString();
     		String destination = uiparam.getDestTextFieldTextString();
-			String restoreto = uiparam.getFolderNameRestoreToTextFieldTextString();
+			String restoreto = uiparam.getRestoreToFolderName();
 			boolean fullBackup = false;
 			boolean backup = false;
 			boolean search = false;
@@ -197,8 +205,9 @@ public class Main extends Application {
     			if (sectionRestoreParametersBox == null) {
     	    		TextFieldChanged restoreToFolderChanged = (text) -> restoreToFolderTextFieldChanged(text);
     	    		String initialTextRestoreToFolder = "";
-        			// (Stage primaryStage, TextFieldChanged excludedFileListChanged, TextFieldChanged excludedPathListChanged, TextFieldChanged folderNameMappingListChanged, String initialTextExcludedFile, String initialTextExclucedPath, String initialTextFolderNameMapping) {
-                    sectionRestoreParametersBox = SectionRestoreParameters.createSectionRestoreParameters(primaryStage, processText, restoreToFolderChanged, initialTextRestoreToFolder, destFolderChangedHolder);
+                    sectionRestoreParametersBox = SectionRestoreParameters.createSectionRestoreParameters(primaryStage, processText, restoreToFolderChanged, initialTextRestoreToFolder, destFolderChangedHolder, backupFolderChangedHolder);
+                    // set destFolder changed so that list of backup folders can be fetched
+                    destFolderChangedHolder.folderChanged.handleNewFolder(uiparam.getDestTextFieldTextString());
         		}
         		root.getChildren().add(sectionRestoreParametersBox);
         		addSubmitButtonVBox(enabled);
@@ -304,7 +313,7 @@ public class Main extends Application {
     }
 
     private void restoreToFolderTextFieldChanged(String text) {
-    	uiparam.setFolderNameRestoreToTextFieldTextString(verifyIfFolderExists(text, (String textToProcess) -> SectionRestoreParameters.addRestoreToFolderWarning(textToProcess)));
+    	uiparam.setRestoreToFolderName(verifyIfFolderExists(text, (String textToProcess) -> SectionRestoreParameters.addRestoreToFolderWarning(textToProcess)));
     	verifySubmitButtonStatus();
     }
 

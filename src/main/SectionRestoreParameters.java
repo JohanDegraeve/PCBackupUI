@@ -3,24 +3,38 @@ package main;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import Interfaces.ProcessText;
 import Interfaces.FolderChangedHolder;
 import Interfaces.TextFieldChanged;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
+import model.Constants;
 import model.UIParameters;
 import utilities.ListBackupsInFolder;
+import utilities.OtherUtilities;
 import utilities.UIUtilities;
 
 public class SectionRestoreParameters {
+
+	/**
+	 * used in pop up with list of backup foldrs, initiallyempty
+	 */ 
+	private static ObservableList<String> allBackups = FXCollections.observableArrayList();
 
 	// there's these parameters
 	// - backup folder to use (which sets also the date to restore)
@@ -32,6 +46,8 @@ public class SectionRestoreParameters {
 	private static HBox selectBackupHBox;
 	private static Button selectBackupButton;
 	private static Label selectedBackupLabel;
+	private static Popup popup = new Popup();// pop up to let user select from list of backups
+	//private static ListView<String> listView = new ListView<>(allBackups);
 	
 	private static VBox completeRestoreToFolderVBox;
 	private static HBox restoreToFolderHBoxWithFileText;
@@ -40,9 +56,9 @@ public class SectionRestoreParameters {
 	
 	private static ProcessText processText;
 	
-	private static List<String> allBackups;
-
     static public String defaultBackupFolderTextString = "Geen backup geselecteerd";
+    
+    static private Stage stage;
 
     /**
      * 
@@ -50,8 +66,8 @@ public class SectionRestoreParameters {
      * @param processText
      * @param restoreToFolderChanged
      * @param initialTextRestoreToFolder
-     * @param destFolderChangedHolder
-     * @param backupFolderChangedHolder is used to update UIParameters
+     * @param destFolderChangedHolder is the folder where backup subfolders are stored, that folder is needed here because we get all backup folder names
+     * @param backupFolderChangedHolder is the subfolder within destFolder that the user selected as backup folder to restore from
      * @return
      */
 	public static VBox createSectionRestoreParameters(Stage primaryStage, ProcessText processText, TextFieldChanged restoreToFolderChanged, String initialTextRestoreToFolder, FolderChangedHolder destFolderChangedHolder, FolderChangedHolder backupFolderChangedHolder) {
@@ -68,6 +84,8 @@ public class SectionRestoreParameters {
 		backupFolderChangedHolder.folderChanged = (String folder) -> backupFolderChangedHandler(folder);
 		
 		destFolderChangedHolder.folderChanged = (String folder) -> destFolderChangedHandler(folder);
+		
+		stage = primaryStage;
 
 		VBox section = new VBox();
         section.setSpacing(5);
@@ -127,12 +145,34 @@ public class SectionRestoreParameters {
 	
     public static void addRestoreToFolderWarning(String text) {UIUtilities.addWarningToVBox(completeRestoreToFolderVBox, restoreToFolderHBoxWithLabelHBox, text, restoreToFolderWarningLabel);}
 
-	public static void getAllBackupDates(Path backupPath) {
+	
+	/**
+	 * if user selects different backup folder from where restore is done, then this function is called<br>
+	 * The function stores the new folder in UIParameters
+	 * @param newFolder
+	 */
+	private static void backupFolderChangedHandler(String newFolder) {
+		UIParameters.getInstance().setBackupFolderName(newFolder);
+	}
+	
+	/**
+	 * function gets all backup subfolders and stores the list in allBackups
+	 * @param newFolder
+	 */
+	private static void destFolderChangedHandler(String newFolder) {
+		attachPopUpToSelectBackupButton(newFolder);
+	}
+	
+	private static void attachPopUpToSelectBackupButton(String newFolder) {
 		
+		/// zzz is used because we want all backups
 		try {
-			
-			allBackups = ListBackupsInFolder.getAllBackupFoldersAsStrings(backupPath, "zzzz");
-			
+			List<String> backupFokdersAsStrings = ListBackupsInFolder.getAllBackupFoldersAsStrings(Paths.get(newFolder), "zzzz");
+			List<String>  backupFokdersAsDates = new ArrayList<>();
+			for (String string : backupFokdersAsStrings) {
+				backupFokdersAsDates.add(OtherUtilities.dateToString(OtherUtilities.getBackupDate(string, processText),"yyyy MMM dd HH:mm" ));
+			}
+			allBackups = FXCollections.observableArrayList(backupFokdersAsDates);
 		} catch (IOException e) {
 			if (processText != null) {
 				processText.process("Fout bij het uitlezen van backup folders.");
@@ -143,19 +183,35 @@ public class SectionRestoreParameters {
 			}
 			System.exit(1);
 		}
+		ListView<String> listView = new ListView<>(allBackups);
+		listView.setOnMouseClicked(e -> {
+            // Handle selection of an item
+            String selectedString = listView.getSelectionModel().getSelectedItem();
+            System.out.println("Selected String: " + selectedString);
+            // You can store the selectedString in a variable or perform any other action here
+            popup.hide(); // Close the popup
+        });
+		selectBackupButton.setOnAction(e -> popup.show(stage));
 		
-	}
-	
-	/**
-	 * if user selects different backup folder from where restore is done,  then this function is called
-	 * @param newFolder
-	 */
-	private static void backupFolderChangedHandler(String newFolder) {
-		UIParameters.getInstance().setBackupFolderName(newFolder);
-	}
-	
-	private static void destFolderChangedHandler(String newFolder) {
-		getAllBackupDates(Paths.get(newFolder));
+		// Create a cancel button
+        Button cancelButton = new Button("Annuleer");
+        cancelButton.setOnAction(e -> popup.hide());
+		
+        // Create a Pane to contain the cancel button
+        Pane cancelButtonContainer = new Pane(cancelButton);
+        cancelButtonContainer.setMinWidth(200); // Match the width of the ListView
+        cancelButtonContainer.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
+
+        // Set the position of the cancel button within the container
+        cancelButton.layoutXProperty().bind(cancelButtonContainer.widthProperty().subtract(cancelButton.widthProperty()).divide(2));
+        cancelButton.layoutYProperty().bind(cancelButtonContainer.heightProperty().subtract(cancelButton.heightProperty()).divide(2));
+
+        // Create a layout for the popup content
+        VBox popupContent = new VBox(listView, cancelButtonContainer);
+        popupContent.setSpacing(10); // Set spacing between nodes
+        
+        popup.getContent().addAll(popupContent);
+        
 	}
 	
 }
