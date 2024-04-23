@@ -54,11 +54,11 @@ public class Restore {
 			String latestBackupFolderName = ListBackupsInFolder.getMostRecentBackup(sourceFolderPath, commandLineArguments.restoreDate);
 			
 			if (latestBackupFolderName == null) {
-                commandLineArguments.processText.process("No backups are found that were created before " + (new SimpleDateFormat(Constants.OUTPUTDATEFORMAT_STRING)).format(commandLineArguments.restoreDate));
+                commandLineArguments.processText.process("No backups are found that were created before or at " + (new SimpleDateFormat(Constants.OUTPUTDATEFORMAT_STRING)).format(commandLineArguments.restoreDate));
                 System.exit(1);
 			}
 			
-			commandLineArguments.processText.process("Found backup " + latestBackupFolderName + " created before " + (new SimpleDateFormat(Constants.OUTPUTDATEFORMAT_STRING).format(commandLineArguments.restoreDate)));
+			commandLineArguments.processText.process("Found backup " + latestBackupFolderName + " created before or at " + (new SimpleDateFormat(Constants.OUTPUTDATEFORMAT_STRING).format(commandLineArguments.restoreDate)));
 			
 			// get list of all older backup folders, to support the case were we don't find a specific file in the specified folder, we can start searching in older backups,
 			List<String> olderBackups = ListBackupsInFolder.getAllBackupFoldersAsStrings(sourceFolderPath, latestBackupFolderName);

@@ -39,6 +39,7 @@ import javafx.stage.Stage;
 import model.CommandLineArguments;
 import model.UIParameters;
 import pcbackup.Backup;
+import pcbackup.Restore;
 import utilities.OtherUtilities;
 
 public class Main extends Application {
@@ -71,11 +72,6 @@ public class Main extends Application {
      * destFolderChangedHolder is used to trigger change of dest folder, dest folder is the folder with all backups in
      */
     private FolderChangedHolder destFolderChangedHolder = new FolderChangedHolder();
-    
-    /**
-     * backupFolderChangedHolder is used to trigger change of the backupfolder, backupfolder is the subfolder within destFolderChangedHolder
-     */
-    private FolderChangedHolder backupFolderChangedHolder = new FolderChangedHolder();
     
     @Override
     public void start(Stage primaryStage) {
@@ -159,6 +155,8 @@ public class Main extends Application {
     		
     		CommandLineArguments commandLineArguments = new CommandLineArguments(startSearchDate, endSearchDate, source, destination, restoreto, fullBackup, backup, search, logfilefolder, excludedFiles, excludedPaths, restoreDate, subfolderToRestore, folderNameMapping, overwrite, writesearchto, searchTextPattern, addpathlengthforallfolders, addpathlengthforfolderswithnewormodifiedcontent, searchText, processText);
 			
+    		Restore.restore(commandLineArguments);
+    		
     		break;
     	default:
     		break;
@@ -205,7 +203,7 @@ public class Main extends Application {
     			if (sectionRestoreParametersBox == null) {
     	    		TextFieldChanged restoreToFolderChanged = (text) -> restoreToFolderTextFieldChanged(text);
     	    		String initialTextRestoreToFolder = "";
-                    sectionRestoreParametersBox = SectionRestoreParameters.createSectionRestoreParameters(primaryStage, processText, restoreToFolderChanged, initialTextRestoreToFolder, destFolderChangedHolder, backupFolderChangedHolder);
+                    sectionRestoreParametersBox = SectionRestoreParameters.createSectionRestoreParameters(primaryStage, processText, restoreToFolderChanged, initialTextRestoreToFolder, destFolderChangedHolder, (String selectedBackupFolder) -> handleSelectedBackupFolder(selectedBackupFolder));
                     // set destFolder changed so that list of backup folders can be fetched
                     destFolderChangedHolder.folderChanged.handleNewFolder(uiparam.getDestTextFieldTextString());
         		}
@@ -288,7 +286,7 @@ public class Main extends Application {
     
     private void destTextFieldChanged(String text) {
     	uiparam.setDestTextFieldTextString(verifyIfFolderExists(text, (String textToProcess) -> Section1.addDestWarning(textToProcess)));
-    	destFolderChangedHolder.folderChanged.handleNewFolder(text);
+    	destFolderChangedHolder.folderChanged.handleNewFolder(uiparam.getDestTextFieldTextString());
     	verifySubmitButtonStatus();
     }
     
@@ -315,6 +313,11 @@ public class Main extends Application {
     private void restoreToFolderTextFieldChanged(String text) {
     	uiparam.setRestoreToFolderName(verifyIfFolderExists(text, (String textToProcess) -> SectionRestoreParameters.addRestoreToFolderWarning(textToProcess)));
     	verifySubmitButtonStatus();
+    }
+    
+    private void handleSelectedBackupFolder(String backup) {
+        uiparam.setBackupFolderName(backup);
+        verifySubmitButtonStatus();
     }
 
     /**
@@ -388,6 +391,36 @@ public class Main extends Application {
     		}
     		
     		break;
+    		
+    	case RESTORE:
+    		if (uiparam.getSourceTextFieldTextString() != null && uiparam.getDestTextFieldTextString() != null && uiparam.getLogfileFolderTextFieldString() != null) {
+    			if (uiparam.getSourceTextFieldTextString().length() > 0 && uiparam.getDestTextFieldTextString().length() > 0 && uiparam.getLogfileFolderTextFieldString().length() > 0) {
+    				
+    				if (uiparam.getRestoreToFolderName() != null && uiparam.getRestoreToFolderName().length() > 0) {
+    					
+    					if (!uiparam.getBackupFolderName().equalsIgnoreCase(SectionRestoreParameters.defaultBackupFolderTextString)) {
+    						
+    						submitButton.setDisable(false);
+    						
+    					} else {
+        					submitButton.setDisable(true);
+        					break;
+        				} 
+    					
+    				} else {
+    					submitButton.setDisable(true);
+    					break;
+    				}
+    				
+    			} else {
+    				submitButton.setDisable(true);
+    				break;
+    			}
+    		} else {
+    			submitButton.setDisable(true);
+    			break;
+    		}
+    		
     	default:
     		break;
     	}

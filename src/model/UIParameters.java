@@ -37,8 +37,17 @@ public class UIParameters {
     private String folderNameMappingTextFieldTextKey = "folderNameMappingTextFieldTextKey";
     
     // restore parameters
+    /*
+     * to which folder should restore be written
+     */
     private String restoreToFolderName = "";
+    /**
+     * the backup folder to use, this is the folder within the dest folder
+     */
     private String backupFolderName = "";
+    /**
+     * subfolder to restore
+     */
     private String subfolderToRestore = "";
     
 	public Action getCurrentlySelectedAction() {

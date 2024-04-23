@@ -60,7 +60,7 @@ public class ListBackupsInFolder {
     	
     	for (int i = 0; i < backupFolders.size();i++) {
     		String backupFolderName = backupFolders.get(i).getFileName().toString();
-    		if (backupFolderName.compareTo(backupfoldernameJustTheDate) <= 0) {
+    		if (backupFolderName.substring(0, 19).compareTo(backupfoldernameJustTheDate) <= 0) {
     			return backupFolderName;
     		}
     	}
