@@ -78,7 +78,9 @@ public class SectionRestoreParameters {
         String labelTextSelectWithExplanationExcludedPathList = "nog toe te voegen\n" 
         		+ "";
         String labelSelectBackup = "Selecteer de backup\u002A:";
-        String labelSelectBackupWithExplanation = ";";
+        String labelSelectBackupWithExplanation = "Selecteer welke backup je wil gebruiken om de restore te doen.\n" + 
+        		"Indien de knop niet actief is, dan betekent het dat er in de backup map geen backups werden gevonden.\n" +
+        		"Controleer in dat geval het veld 'Waar bevinden zich de backups'.\n";
 
 		SectionRestoreParameters.processText = processText;
 

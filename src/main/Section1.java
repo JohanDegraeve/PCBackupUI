@@ -112,7 +112,7 @@ public class Section1 {
 	
 	private static HBox createHboxWitDest(Stage primaryStage, TextFieldChanged textFieldChanged, String initialText) {
 		
-        String labelTextString = "Waar bevinden zich de backup folders\u002A:\n";
+        String labelTextString = "Waar bevinden zich de backups\u002A:\n";
         String labelTextWithExplanationString = "Dit is de folder waar de backups komen."
         		+ "Elke nieuwe incrementele of volledige backup komt in een subfolder van deze folder.\n"
         		+ "Restores gebeuren vanuit deze backup folders. Zoeken naar bestanden gebeurt ook in deze backup folders.\n";
