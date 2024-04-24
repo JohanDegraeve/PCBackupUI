@@ -102,7 +102,7 @@ public class Section1 {
 	private static HBox createHboxWithSource(Stage primaryStage, TextFieldChanged textFieldChanged, String initialText) {
 		
         String labelTextString = "Waar bevinden zich de oorspronkelijke bestanden\u002A:\n";
-        String labelTextWithExplanationString = "Dit is de folder met de bron bestanden en folders,"
+        String labelTextWithExplanationString = "Dit is de map met de bron bestanden en mappen,"
         		+ " dus de bestanden en folders die gebackupped worden. Ook als je een restore doet of\n"
         		+ "als je wilt zoeken in de backup, dan blijft dit de folder met de bron bestanden.\n";
   
@@ -113,7 +113,7 @@ public class Section1 {
 	private static HBox createHboxWitDest(Stage primaryStage, TextFieldChanged textFieldChanged, String initialText) {
 		
         String labelTextString = "Waar bevinden zich de backups\u002A:\n";
-        String labelTextWithExplanationString = "Dit is de folder waar de backups komen."
+        String labelTextWithExplanationString = "Dit is de map waar de backups komen."
         		+ "Elke nieuwe incrementele of volledige backup komt in een subfolder van deze folder.\n"
         		+ "Restores gebeuren vanuit deze backup folders. Zoeken naar bestanden gebeurt ook in deze backup folders.\n";
   
@@ -124,7 +124,7 @@ public class Section1 {
 	private static HBox createHboxWitLogFileFolder(Stage primaryStage, TextFieldChanged textFieldChanged, String initialText) {
 		
         String labelTextString = "In welke folder mogen de logs weggeschreven worden\u002A:\n";
-        String labelTextWithExplanationString = "Dit is de folder waar de logs komen."
+        String labelTextWithExplanationString = "Dit is de map waar de logs komen."
         		+ "De logs zijn tekst bestanden die info geven over het backup proces.\n";
   
         return UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged, initialText);

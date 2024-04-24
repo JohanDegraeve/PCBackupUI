@@ -135,13 +135,15 @@ public class UIUtilities {
      */
 	public static void addWarningToVBox(VBox vbox, HBox hboxWithLabel, String text, Label label) {
     	
-    	if (text == null) {removeWarningFromVBox(vbox, hboxWithLabel);return;};
-    	if (text.length() == 0) {removeWarningFromVBox(vbox, hboxWithLabel);return;};
-    	
-    	if (vbox.getChildren().size() > 1) {return;}
+		// first remove then check if re-adding is necessary
+		removeWarningFromVBox(vbox, hboxWithLabel);
+		
+    	if (text == null) {return;}; // re-add not necessary
+    	if (text.length() == 0) {return;}; // re-add not necessary
     	
 		label.setText(text);
 		vbox.getChildren().add(hboxWithLabel);
+		
     }
 	
     private static void removeWarningFromVBox(VBox vBox, HBox hboxWithLabel) {

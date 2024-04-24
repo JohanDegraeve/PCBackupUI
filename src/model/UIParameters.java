@@ -16,6 +16,7 @@ import Enumerations.Action;
  * Not stored:<br>
  * - currentlySelectedActionKey<br>
  * - backupFolderName<br> 
+ * - subfolderToRestore<br>
  */
 public class UIParameters {
 	

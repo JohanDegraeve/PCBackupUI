@@ -311,7 +311,19 @@ public class Main extends Application {
     }
 
     private void restoreToFolderTextFieldChanged(String text) {
-    	uiparam.setRestoreToFolderName(verifyIfFolderExists(text, (String textToProcess) -> SectionRestoreParameters.addRestoreToFolderWarning(textToProcess)));
+    	String resultString = verifyIfFolderExists(text, (String textToProcess) -> SectionRestoreParameters.addRestoreToFolderWarning(textToProcess));
+    	uiparam.setRestoreToFolderName(resultString);
+    	
+    	// here specific handling different than other folders
+    	// if folder is the same as the source folder, then give green text, info, .. to explain to take care if same folder is used as the source
+    	if (resultString != null && resultString.length() > 0 && uiparam.getSourceTextFieldTextString().length() > 0 && resultString.equalsIgnoreCase(uiparam.getSourceTextFieldTextString())) {
+    		SectionRestoreParameters.addRestoreToFolderInfo("Je hebt de oorspronkelijke map gekozen als doelmap voor herstel.\n"
+    				+ "De oorspronkelijke mappen en bestanden zullen overschreven worden.\n"
+    				+ "Mogelijks zitten er in de oorspronkelijke map, mappen en bestanden die niet in de backup zitten die je geselecteerd hebt.\n"
+    				+ "Deze zullen dus ook na het herstel niet verwijderd zijn.\n"
+    				+ "Hou hier rekening mee, en maak eventueel de oorspronkelijke map (of de submap in die map) leeg vooraleer het herstel te starten.");
+    	}
+    	
     	verifySubmitButtonStatus();
     }
     

@@ -22,7 +22,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
-import model.UIParameters;
 import utilities.ListBackupsInFolder;
 import utilities.OtherUtilities;
 import utilities.UIUtilities;
@@ -45,7 +44,6 @@ public class SectionRestoreParameters {
 	private static Button selectBackupButton;
 	private static Label selectedBackupLabel;
 	private static Popup popup = new Popup();// pop up to let user select from list of backups
-	//private static ListView<String> listView = new ListView<>(allBackups);
 	
 	private static VBox completeRestoreToFolderVBox;
 	private static HBox restoreToFolderHBoxWithFileText;
@@ -75,8 +73,11 @@ public class SectionRestoreParameters {
 		
         // texts for excluced path list
         String labelTextSelectRestoreToFolder = "Selecteer folder waar de herstelde mappen moeten komen\u002A:\n";
-        String labelTextSelectWithExplanationExcludedPathList = "nog toe te voegen\n" 
-        		+ "";
+        String labelTextSelectRestoreFolderWithExplanation = "De bestanden uit de backup worden gekopieerd naar deze map.\n" 
+        						+ "Let op: als er al mappen en bestanden bestaan in deze map dan worden ze mogelijk overschreven.\n" 
+        		                + "Je kunt hier dezelfde map kiezen als de map met de oorspronkelijk bestanden,\n"
+        		                + "maar dan zorg je best dat de overeenkomende map die hersteld wordt in de oorspronkelijke map, verwijderd wordt.";
+
         String labelSelectBackup = "Selecteer de backup\u002A:";
         String labelSelectBackupWithExplanation = "Selecteer welke backup je wil gebruiken om de restore te doen.\n" + 
         		"Indien de knop niet actief is, dan betekent het dat er in de backup map geen backups werden gevonden.\n" +
@@ -128,7 +129,7 @@ public class SectionRestoreParameters {
 		///////        CREATE RESTORETO VBOX
 		//////////////////////////////////////////////
 		
-		restoreToFolderHBoxWithFileText = UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextSelectRestoreToFolder, labelTextSelectWithExplanationExcludedPathList, restoreToFolderChanged, initialTextRestoreToFolder);
+		restoreToFolderHBoxWithFileText = UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextSelectRestoreToFolder, labelTextSelectRestoreFolderWithExplanation, restoreToFolderChanged, initialTextRestoreToFolder);
 		restoreToFolderHBoxWithFileText.setSpacing(10);
 		
 		// create the complete HBOX that holds the RESTORETO info : completeRestoreToFolderVBox
@@ -138,7 +139,6 @@ public class SectionRestoreParameters {
 		
         // intialize label and hbox that will contain the warning label, but don't add it yet
         restoreToFolderWarningLabel = new Label();
-        restoreToFolderWarningLabel.setStyle("-fx-text-fill: red;");
         restoreToFolderHBoxWithLabelHBox = new HBox();
         restoreToFolderHBoxWithLabelHBox.getChildren().add(restoreToFolderWarningLabel);
 		
@@ -146,7 +146,15 @@ public class SectionRestoreParameters {
 		
 	}
 	
-    public static void addRestoreToFolderWarning(String text) {UIUtilities.addWarningToVBox(completeRestoreToFolderVBox, restoreToFolderHBoxWithLabelHBox, text, restoreToFolderWarningLabel);}
+    public static void addRestoreToFolderWarning(String text) {
+    	restoreToFolderWarningLabel.setStyle("-fx-text-fill: red;");
+    	UIUtilities.addWarningToVBox(completeRestoreToFolderVBox, restoreToFolderHBoxWithLabelHBox, text, restoreToFolderWarningLabel);
+    }
+    
+    public static void addRestoreToFolderInfo(String text) {
+    	restoreToFolderWarningLabel.setStyle("-fx-text-fill: green;");
+    	UIUtilities.addWarningToVBox(completeRestoreToFolderVBox, restoreToFolderHBoxWithLabelHBox, text, restoreToFolderWarningLabel);
+    }
 
 	
 	/**
