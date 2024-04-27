@@ -31,10 +31,12 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -159,7 +161,6 @@ public class UIUtilities {
         hBox.setAlignment(Pos.CENTER_LEFT);
         GridPane.setHgrow(hBox, Priority.ALWAYS); // allows the Hbox to grow horizontally till the end of the grid
   
-        /// the label to explain that source needs to be given
         Label label = new Label(labelTextString );
         UIUtilities.addToolTip(label, labelTextString + labelTextWithExplanationString);
         
@@ -184,4 +185,27 @@ public class UIUtilities {
 
 	}
 	
+	/**
+	 * adds a cancel button to a popup
+	 * @param popUpToHideWhenClicked
+	 * @return
+	 */
+	public static Pane createCancelButtonContainer(Popup popUpToHideWhenClicked) {
+		// Create a cancel button
+        Button cancelButton = new Button("Annuleer");
+        cancelButton.setOnAction(e -> popUpToHideWhenClicked.hide());
+        
+        // Create a Pane to contain the cancel button
+        Pane cancelButtonContainer = new Pane(cancelButton);
+        cancelButtonContainer.setMinWidth(200); // Match the width of the ListView
+        cancelButtonContainer.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
+
+        // Set the position of the cancel button within the container
+        cancelButton.layoutXProperty().bind(cancelButtonContainer.widthProperty().subtract(cancelButton.widthProperty()).divide(2));
+        cancelButton.layoutYProperty().bind(cancelButtonContainer.heightProperty().subtract(cancelButton.heightProperty()).divide(2));
+
+        return cancelButtonContainer;
+	}
+	
+
 }

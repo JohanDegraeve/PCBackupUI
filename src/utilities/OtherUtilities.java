@@ -87,6 +87,26 @@ public class OtherUtilities {
 	}
 	
 	/**
+	 * if currentPath = "" (ie empty String) or null, then returns ""<br>
+	 * Else returns the system seperator
+	 * @param currentPath
+	 * @return
+	 */
+	public static String getSeperatorToAdd(String currentPath) {
+		
+		if (currentPath == null) {
+			return "";
+		}
+		
+		if (currentPath.length() != 0) {
+			return File.separator;
+		}
+		
+		return "";
+		
+	}
+	
+	/**
 	 * example files of format .849C9593-D756-4E56-8D6E-42412F2A707B need to be ignored
 	 * @param fileName
 	 * @return

@@ -1,8 +1,10 @@
 package main;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import Interfaces.ProcessText;
@@ -14,14 +16,22 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
+import model.AFile;
+import model.AFileOrAFolder;
+import model.AFolder;
+import model.UIParameters;
+import utilities.FileAndFolderUtilities;
 import utilities.ListBackupsInFolder;
 import utilities.OtherUtilities;
 import utilities.UIUtilities;
@@ -43,21 +53,40 @@ public class SectionRestoreParameters {
 	private static HBox selectBackupHBox;
 	private static Button selectBackupButton;
 	private static Label selectedBackupLabel;
-	private static Popup popup = new Popup();// pop up to let user select from list of backups
+	private static Popup selectBackupPopup = new Popup();// pop up to let user select from list of backups
 	
 	private static VBox completeRestoreToFolderVBox;
 	private static HBox restoreToFolderHBoxWithFileText;
 	private static HBox restoreToFolderHBoxWithLabelHBox;
 	private static Label restoreToFolderWarningLabel;
 	
+	private static VBox completeSelectFolderToRestoreBox;
+	private static HBox selectFolderToRestoreHBox;
+	private static Button selectFolderToRestoreButton;
+	private static Label selectFolderToRestoreLabel;
+	private static Popup selectFolderToRestorePopup = new Popup();
+	
 	private static ProcessText processText;
 	
-    static final public String defaultBackupFolderTextString = "Geen backup geselecteerd";
+    public static final String defaultBackupFolderTextString = "Geen backup geselecteerd";
     
-    static private BackupFolderSelectedHandler backupFolderSelectedHandler = null;
+    public static final String defaultFolderToRestoreTextString = "Geen map geselecteerd";
     
-    static private Stage stage;
-
+    private static BackupFolderSelectedHandler backupFolderSelectedHandler = null;
+    
+    private static Stage stage;
+    
+    /**
+     * as only Folders are clickable (we don't allow to select files for restore), we need to know how much folders there are.<br>
+     * If user will click a line higher, no reaction
+     */
+    private static int amountOfFoldersInAFolder;
+    
+    /**
+     * as it's displayed to the user, to keep track of the currently selected folder
+     */
+    private static String currentlySelectFolderToRestoreAString = "";
+    
     /**
      * 
      * @param primaryStage
@@ -83,6 +112,9 @@ public class SectionRestoreParameters {
         		"Indien de knop niet actief is, dan betekent het dat er in de backup map geen backups werden gevonden.\n" +
         		"Controleer in dat geval het veld 'Waar bevinden zich de backups'.\n";
 
+        String labelSelecFolderToRestore = "Selecteer de te herstellen map\u002A:";
+        String labelSelectFolderToRestoreWithExplanation = "";
+
 		SectionRestoreParameters.processText = processText;
 
 		destFolderChangedHolder.folderChanged = (String folder) -> destFolderChangedHandler(folder);
@@ -96,13 +128,13 @@ public class SectionRestoreParameters {
 
 		completeSelectBackupVBox = new VBox();
 		completeRestoreToFolderVBox = new VBox();
+		completeSelectFolderToRestoreBox = new VBox();
         
 		//////////////////////////////////////////////
         //////         CREATE BACKUP VBOX
 		//////////////////////////////////////////////
         
 		// create label which gives explanation
-		/// the label to explain that source needs to be given
         Label label = new Label(labelSelectBackup);
         UIUtilities.addToolTip(label, labelSelectBackup + labelSelectBackupWithExplanation);
 		
@@ -125,6 +157,34 @@ public class SectionRestoreParameters {
         // add completeSelectBackupVBox to section
 		section.getChildren().add(completeSelectBackupVBox);
 		
+		//////////////////////////////////////////////
+		///////        CREATE FOLDERTORESTORE VBOX
+		//////////////////////////////////////////////
+		
+		// create label which gives explanation
+        label = new Label(labelSelecFolderToRestore);
+        UIUtilities.addToolTip(label, labelSelecFolderToRestore + labelSelectFolderToRestoreWithExplanation);
+		
+		// create button to select the backup folder
+		selectFolderToRestoreButton = new Button("Kies");
+		
+		// create the label that shows the currently selected folder to restore
+		selectFolderToRestoreLabel = new Label();
+		selectFolderToRestoreLabel.setText(defaultFolderToRestoreTextString);
+
+		// create the HBOX that holds the Button selectFolderToRestoreButton and the Label selectFolderToRestoreLabel
+		selectFolderToRestoreHBox = new HBox();
+		selectFolderToRestoreHBox.setSpacing(10);//  space between individual nodes in the Hbox
+		selectFolderToRestoreHBox.setAlignment(Pos.CENTER_LEFT);
+	    GridPane.setHgrow(selectFolderToRestoreHBox, Priority.ALWAYS);
+	    selectFolderToRestoreHBox.getChildren().addAll(label, selectFolderToRestoreButton, selectFolderToRestoreLabel);
+		
+		// create the complete HBOX that holds the backup info : completeSelectFolderToRestoreBox
+	    completeSelectFolderToRestoreBox.getChildren().add(selectFolderToRestoreHBox);
+        // add completeSelectFolderToRestoreBox to section
+		section.getChildren().add(completeSelectFolderToRestoreBox);
+		
+
 		//////////////////////////////////////////////
 		///////        CREATE RESTORETO VBOX
 		//////////////////////////////////////////////
@@ -174,33 +234,37 @@ public class SectionRestoreParameters {
 		}
 		
 		try {
-			List<String> backupFokdersAsStrings = ListBackupsInFolder.getAllBackupFoldersAsStrings(Paths.get(newFolder), "zzzz");
-			List<String>  backupFokdersAsDates = new ArrayList<>();
-			for (String string : backupFokdersAsStrings) {
-				backupFokdersAsDates.add(OtherUtilities.dateToString(OtherUtilities.getBackupDate(string, processText),"dd MMM yyyy   HH:mm" ));
+			List<String> backupFoldersAsStrings = ListBackupsInFolder.getAllBackupFoldersAsStrings(Paths.get(newFolder), "zzzz");
+			List<String> backupFoldersAsDates = new ArrayList<>();
+			for (String string : backupFoldersAsStrings) {
+				backupFoldersAsDates.add(OtherUtilities.dateToString(OtherUtilities.getBackupDate(string, processText),"dd MMM yyyy   HH:mm" ));
 			}
-			allBackups = FXCollections.observableArrayList(backupFokdersAsDates);
+			allBackups = FXCollections.observableArrayList(backupFoldersAsDates);
 		
 			ListView<String> listView = new ListView<>(allBackups);
 			listView.setOnMouseClicked(e -> {
 	            // Handle selection of an item
 	            String selectedString = listView.getSelectionModel().getSelectedItem();
 	            
-	            String selectedBackupFolderString = backupFokdersAsStrings.get(listView.getSelectionModel().getSelectedIndex());
+	            String selectedBackupFolderString = backupFoldersAsStrings.get(listView.getSelectionModel().getSelectedIndex());
 	            
 	            // set the selected backup in the label
 	            selectedBackupLabel.setText(selectedString);
+	            
+	            attachPopUpToSelectFolderToRestoreButton(selectedBackupFolderString);
 	            
 	            if (backupFolderSelectedHandler != null) {
 	            	backupFolderSelectedHandler.handleSelectedBackupFolder(selectedBackupFolderString);
 	            }
 	            
-	            // You can store the selectedString in a variable or perform any other action here
-	            popup.hide(); // Close the popup
+	            selectBackupPopup.hide();
+	            
 	        });
 			
-			selectBackupButton.setOnAction(e -> popup.show(stage));
+			selectBackupButton.setOnAction(e -> selectBackupPopup.show(stage));
 			
+			// if the allBackups is empty or the current text in selectedBackupLabel is not in the  list of allBackups
+			//    then set back the selectedBackupLabel to the default value
 			if (allBackups.size() > 0) {
 				selectBackupButton.setDisable(false);
 				if (!allBackups.contains(selectedBackupLabel.getText())) {
@@ -217,26 +281,12 @@ public class SectionRestoreParameters {
 	            	backupFolderSelectedHandler.handleSelectedBackupFolder(defaultBackupFolderTextString);
 	            }
 			}
-			
-			
-			// Create a cancel button
-	        Button cancelButton = new Button("Annuleer");
-	        cancelButton.setOnAction(e -> popup.hide());
-			
-	        // Create a Pane to contain the cancel button
-	        Pane cancelButtonContainer = new Pane(cancelButton);
-	        cancelButtonContainer.setMinWidth(200); // Match the width of the ListView
-	        cancelButtonContainer.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
-	
-	        // Set the position of the cancel button within the container
-	        cancelButton.layoutXProperty().bind(cancelButtonContainer.widthProperty().subtract(cancelButton.widthProperty()).divide(2));
-	        cancelButton.layoutYProperty().bind(cancelButtonContainer.heightProperty().subtract(cancelButton.heightProperty()).divide(2));
-	
-	        // Create a layout for the popup content
-	        VBox popupContent = new VBox(listView, cancelButtonContainer);
+
+			// Create a layout for the popup content, add cancel button
+	        VBox popupContent = new VBox(listView, UIUtilities.createCancelButtonContainer(selectBackupPopup));
 	        popupContent.setSpacing(10); // Set spacing between nodes
 	        
-	        popup.getContent().addAll(popupContent);
+	        selectBackupPopup.getContent().addAll(popupContent);
         
 		} catch (IOException e) {
 			if (processText != null) {
@@ -250,4 +300,157 @@ public class SectionRestoreParameters {
         
 	}
 	
+	/**
+	 * this function uses the selecedBackupFolder (which is something like 2024-03-10 20;31;55 (Incremental))<br>
+	 * It will open the file folderlist.json in that folder, parse it and then call attachPopUpToSelectFolderToRestoreButton(AFolder)
+	 * @param selecedBackupFolder
+	 */
+	private static void attachPopUpToSelectFolderToRestoreButton(String selecedBackupFolder) {
+		
+		if (selecedBackupFolder == null || selecedBackupFolder.length() == 0) {
+			selectFolderToRestoreButton.setText(defaultFolderToRestoreTextString);
+			selectFolderToRestoreButton.setDisable(true);
+			return;
+		}
+		
+		Path backupFolderPath = Paths.get(UIParameters.getInstance().getDestTextFieldTextString()).resolve(selecedBackupFolder);
+		
+        AFileOrAFolder listOfFilesAndFoldersInBackupFolder = FileAndFolderUtilities.fromFolderlistDotJsonToAFileOrAFolder
+        		(backupFolderPath.resolve("folderlist.json"), processText);
+        
+        if(!(listOfFilesAndFoldersInBackupFolder instanceof AFolder)) {
+        	processText.process("Blijkbaar is listOfFilesAndFoldersInBackupFolder geen folder");
+        } else {
+        	attachPopUpToSelectFolderToRestoreButton((AFolder)listOfFilesAndFoldersInBackupFolder);
+        }
+
+	}
+	
+	private static void attachPopUpToSelectFolderToRestoreButton(AFolder aFolder) {
+		
+		if (aFolder == null || aFolder.getFileOrFolderList().size() == 0) {
+			selectFolderToRestoreLabel.setText(defaultFolderToRestoreTextString);
+			selectFolderToRestoreLabel.setDisable(true);
+			return;
+		}
+		
+		// create a list of all folders in aFolder
+		List<String> allFoldersInAFolder = new ArrayList<>();
+		for (AFileOrAFolder aFileOrAFolder: aFolder.getFileOrFolderList()) {
+			if (aFileOrAFolder instanceof AFolder) {
+				allFoldersInAFolder.add(aFileOrAFolder.getName());
+			}
+		}
+		
+		// store amount of folders
+		amountOfFoldersInAFolder = allFoldersInAFolder.size();
+		
+		// sort alphabetically
+		Collections.sort(allFoldersInAFolder, (a,b) -> b.compareTo(a));
+		
+		// now create list of all files in aFolder
+		List<String> allFilesInAFolder = new ArrayList<>();
+		for (AFileOrAFolder aFileOrAFolder: aFolder.getFileOrFolderList()) {
+			if (aFileOrAFolder instanceof AFile) {
+				allFilesInAFolder.add(aFileOrAFolder.getName());
+			}
+		}
+		
+		// sort alphabetically
+		Collections.sort(allFilesInAFolder, (a,b) -> b.compareTo(a));
+		
+		// now add the files to the existing list of folders
+		allFoldersInAFolder.addAll(allFilesInAFolder);
+		
+		// create the list to show in the popup
+		ListView<String> listView = new ListView<>(FXCollections.observableArrayList(allFoldersInAFolder));
+		
+		// User needs to see difference between files and folders
+		giveOtherColorToFiles(listView, amountOfFoldersInAFolder);
+		
+		// Handle selection of an item
+		listView.setOnMouseClicked(e -> {
+            
+			// if it's not a folder then no reaction
+			if (listView.getSelectionModel().getSelectedIndex() >= amountOfFoldersInAFolder) {
+				return;
+			}
+			
+            currentlySelectFolderToRestoreAString = 
+            		currentlySelectFolderToRestoreAString + 
+            		OtherUtilities.getSeperatorToAdd(currentlySelectFolderToRestoreAString) + 
+            		allFilesInAFolder.get(listView.getSelectionModel().getSelectedIndex()); 
+            
+            // set the selected backup in the label
+            selectFolderToRestoreLabel.setText(currentlySelectFolderToRestoreAString);
+            
+            selectFolderToRestorePopup.hide();
+            
+        });
+		
+		selectFolderToRestoreButton.setOnAction(e -> selectFolderToRestorePopup.show(stage));
+		
+		if (amountOfFoldersInAFolder > 0) {
+			selectFolderToRestoreButton.setDisable(false);
+			/*if (!allFoldersInAFolder.contains(currentlySelectFolderToRestoreAString.getText())) {
+				selectedBackupLabel.setText(defaultBackupFolderTextString);
+				if (backupFolderSelectedHandler != null) {
+	            	backupFolderSelectedHandler.handleSelectedBackupFolder(defaultBackupFolderTextString);
+	            }
+			}*/
+			
+		} else {
+			selectFolderToRestoreButton.setDisable(true);
+			/*selectedBackupLabel.setText(defaultBackupFolderTextString);
+			if (backupFolderSelectedHandler != null) {
+            	backupFolderSelectedHandler.handleSelectedBackupFolder(defaultBackupFolderTextString);
+            }*/
+		}
+		
+        // Create a layout for the popup content
+        VBox popupContent = new VBox(listView, UIUtilities.createCancelButtonContainer(selectFolderToRestorePopup));
+        popupContent.setSpacing(10); // Set spacing between nodes
+        popupContent.setPrefWidth(1000);
+        
+        selectFolderToRestorePopup.getContent().addAll(popupContent);
+
+		
+	}
+	
+	/**
+	 * listview consists first a list of folders, then a list of files. It needs to be visible to the user what are the files and what are the folders<br>
+	 * 
+	 * @param listView
+	 * @param amountOfFolders
+	 */
+	private static void giveOtherColorToFiles(ListView<String> listView, int amountOfFolders) {
+		
+		listView.setCellFactory(param -> new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                	
+                    // Set text
+                    setText(item);
+
+                    ImageView icon = new ImageView();
+                    
+                    // Set color based on item
+                    if (getIndex() >= amountOfFolders) {
+                        setTextFill(Color.GREY); // Change color for specific items
+                        icon.setImage(new Image(getClass().getResourceAsStream("/img/file-1453.png")));
+                    } else {
+                        icon.setImage(new Image(getClass().getResourceAsStream("/img/folder-1484.png")));
+                    }
+                    setGraphic(icon);
+                }
+            }
+        });
+
+	}
+
 }
