@@ -190,14 +190,14 @@ public class UIUtilities {
 	 * @param popUpToHideWhenClicked
 	 * @return
 	 */
-	public static Pane createCancelButtonContainer(Popup popUpToHideWhenClicked) {
+	public static Pane createCancelButtonContainer(Popup popUpToHideWhenClicked, int minWidth) {
 		// Create a cancel button
         Button cancelButton = new Button("Annuleer");
         cancelButton.setOnAction(e -> popUpToHideWhenClicked.hide());
         
         // Create a Pane to contain the cancel button
         Pane cancelButtonContainer = new Pane(cancelButton);
-        cancelButtonContainer.setMinWidth(200); // Match the width of the ListView
+        cancelButtonContainer.setMinWidth(minWidth); // Match the width of the ListView
         cancelButtonContainer.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
 
         // Set the position of the cancel button within the container

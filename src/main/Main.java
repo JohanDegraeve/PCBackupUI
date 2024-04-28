@@ -144,7 +144,7 @@ public class Main extends Application {
 			String excludedFiles = uiparam.getExcludedFileListTextFieldTextString();
 			String excludedPaths = uiparam.getExcludedPathListTextFieldTextString();
 			Date restoreDate = uiparam.getBackupFolderName().equalsIgnoreCase(SectionRestoreParameters.defaultBackupFolderTextString) ? new Date():OtherUtilities.getBackupDate(uiparam.getBackupFolderName(), processText);
-			String subfolderToRestore = uiparam.getSubfolderToRestore();
+			String subfolderToRestore = uiparam.getFolderToRestore();
 			String folderNameMapping = uiparam.getFolderNameMappingTextFieldTextString();
 			boolean overwrite = true;
 			String writesearchto = null;

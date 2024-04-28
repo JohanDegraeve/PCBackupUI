@@ -402,6 +402,55 @@ public class OtherUtilities {
         
     }
     
-
+    /**
+     * Example:<br>
+     * - listA = "banana", "apple", "orange", "grape", "cherry"<br>
+     * - toSortWithListA = 0, 1, 2, 3, 4<br>
+     * After sorting
+     * - listA = "apple", "banana", "cherry", "grape", "orange"
+     * - toSortWithListA = 1, 0, 4, 3, 2<br>
+     * <br>
+     * the two lists must have the same size, otherwise things will go wrong
+     * @param listA is the list to sort
+     * @param toSortWithListA a second list of Integers, which will get the same order as list A
+     */
+    public static void bubbleSort(List<String> listA, List<Integer> toSortWithListA) {
+        boolean swapped;
+        int n = listA.size();
+        do {
+            swapped = false;
+            for (int i = 1; i < n; i++) {
+                if (listA.get(i - 1).compareTo(listA.get(i)) > 0) {
+                    // Swap elements in listA
+                    String temp = listA.get(i - 1);
+                    listA.set(i - 1, listA.get(i));
+                    listA.set(i, temp);
+                    
+                    // Swap elements in toSortWithListA
+                    Integer tempB = toSortWithListA.get(i - 1);
+                    toSortWithListA.set(i - 1, toSortWithListA.get(i));
+                    toSortWithListA.set(i, tempB);
+                    
+                    
+                    swapped = true;
+                }
+            }
+            n--;
+        } while (swapped);
+    }
+    
+    /**
+     * Example if path = /Users/johandegraeve/subfolder1/subfolder2, then returns /Users/johandegraeve/subfolder1
+     * @param path
+     * @return
+     */
+    public static String getParentFolder(String path) {
+        File file = new File(path);
+        String parent = file.getParent();
+        if (parent != null) {
+            return parent;
+        }
+        return "";
+    }
 	
 }

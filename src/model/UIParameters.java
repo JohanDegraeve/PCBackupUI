@@ -16,7 +16,7 @@ import Enumerations.Action;
  * Not stored:<br>
  * - currentlySelectedActionKey<br>
  * - backupFolderName<br> 
- * - subfolderToRestore<br>
+ * - folderToRestore<br>
  */
 public class UIParameters {
 	
@@ -47,9 +47,9 @@ public class UIParameters {
      */
     private String backupFolderName = "";
     /**
-     * subfolder to restore
+     * folder to restore
      */
-    private String subfolderToRestore = "";
+    private String folderToRestore = "";
     
 	public Action getCurrentlySelectedAction() {
     	return Action.stringToEnum(keyValueMap.get(currentlySelectedActionKey));
@@ -132,12 +132,12 @@ public class UIParameters {
 		this.backupFolderName = backupFolderName;
 	}
 
-	public String getSubfolderToRestore() {
-		return subfolderToRestore;
+	public String getFolderToRestore() {
+		return folderToRestore;
 	}
 
-	public void setSubfolderToRestore(String subfolderToRestore) {
-		this.subfolderToRestore = subfolderToRestore;
+	public void setFolderToRestore(String folderToRestore) {
+		this.folderToRestore = folderToRestore;
 	}
 
 	// Create a HashMap to store key-value pairs

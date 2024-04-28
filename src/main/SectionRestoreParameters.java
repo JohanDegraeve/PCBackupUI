@@ -20,6 +20,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -38,11 +39,8 @@ import utilities.UIUtilities;
 
 public class SectionRestoreParameters {
 
-	/**
-	 * used in pop up with list of backup foldrs, initiallyempty
-	 */ 
-	private static ObservableList<String> allBackups = FXCollections.observableArrayList();
-
+	private static final int popupWidth = 1000;
+	
 	// there's these parameters
 	// - backup folder to use (which sets also the date to restore)
 	//     - also button to select the folder
@@ -75,6 +73,17 @@ public class SectionRestoreParameters {
     private static BackupFolderSelectedHandler backupFolderSelectedHandler = null;
     
     private static Stage stage;
+    
+	/**
+	 * used in pop up with list of backup folders, initially empty
+	 */ 
+	private static ObservableList<String> allBackups = FXCollections.observableArrayList();
+
+    /**
+     * when aFolder is selected, then we add the parentFolder to this arraylist<br>
+     * User can go up a folder, then we go back to the latest entry in that list
+     */
+    private static List<AFolder> parentFolders = new ArrayList<>();
     
     /**
      * as only Folders are clickable (we don't allow to select files for restore), we need to know how much folders there are.<br>
@@ -283,7 +292,7 @@ public class SectionRestoreParameters {
 			}
 
 			// Create a layout for the popup content, add cancel button
-	        VBox popupContent = new VBox(listView, UIUtilities.createCancelButtonContainer(selectBackupPopup));
+	        VBox popupContent = new VBox(listView, UIUtilities.createCancelButtonContainer(selectBackupPopup, popupWidth));
 	        popupContent.setSpacing(10); // Set spacing between nodes
 	        
 	        selectBackupPopup.getContent().addAll(popupContent);
@@ -302,7 +311,9 @@ public class SectionRestoreParameters {
 	
 	/**
 	 * this function uses the selecedBackupFolder (which is something like 2024-03-10 20;31;55 (Incremental))<br>
-	 * It will open the file folderlist.json in that folder, parse it and then call attachPopUpToSelectFolderToRestoreButton(AFolder)
+	 * It will open the file folderlist.json in that folder, parse it and then call attachPopUpToSelectFolderToRestoreButton(AFolder)<br>
+	 * <br>
+	 * Only used when backupFolder is changed by the user
 	 * @param selecedBackupFolder
 	 */
 	private static void attachPopUpToSelectFolderToRestoreButton(String selecedBackupFolder) {
@@ -328,25 +339,34 @@ public class SectionRestoreParameters {
 	
 	private static void attachPopUpToSelectFolderToRestoreButton(AFolder aFolder) {
 		
-		if (aFolder == null || aFolder.getFileOrFolderList().size() == 0) {
+		// if aFolder is null or if there are no files and/or folders in aFolder then return - excep tif parentFolder is not null
+		//    if parentFolder, then even if there's no files, we allow the user to go a level up
+		if (aFolder == null || (aFolder.getFileOrFolderList().size() == 0 && parentFolders.size() == 0)) {
 			selectFolderToRestoreLabel.setText(defaultFolderToRestoreTextString);
 			selectFolderToRestoreLabel.setDisable(true);
 			return;
 		}
 		
 		// create a list of all folders in aFolder
+		// we maintain a second list of ints, which are indexes of each folder in  allFoldersInAFolder
+		// this list will be sorted together with allFoldersInAFolder, so that we know where to find a folder with 
+		//   a specific name in the original aFolder
 		List<String> allFoldersInAFolder = new ArrayList<>();
-		for (AFileOrAFolder aFileOrAFolder: aFolder.getFileOrFolderList()) {
+		List<Integer> allFoldersInAFolderIndex = new ArrayList<>();
+		for (int i = 0; i < aFolder.getFileOrFolderList().size(); i++) {
+			AFileOrAFolder aFileOrAFolder = aFolder.getFileOrFolderList().get(i);
 			if (aFileOrAFolder instanceof AFolder) {
 				allFoldersInAFolder.add(aFileOrAFolder.getName());
+				allFoldersInAFolderIndex.add(i);
 			}
 		}
 		
 		// store amount of folders
-		amountOfFoldersInAFolder = allFoldersInAFolder.size();
-		
-		// sort alphabetically
-		Collections.sort(allFoldersInAFolder, (a,b) -> b.compareTo(a));
+		// add 1 if parentFolder != null, because we will add ".." in that case
+		amountOfFoldersInAFolder = allFoldersInAFolder.size() + (parentFolders.size() != 0 ? 1:0);
+
+		// sort alphabetically, also sort allFoldersInAFolderIndex so that we keep track of the original index in aFolder.getFileOrFolderList()
+		OtherUtilities.bubbleSort(allFoldersInAFolder, allFoldersInAFolderIndex);
 		
 		// now create list of all files in aFolder
 		List<String> allFilesInAFolder = new ArrayList<>();
@@ -360,31 +380,70 @@ public class SectionRestoreParameters {
 		Collections.sort(allFilesInAFolder, (a,b) -> b.compareTo(a));
 		
 		// now add the files to the existing list of folders
+		// now we have a list with first the folders, alphabetically sorted, then the files, alphabetically sorted
 		allFoldersInAFolder.addAll(allFilesInAFolder);
+		
+		// and now also add ".." if parentFolder is not null, so user can go back a level
+		if (parentFolders.size() != 0) {
+			allFoldersInAFolder.add(0, "..");
+			allFoldersInAFolderIndex.add(0, 0);// arbitrary value
+		}
 		
 		// create the list to show in the popup
 		ListView<String> listView = new ListView<>(FXCollections.observableArrayList(allFoldersInAFolder));
 		
-		// User needs to see difference between files and folders
-		giveOtherColorToFiles(listView, amountOfFoldersInAFolder);
+		// User needs to see the difference between files and folders - files will be not selectable (ie disabled)
+		setIconAndSelectable(listView, amountOfFoldersInAFolder);
 		
 		// Handle selection of an item
 		listView.setOnMouseClicked(e -> {
             
-			// if it's not a folder then no reaction
-			if (listView.getSelectionModel().getSelectedIndex() >= amountOfFoldersInAFolder) {
-				return;
-			}
+			// only double click is treated
+			if (!(e.getButton() == MouseButton.PRIMARY) || !(e.getClickCount() == 2)) {return;}
 			
-            currentlySelectFolderToRestoreAString = 
-            		currentlySelectFolderToRestoreAString + 
-            		OtherUtilities.getSeperatorToAdd(currentlySelectFolderToRestoreAString) + 
-            		allFilesInAFolder.get(listView.getSelectionModel().getSelectedIndex()); 
+			// if it's not a folder then don't react
+			if (listView.getSelectionModel().getSelectedIndex() >= amountOfFoldersInAFolder) {return;}
+			
+	        int selectedIndex = listView.getSelectionModel().getSelectedIndex();
+
+	        // will be the folder that will be used next time we create the button
+	        AFolder nextFolder;
+	        
+	        //if parentFolders.size() != 0, means there's a parent, and the first element is ".."
+	        //if user clicked the first element, then user actually wants to go a level up
+	        if (parentFolders.size() != 0 && selectedIndex == 0) {
+	        	
+	        	currentlySelectFolderToRestoreAString = OtherUtilities.getParentFolder(currentlySelectFolderToRestoreAString);
+	        	
+	        	// remove last element from parentFolders, and assign it to nextFolder
+	            nextFolder = parentFolders.removeLast();
+
+	        } else {
+	            currentlySelectFolderToRestoreAString = 
+	            		currentlySelectFolderToRestoreAString + 
+	            		OtherUtilities.getSeperatorToAdd(currentlySelectFolderToRestoreAString) + 
+	            		allFoldersInAFolder.get(selectedIndex); 
+	            
+	            // add aFolder to parentFolders
+	            parentFolders.add(aFolder);
+	            
+	            nextFolder = (AFolder)aFolder.getFileOrFolderList().get(allFoldersInAFolderIndex.get(selectedIndex));
+	            
+	        }
+	        
             
-            // set the selected backup in the label
+            // set the selected folder to restore in the label
             selectFolderToRestoreLabel.setText(currentlySelectFolderToRestoreAString);
             
+            // also set in uiparam
+            UIParameters.getInstance().setFolderToRestore(currentlySelectFolderToRestoreAString);
+            
+            // hide the popup
             selectFolderToRestorePopup.hide();
+
+            // attach a new popup with contents of the selected folder
+            // the folder is now the just selected folder, the index of that folder is in allFoldersInAFolderIndex
+            attachPopUpToSelectFolderToRestoreButton(nextFolder);
             
         });
 		
@@ -408,22 +467,22 @@ public class SectionRestoreParameters {
 		}
 		
         // Create a layout for the popup content
-        VBox popupContent = new VBox(listView, UIUtilities.createCancelButtonContainer(selectFolderToRestorePopup));
+        VBox popupContent = new VBox(listView, UIUtilities.createCancelButtonContainer(selectFolderToRestorePopup, popupWidth));
         popupContent.setSpacing(10); // Set spacing between nodes
-        popupContent.setPrefWidth(1000);
+        popupContent.setPrefWidth(popupWidth);
         
         selectFolderToRestorePopup.getContent().addAll(popupContent);
-
 		
 	}
 	
 	/**
 	 * listview consists first a list of folders, then a list of files. It needs to be visible to the user what are the files and what are the folders<br>
+	 * This function gives an different icons for folders and files and also sets files not selectable
 	 * 
 	 * @param listView
 	 * @param amountOfFolders
 	 */
-	private static void giveOtherColorToFiles(ListView<String> listView, int amountOfFolders) {
+	private static void setIconAndSelectable(ListView<String> listView, int amountOfFolders) {
 		
 		listView.setCellFactory(param -> new ListCell<String>() {
             @Override
@@ -437,16 +496,17 @@ public class SectionRestoreParameters {
                     // Set text
                     setText(item);
 
+                    // set icon for file or folder
                     ImageView icon = new ImageView();
-                    
-                    // Set color based on item
                     if (getIndex() >= amountOfFolders) {
                         setTextFill(Color.GREY); // Change color for specific items
                         icon.setImage(new Image(getClass().getResourceAsStream("/img/file-1453.png")));
+                        setDisable(true);
                     } else {
                         icon.setImage(new Image(getClass().getResourceAsStream("/img/folder-1484.png")));
                     }
                     setGraphic(icon);
+                    
                 }
             }
         });
