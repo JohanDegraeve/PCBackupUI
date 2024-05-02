@@ -22,6 +22,7 @@ import java.io.File;
 
 import Interfaces.ButtonCreator;
 import Interfaces.TextFieldChanged;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -200,6 +201,9 @@ public class UIUtilities {
         cancelButtonContainer.setMinWidth(minWidth); // Match the width of the ListView
         cancelButtonContainer.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
 
+        // Set padding around the label
+        cancelButtonContainer.setPadding(new Insets(5));
+        
         // Set the position of the cancel button within the container
         cancelButton.layoutXProperty().bind(cancelButtonContainer.widthProperty().subtract(cancelButton.widthProperty()).divide(2));
         cancelButton.layoutYProperty().bind(cancelButtonContainer.heightProperty().subtract(cancelButton.heightProperty()).divide(2));

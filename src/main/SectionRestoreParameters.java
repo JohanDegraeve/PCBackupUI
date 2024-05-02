@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import Interfaces.ProcessText;
@@ -14,6 +13,7 @@ import Interfaces.FolderChangedHolder;
 import Interfaces.TextFieldChanged;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -487,8 +487,8 @@ public class SectionRestoreParameters {
             }*/
 		}
 		
-        String infoSelectedFolderInfoLabelsString = "Huidige folder:\n"
-        		+ currentlySelectFolderToRestoreAString; 
+        String infoSelectedFolderInfoLabelsString = "Huidige geselecteerde map (klik 'Ok' als je deze map wil herstellen):\n"
+        		+ (currentlySelectFolderToRestoreAString.length() > 0? currentlySelectFolderToRestoreAString:defaultFolderToRestoreTextString); 
         Label infoSelectedFolderInfoLabel = new Label();
         infoSelectedFolderInfoLabel.setText(infoSelectedFolderInfoLabelsString);
 
@@ -497,13 +497,18 @@ public class SectionRestoreParameters {
         infoLabelContainer.setMinWidth(selectFolterToRestorePopupWidth); 
         infoLabelContainer.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
 
+        // Set padding around the label
+        final double padding = 10;
+        infoSelectedFolderInfoLabel.setPadding(new Insets(10));
+        //infoSelectedFolderInfoLabel.setLayoutY(padding);
+
         // Create a layout for the popup content
         VBox popupContent = new VBox(listView, infoLabelContainer, UIUtilities.createCancelButtonContainer(selectFolderToRestorePopup, selectFolterToRestorePopupWidth, "Ok"));
 
         popupContent.setSpacing(5);
         popupContent.setPrefWidth(selectFolterToRestorePopupWidth);
         
-        selectFolderToRestorePopup.getContent().removeAll(popupContent);
+        selectFolderToRestorePopup.getContent().clear();
         selectFolderToRestorePopup.getContent().addAll(popupContent);
 		
 	}
