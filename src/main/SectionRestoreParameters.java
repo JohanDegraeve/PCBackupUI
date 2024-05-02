@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import Interfaces.ProcessText;
@@ -23,6 +24,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -39,7 +41,8 @@ import utilities.UIUtilities;
 
 public class SectionRestoreParameters {
 
-	private static final int popupWidth = 1000;
+	private static final int selectFolterToRestorePopupWidth = 1000;
+	private static final int selectBackupPopupWidth = 200;
 	
 	// there's these parameters
 	// - backup folder to use (which sets also the date to restore)
@@ -176,6 +179,7 @@ public class SectionRestoreParameters {
 		
 		// create button to select the backup folder
 		selectFolderToRestoreButton = new Button("Kies");
+		selectFolderToRestoreButton.setDisable(true);
 		
 		// create the label that shows the currently selected folder to restore
 		selectFolderToRestoreLabel = new Label();
@@ -252,8 +256,11 @@ public class SectionRestoreParameters {
 		
 			ListView<String> listView = new ListView<>(allBackups);
 			listView.setOnMouseClicked(e -> {
-	            // Handle selection of an item
-	            String selectedString = listView.getSelectionModel().getSelectedItem();
+	            
+				// only double click is treated
+				if (!(e.getButton() == MouseButton.PRIMARY) || !(e.getClickCount() == 2)) {return;}
+				
+				String selectedString = listView.getSelectionModel().getSelectedItem();
 	            
 	            String selectedBackupFolderString = backupFoldersAsStrings.get(listView.getSelectionModel().getSelectedIndex());
 	            
@@ -292,7 +299,7 @@ public class SectionRestoreParameters {
 			}
 
 			// Create a layout for the popup content, add cancel button
-	        VBox popupContent = new VBox(listView, UIUtilities.createCancelButtonContainer(selectBackupPopup, popupWidth));
+	        VBox popupContent = new VBox(listView, UIUtilities.createCancelButtonContainer(selectBackupPopup, selectBackupPopupWidth, "Annuleer"));
 	        popupContent.setSpacing(10); // Set spacing between nodes
 	        
 	        selectBackupPopup.getContent().addAll(popupContent);
@@ -398,52 +405,66 @@ public class SectionRestoreParameters {
 		// Handle selection of an item
 		listView.setOnMouseClicked(e -> {
             
-			// only double click is treated
-			if (!(e.getButton() == MouseButton.PRIMARY) || !(e.getClickCount() == 2)) {return;}
-			
 			// if it's not a folder then don't react
 			if (listView.getSelectionModel().getSelectedIndex() >= amountOfFoldersInAFolder) {return;}
+					
+			boolean digDeeper = false;
 			
-	        int selectedIndex = listView.getSelectionModel().getSelectedIndex();
+			// if double click then we'll dig deeper into the selected folder, meaning show all folders in the selected folder
+			// but the currently selected folder will be the same,  no matter if it's a single click or a double click
+			if (e.getClickCount() == 2) {digDeeper = true;}
+			
+			int selectedIndex = listView.getSelectionModel().getSelectedIndex();
 
-	        // will be the folder that will be used next time we create the button
-	        AFolder nextFolder;
+	        // will be the folder that will be used next time we create the button, only if digDeeper = true
+	        AFolder nextFolder = null;
 	        
 	        //if parentFolders.size() != 0, means there's a parent, and the first element is ".."
 	        //if user clicked the first element, then user actually wants to go a level up
-	        if (parentFolders.size() != 0 && selectedIndex == 0) {
-	        	
-	        	currentlySelectFolderToRestoreAString = OtherUtilities.getParentFolder(currentlySelectFolderToRestoreAString);
-	        	
-	        	// remove last element from parentFolders, and assign it to nextFolder
-	            nextFolder = parentFolders.removeLast();
+	        // only if double click is chosen
+	        if (e.getClickCount() == 2) {
+		        if (parentFolders.size() != 0 && selectedIndex == 0) {
+		        	currentlySelectFolderToRestoreAString = OtherUtilities.getParentFolder(currentlySelectFolderToRestoreAString);
+		        	
+		        	// remove last element from parentFolders, and assign it to nextFolder
+		        	// only if digDeeper = true
+		        	if (digDeeper) {nextFolder = parentFolders.removeLast();}
 
-	        } else {
-	            currentlySelectFolderToRestoreAString = 
-	            		currentlySelectFolderToRestoreAString + 
-	            		OtherUtilities.getSeperatorToAdd(currentlySelectFolderToRestoreAString) + 
-	            		allFoldersInAFolder.get(selectedIndex); 
-	            
-	            // add aFolder to parentFolders
-	            parentFolders.add(aFolder);
-	            
-	            nextFolder = (AFolder)aFolder.getFileOrFolderList().get(allFoldersInAFolderIndex.get(selectedIndex));
-	            
+		        } else {
+		            currentlySelectFolderToRestoreAString = 
+		            		currentlySelectFolderToRestoreAString + 
+		            		OtherUtilities.getSeperatorToAdd(currentlySelectFolderToRestoreAString) + 
+		            		allFoldersInAFolder.get(selectedIndex); 
+		            
+		            // add aFolder to parentFolders
+		        	// only if digDeeper = true
+		            if (digDeeper) {parentFolders.add(aFolder);}
+		            
+		            nextFolder = (AFolder)aFolder.getFileOrFolderList().get(allFoldersInAFolderIndex.get(selectedIndex));
+		            
+		        }
 	        }
 	        
-            
             // set the selected folder to restore in the label
             selectFolderToRestoreLabel.setText(currentlySelectFolderToRestoreAString);
             
-            // also set in uiparam
+            // also set in uiparam 
             UIParameters.getInstance().setFolderToRestore(currentlySelectFolderToRestoreAString);
             
-            // hide the popup
-            selectFolderToRestorePopup.hide();
-
+            //// if digDeeper = true
             // attach a new popup with contents of the selected folder
             // the folder is now the just selected folder, the index of that folder is in allFoldersInAFolderIndex
-            attachPopUpToSelectFolderToRestoreButton(nextFolder);
+            // calling this function will actually result in
+            // - creation of a new listview with new folder contents
+            // - creation and showing a new popup with the contents, and adding it to selectFolderToRestorePopup
+            // - so it actually refreshes selectFolderToRestorePopup
+            // we hide the pop up here, it will be reopened
+            if (digDeeper) {
+            	selectFolderToRestorePopup.hide();
+            	attachPopUpToSelectFolderToRestoreButton(nextFolder);
+            	selectFolderToRestorePopup.show(stage);
+            }
+            
             
         });
 		
@@ -466,11 +487,23 @@ public class SectionRestoreParameters {
             }*/
 		}
 		
+        String infoSelectedFolderInfoLabelsString = "Huidige folder:\n"
+        		+ currentlySelectFolderToRestoreAString; 
+        Label infoSelectedFolderInfoLabel = new Label();
+        infoSelectedFolderInfoLabel.setText(infoSelectedFolderInfoLabelsString);
+
+        // Create a Pane to contain the cancel button
+        Pane infoLabelContainer = new Pane(infoSelectedFolderInfoLabel);
+        infoLabelContainer.setMinWidth(selectFolterToRestorePopupWidth); 
+        infoLabelContainer.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
+
         // Create a layout for the popup content
-        VBox popupContent = new VBox(listView, UIUtilities.createCancelButtonContainer(selectFolderToRestorePopup, popupWidth));
-        popupContent.setSpacing(10); // Set spacing between nodes
-        popupContent.setPrefWidth(popupWidth);
+        VBox popupContent = new VBox(listView, infoLabelContainer, UIUtilities.createCancelButtonContainer(selectFolderToRestorePopup, selectFolterToRestorePopupWidth, "Ok"));
+
+        popupContent.setSpacing(5);
+        popupContent.setPrefWidth(selectFolterToRestorePopupWidth);
         
+        selectFolderToRestorePopup.getContent().removeAll(popupContent);
         selectFolderToRestorePopup.getContent().addAll(popupContent);
 		
 	}
@@ -506,7 +539,6 @@ public class SectionRestoreParameters {
                         icon.setImage(new Image(getClass().getResourceAsStream("/img/folder-1484.png")));
                     }
                     setGraphic(icon);
-                    
                 }
             }
         });

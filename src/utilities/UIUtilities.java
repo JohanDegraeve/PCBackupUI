@@ -190,9 +190,9 @@ public class UIUtilities {
 	 * @param popUpToHideWhenClicked
 	 * @return
 	 */
-	public static Pane createCancelButtonContainer(Popup popUpToHideWhenClicked, int minWidth) {
+	public static Pane createCancelButtonContainer(Popup popUpToHideWhenClicked, int minWidth, String buttonText) {
 		// Create a cancel button
-        Button cancelButton = new Button("Annuleer");
+        Button cancelButton = new Button(buttonText);
         cancelButton.setOnAction(e -> popUpToHideWhenClicked.hide());
         
         // Create a Pane to contain the cancel button
@@ -205,6 +205,7 @@ public class UIUtilities {
         cancelButton.layoutYProperty().bind(cancelButtonContainer.heightProperty().subtract(cancelButton.heightProperty()).divide(2));
 
         return cancelButtonContainer;
+        
 	}
 	
 
