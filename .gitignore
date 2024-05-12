@@ -1,0 +1,27 @@
+# mac file
+.DS_Store
+
+# eclipse files
+.classpath
+.project
+.settings/
+lib/
+bin/
+
+# created by maven
+target/
+
+# created during run
+pcbackup-parameters.txt
+
+# temp file used to create commit message
+commit.txt
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
