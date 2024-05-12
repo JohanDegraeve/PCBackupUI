@@ -117,7 +117,8 @@ public class Main extends Application {
     	}
     	
     	switch (uiparam.getCurrentlySelectedAction()) {
-    	case FULLBACKUP, INCREMENTALBACKUP:
+    	case FULLBACKUP:
+    	case INCREMENTALBACKUP:
     		
     		CommandLineArguments commandLineArgumentsForBackup = new CommandLineArguments(
     				null, null, uiparam.getSourceTextFieldTextString(), uiparam.getDestTextFieldTextString(), null, uiparam.getCurrentlySelectedAction() == Action.FULLBACKUP ? true:false, 
@@ -144,7 +145,7 @@ public class Main extends Application {
 			String excludedFiles = uiparam.getExcludedFileListTextFieldTextString();
 			String excludedPaths = uiparam.getExcludedPathListTextFieldTextString();
 			Date restoreDate = uiparam.getBackupFolderName().equalsIgnoreCase(SectionRestoreParameters.defaultBackupFolderTextString) ? new Date():OtherUtilities.getBackupDate(uiparam.getBackupFolderName(), processText);
-			String subfolderToRestore = uiparam.getFolderToRestore();
+			String folderToRestore = uiparam.getFolderToRestore();
 			String folderNameMapping = uiparam.getFolderNameMappingTextFieldTextString();
 			boolean overwrite = true;
 			String writesearchto = null;
@@ -153,7 +154,7 @@ public class Main extends Application {
 			boolean addpathlengthforfolderswithnewormodifiedcontent = false;
 			String searchText = null;
     		
-    		CommandLineArguments commandLineArguments = new CommandLineArguments(startSearchDate, endSearchDate, source, destination, restoreto, fullBackup, backup, search, logfilefolder, excludedFiles, excludedPaths, restoreDate, subfolderToRestore, folderNameMapping, overwrite, writesearchto, searchTextPattern, addpathlengthforallfolders, addpathlengthforfolderswithnewormodifiedcontent, searchText, processText);
+    		CommandLineArguments commandLineArguments = new CommandLineArguments(startSearchDate, endSearchDate, source, destination, restoreto, fullBackup, backup, search, logfilefolder, excludedFiles, excludedPaths, restoreDate, folderToRestore, folderNameMapping, overwrite, writesearchto, searchTextPattern, addpathlengthforallfolders, addpathlengthforfolderswithnewormodifiedcontent, searchText, processText);
 			
     		Restore.restore(commandLineArguments);
     		
@@ -389,7 +390,8 @@ public class Main extends Application {
     	}
     	
     	switch (uiparam.getCurrentlySelectedAction()) {
-    	case FULLBACKUP, INCREMENTALBACKUP:
+    	case INCREMENTALBACKUP:
+    	case FULLBACKUP:
     		if (uiparam.getSourceTextFieldTextString() != null && uiparam.getDestTextFieldTextString() != null && uiparam.getLogfileFolderTextFieldString() != null) {
     			if (uiparam.getSourceTextFieldTextString().length() > 0 && uiparam.getDestTextFieldTextString().length() > 0 && uiparam.getLogfileFolderTextFieldString().length() > 0) {
     				submitButton.setDisable(false);

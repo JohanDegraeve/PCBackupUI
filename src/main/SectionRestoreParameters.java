@@ -67,6 +67,9 @@ public class SectionRestoreParameters {
 	private static Label selectFolderToRestoreLabel;
 	private static Popup selectFolderToRestorePopup = new Popup();
 	
+	private static VBox completeFolderNameMappingListVBox;
+	private static HBox folderNameMappingListHBoxWithFileText;
+	
 	private static ProcessText processText;
 	
     public static final String defaultBackupFolderTextString = "Geen backup geselecteerd";
@@ -126,6 +129,12 @@ public class SectionRestoreParameters {
 
         String labelSelecFolderToRestore = "Selecteer de te herstellen map\u002A:";
         String labelSelectFolderToRestoreWithExplanation = "";
+        
+        // texts for foldername mapping
+        String labelTextSelectedFolderNameMappingList = "Map met namen die moeten aangepast worden:\n";
+        String labelTextWithExplanationSelectedFolderNameMappingList = "Dit is een tekstbestand en bevat een lijst met mappen waarvan de naam moet aangepast worden tijdens het herstel.\n" 
+        		+ "Dit geldt enkel voor de eerste map.\n"
+        		+ "(Deze map is geselecteerd via optie '" + Section2.fullBackupOptionsString + "' of '" + Section2.incrementalBackupOptionString;
 
 		SectionRestoreParameters.processText = processText;
 
@@ -141,6 +150,7 @@ public class SectionRestoreParameters {
 		completeSelectBackupVBox = new VBox();
 		completeRestoreToFolderVBox = new VBox();
 		completeSelectFolderToRestoreBox = new VBox();
+		completeFolderNameMappingListVBox = new VBox();
         
 		//////////////////////////////////////////////
         //////         CREATE BACKUP VBOX
@@ -214,7 +224,27 @@ public class SectionRestoreParameters {
         restoreToFolderWarningLabel = new Label();
         restoreToFolderHBoxWithLabelHBox = new HBox();
         restoreToFolderHBoxWithLabelHBox.getChildren().add(restoreToFolderWarningLabel);
-		
+
+		//////////////////////////////////////////////
+		///////        CREATE FOLDERNAME MAPPING VBOX
+		//////////////////////////////////////////////
+
+        /// HBOX to hold the label
+        folderNameMappingListHBoxWithFileText = new HBox();
+        folderNameMappingListHBoxWithFileText.setSpacing(10);//  space between individual nodes in the Hbox
+        folderNameMappingListHBoxWithFileText.setAlignment(Pos.CENTER_LEFT);
+        GridPane.setHgrow(folderNameMappingListHBoxWithFileText, Priority.ALWAYS); // allows the Hbox to grow horizontally till the end of the grid
+  
+        Label foldernameMappingLabel = new Label(labelTextSelectedFolderNameMappingList  + UIParameters.getInstance().getFolderNameMappingTextFieldTextString());
+        UIUtilities.addToolTip(foldernameMappingLabel, labelTextWithExplanationSelectedFolderNameMappingList);
+        
+        /// add the fields to the HBox
+        folderNameMappingListHBoxWithFileText.getChildren().addAll(foldernameMappingLabel);
+        
+        completeFolderNameMappingListVBox.getChildren().add(folderNameMappingListHBoxWithFileText);
+        section.getChildren().add(completeFolderNameMappingListVBox);
+
+        
 		return section;
 		
 	}
@@ -498,7 +528,6 @@ public class SectionRestoreParameters {
         infoLabelContainer.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
 
         // Set padding around the label
-        final double padding = 10;
         infoSelectedFolderInfoLabel.setPadding(new Insets(10));
         //infoSelectedFolderInfoLabel.setLayoutY(padding);
 

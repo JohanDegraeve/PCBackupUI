@@ -11,10 +11,10 @@ import utilities.UIUtilities;
 
 public class Section2 {
 
-	static String fullBackupOptionsString = "Een volledige backup nemen";
-	static String incrementalBackupOptionString = "Een incrementele backup nemen";
-	static String restoreOptionsString = "Mappen herstellen";
-	static String searchOptionstrString = "Mappen en/of bestanden zoeken";
+	public static String fullBackupOptionsString = "Een volledige backup nemen";
+	public static String incrementalBackupOptionString = "Een incrementele backup nemen";
+	public static String restoreOptionsString = "Mappen herstellen";
+	public static String searchOptionstrString = "Mappen en/of bestanden zoeken";
 
 	public static VBox createSection2(Stage primaryStage, ActionHandler handleAction) {
 		
