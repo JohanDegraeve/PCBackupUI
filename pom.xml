@@ -8,27 +8,38 @@
     <version>1.0.0</version>
     <packaging>jar</packaging>
     
+    <properties>
+  		<!-- Use the latest version whenever possible. -->
+  		<jackson.version>2.17.1</jackson.version>
+	</properties>
+    
    <dependencies>
-    <dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-databind</artifactId>
-   	 	<version>2.17.0</version>
-	</dependency>
-	<dependency>
-   	 	<groupId>org.openjfx</groupId>
-    	<artifactId>javafx-controls</artifactId>
-    	<version>16</version>
-	</dependency>
 	<dependency>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-fxml</artifactId>
         <version>16</version>
     </dependency>
     <dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-databind</artifactId>
+   	 	<version>${jackson.version}</version>
+	</dependency>
+	<dependency>
+   	 	<groupId>org.openjfx</groupId>
+    	<artifactId>javafx-controls</artifactId>
+    	<version>16</version>
+	</dependency>
+    <dependency>
 	    <groupId>com.fasterxml.jackson.core</groupId>
 	    <artifactId>jackson-annotations</artifactId>
-	    <version>2.17.1</version>
+	    <version>${jackson.version}</version>
 	</dependency>
+	    <dependency>
+	    <groupId>com.fasterxml.jackson.core</groupId>
+	    <artifactId>jackson-core</artifactId>
+	    <version>${jackson.version}</version>
+	</dependency>
+
 
    </dependencies>
 
