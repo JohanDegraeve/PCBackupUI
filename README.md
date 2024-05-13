@@ -19,7 +19,10 @@ To build in Eclipse, following jar libraries are required (latest versions)
 - Jackson databind: https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
 - Jackson core: https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
 
-Java FX is downloaded here (use the correct operating system and architecture and download the SDK)
-- https://gluonhq.com/products/javafx/
+Java FX is downloaded here (use the correct operating system and architecture and download the SDK): https://gluonhq.com/products/javafx/
+Extract the zip and copy all jars to a lib folder
+Add all jars (10 in total) in the (to create after cloning the project) lib folder
+Configure the build path and add all jars to "Modulepath"
 
-- 
+
+
