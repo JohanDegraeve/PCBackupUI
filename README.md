@@ -22,7 +22,14 @@ To build in Eclipse, following jar libraries are required (latest versions)
 Java FX is downloaded here (use the correct operating system and architecture and download the SDK): https://gluonhq.com/products/javafx/
 Extract the zip and copy all jars to a lib folder
 Add all jars (10 in total) in the (to create after cloning the project) lib folder
-Configure the build path and add all jars to "Modulepath"
+Configure the build path and add all jars to "Modulepath", it should look like this
+![image 2](https://github.com/JohanDegraeve/PCBackupUI/assets/13840461/d7d5e15d-ff7a-47b9-9783-b39bb1094741)
 
+Export as jar runnable to PCBackupUI.jar
+
+# Run
+To run
+java --module-path java-sdk-22-folder/lib --add-modules javafx.controls,javafx.fxml -jar PCBackupUI.jar
+with java-sdk-22-folder/lib the folder that has the javafx jars 
 
 
