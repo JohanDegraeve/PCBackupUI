@@ -25,3 +25,6 @@ commit.txt
 *.zip
 *.tar.gz
 *.rar
+
+# own files
+pcbackup-parameters kopie.txt
