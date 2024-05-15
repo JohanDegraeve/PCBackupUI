@@ -23,6 +23,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import model.UIParameters;
 import utilities.UIUtilities;
 
 public class Section1 {
@@ -106,7 +107,7 @@ public class Section1 {
         		+ " dus de bestanden en folders die gebackupped worden. Ook als je een restore doet of\n"
         		+ "als je wilt zoeken in de backup, dan blijft dit de folder met de bron bestanden.\n";
   
-        return UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged, initialText);
+        return UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged, initialText, UIParameters.getInstance().getSourceTextFieldTextString());
         
 	}
 	
@@ -117,7 +118,7 @@ public class Section1 {
         		+ "Elke nieuwe incrementele of volledige backup komt in een subfolder van deze folder.\n"
         		+ "Restores gebeuren vanuit deze backup folders. Zoeken naar bestanden gebeurt ook in deze backup folders.\n";
   
-        return UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged, initialText);
+        return UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged, initialText, UIParameters.getInstance().getDestTextFieldTextString());
         
 	}
 	
@@ -127,7 +128,7 @@ public class Section1 {
         String labelTextWithExplanationString = "Dit is de map waar de logs komen."
         		+ "De logs zijn tekst bestanden die info geven over het backup proces.\n";
   
-        return UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged, initialText);
+        return UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextString, labelTextWithExplanationString, textFieldChanged, initialText, UIParameters.getInstance().getLogfileFolderTextFieldString());
         
 	}
 

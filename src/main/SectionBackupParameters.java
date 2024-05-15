@@ -5,6 +5,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import model.UIParameters;
 import utilities.UIUtilities;
 
 public class SectionBackupParameters {
@@ -48,17 +49,17 @@ public class SectionBackupParameters {
         completeFolderNameMappingListVBox = new VBox();
         
         
-        excludedFileListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedFileList, labelTextWithExplanationSelectExcludedFileList, excludedFileListChanged, initialTextExcludedFile);
+        excludedFileListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedFileList, labelTextWithExplanationSelectExcludedFileList, excludedFileListChanged, initialTextExcludedFile, UIParameters.getInstance().getExcludedFileListTextFieldTextString());
         excludedFileListHBoxWithFileText.setSpacing(10);
         completeExcludedFileListVBox.getChildren().add(excludedFileListHBoxWithFileText);
         section.getChildren().add(completeExcludedFileListVBox);
 
-        excludedPathListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedPathList, labelTextSelectWithExplanationExcludedPathList, excludedPathListChanged, initialTextExclucedPath);
+        excludedPathListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectExcludedPathList, labelTextSelectWithExplanationExcludedPathList, excludedPathListChanged, initialTextExclucedPath, UIParameters.getInstance().getExcludedPathListTextFieldTextString());
         excludedPathListHBoxWithFileText.setSpacing(10);
         completeExcludedPathListVBox.getChildren().add(excludedPathListHBoxWithFileText);
         section.getChildren().add(completeExcludedPathListVBox);
 
-        folderNameMappingListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectedFolderNameMappingList, labelTextWithExplanationSelectedFolderNameMappingList, folderNameMappingListChanged, initialTextFolderNameMapping);
+        folderNameMappingListHBoxWithFileText = UIUtilities.createHBoxToSelectFile(primaryStage, labelTextSelectedFolderNameMappingList, labelTextWithExplanationSelectedFolderNameMappingList, folderNameMappingListChanged, initialTextFolderNameMapping, UIParameters.getInstance().getFolderNameMappingTextFieldTextString());
         folderNameMappingListHBoxWithFileText.setSpacing(10);
         completeFolderNameMappingListVBox.getChildren().add(folderNameMappingListHBoxWithFileText);
         section.getChildren().add(completeFolderNameMappingListVBox);

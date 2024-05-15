@@ -84,7 +84,7 @@ public class Main extends Application {
         root.setPadding(new Insets(10));
         root.setSpacing(spacingBetweenSections);
 
-        // Create the first section
+        // Create the first section, this is the section where source folder, backup folder, log file folder are chosen
         VBox section1 = Section1.createSection1(primaryStage, (text) -> sourceTextFieldChanged(text), (text) -> destTextFieldChanged(text), (text) -> logFileFolderTextFieldChanged(text), uiparam.getSourceTextFieldTextString(), uiparam.getDestTextFieldTextString(), uiparam.getLogfileFolderTextFieldString());
         root.getChildren().add(section1);
 

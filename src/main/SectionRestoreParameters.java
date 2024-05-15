@@ -131,10 +131,10 @@ public class SectionRestoreParameters {
         String labelSelectFolderToRestoreWithExplanation = "";
         
         // texts for foldername mapping
-        String labelTextSelectedFolderNameMappingList = "Map met namen die moeten aangepast worden:\n";
+        String labelTextSelectedFolderNameMappingList = "Mapnamen die moeten aangepast worden:\n";
         String labelTextWithExplanationSelectedFolderNameMappingList = "Dit is een tekstbestand en bevat een lijst met mappen waarvan de naam moet aangepast worden tijdens het herstel.\n" 
         		+ "Dit geldt enkel voor de eerste map.\n"
-        		+ "(Deze map is geselecteerd via optie '" + Section2.fullBackupOptionsString + "' of '" + Section2.incrementalBackupOptionString;
+        		+ "(Deze map is geselecteerd via optie '" + Section2.fullBackupOptionsString + "' of '" + Section2.incrementalBackupOptionString + "')";
 
 		SectionRestoreParameters.processText = processText;
 
@@ -212,7 +212,7 @@ public class SectionRestoreParameters {
 		///////        CREATE RESTORETO VBOX
 		//////////////////////////////////////////////
 		
-		restoreToFolderHBoxWithFileText = UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextSelectRestoreToFolder, labelTextSelectRestoreFolderWithExplanation, restoreToFolderChanged, initialTextRestoreToFolder);
+		restoreToFolderHBoxWithFileText = UIUtilities.createHBoxToSelectFolder(primaryStage, labelTextSelectRestoreToFolder, labelTextSelectRestoreFolderWithExplanation, restoreToFolderChanged, initialTextRestoreToFolder, UIParameters.getInstance().getRestoreToFolderName());
 		restoreToFolderHBoxWithFileText.setSpacing(10);
 		
 		// create the complete HBOX that holds the RESTORETO info : completeRestoreToFolderVBox

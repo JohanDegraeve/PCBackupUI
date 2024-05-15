@@ -49,7 +49,16 @@ public class UIUtilities {
         Tooltip.install(node, tooltip);
     }
 	
-	public static Button createButtonWithDirectoryChooser(String buttonTextString, Stage stage, TextField textField, TextFieldChanged textFieldChanged) {
+	/**
+	 * 
+	 * @param buttonTextString
+	 * @param stage
+	 * @param textField
+	 * @param textFieldChanged
+	 * @param initialDirectory directory to show when user clicks the button
+	 * @return
+	 */
+	public static Button createButtonWithDirectoryChooser(String buttonTextString, Stage stage, TextField textField, TextFieldChanged textFieldChanged, String initialDirectory) {
 		
 		Button selectFolderButton = new Button(buttonTextString);
 
@@ -62,6 +71,12 @@ public class UIUtilities {
             // Set title for the directory chooser dialog
             directoryChooser.setTitle("Kies map");
 
+            File initialDirectoryAsFile = UIUtilities.getDirectory(initialDirectory);
+        	
+        	if (initialDirectoryAsFile != null) {
+        		directoryChooser.setInitialDirectory(initialDirectoryAsFile);
+            }
+            
             // Show the dialog and wait for user input
             File selectedDirectory = directoryChooser.showDialog(stage);
 
@@ -73,9 +88,7 @@ public class UIUtilities {
                     textFieldChanged.handleChange(selectedDirectory.getAbsolutePath());
                 }
             } else {
-                if (textFieldChanged != null) {
-                    textFieldChanged.handleChange(null);
-                }
+                // user clicked cancel
             }
         });
         
@@ -83,7 +96,7 @@ public class UIUtilities {
 		
 	}
 	 
-	public static Button createButtonWithFileChooser(String buttonTextString, Stage stage, TextField textField, TextFieldChanged textFieldChanged) {
+	public static Button createButtonWithFileChooser(String buttonTextString, Stage stage, TextField textField, TextFieldChanged textFieldChanged, String initialDirectory) {
 		
 		Button selectFolderButton = new Button(buttonTextString);
 
@@ -96,6 +109,12 @@ public class UIUtilities {
             // Set title for the directory chooser dialog
         	fileChooser.setTitle("Kies bestand");
 
+        	File initialDirectoryAsFile = UIUtilities.getDirectory(initialDirectory);
+        	
+        	if (initialDirectoryAsFile != null) {
+        		fileChooser.setInitialDirectory(initialDirectoryAsFile);
+            }
+        	
             // Show the dialog and wait for user input
             File selectedFile = fileChooser.showOpenDialog(stage);
 
@@ -107,9 +126,7 @@ public class UIUtilities {
                     textFieldChanged.handleChange(selectedFile.getAbsolutePath());
                 }
             } else {
-            	if (textFieldChanged != null) {
-                    textFieldChanged.handleChange(null);
-                }
+            	// user clicked cancel
             }
         });
         
@@ -117,15 +134,15 @@ public class UIUtilities {
 		
 	}
 	 
-	public static HBox createHBoxToSelectFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFileFieldChanged, String initialText) {
+	public static HBox createHBoxToSelectFile(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFileFieldChanged, String initialText, String initialDirectory) {
 		
-		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField, textFieldChanged) -> createButtonWithFileChooser(buttonTextString, stage, textField, textFieldChanged), selectFileFieldChanged, initialText);
+		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField, textFieldChanged) -> createButtonWithFileChooser(buttonTextString, stage, textField, textFieldChanged, initialDirectory), selectFileFieldChanged, initialText);
 		
 	}
 	
-	public static HBox createHBoxToSelectFolder(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFolderFieldChanged, String initialText) {
+	public static HBox createHBoxToSelectFolder(Stage primaryStage, String labelTextString, String labelTextWithExplanationString, TextFieldChanged selectFolderFieldChanged, String initialText, String initialDirectory) {
 
-		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField, textFieldChanged) -> createButtonWithDirectoryChooser(buttonTextString, stage, textField, textFieldChanged), selectFolderFieldChanged, initialText);
+		return createHBoxToSelectFolderOrFile(primaryStage, labelTextString, labelTextWithExplanationString, "Kies", (buttonTextString, stage, textField, textFieldChanged) -> createButtonWithDirectoryChooser(buttonTextString, stage, textField, textFieldChanged, initialDirectory), selectFolderFieldChanged, initialText);
 
 	}
 	
@@ -212,5 +229,27 @@ public class UIUtilities {
         
 	}
 	
-
+	/**
+	 * checks if directory exists<br>
+	 * checks also if directory is a file, if it's a file, then uses the parent directory<br>
+	 * 
+	 * @param directory
+	 * @return If tests succeed, then returns directory as File, otherwise null
+	 */
+	private static File getDirectory(String directory) {
+		
+		if (directory == null) {return null;}
+		if (directory.length() == 0) {return null;}
+		
+		File returnValue = new File(directory);
+		if (!returnValue.isDirectory()) {
+			returnValue = returnValue.getParentFile();
+		}
+		
+		if (!returnValue.exists()) {return null;}
+		
+		return returnValue;
+		
+	}
+	
 }
