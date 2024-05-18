@@ -27,8 +27,13 @@ import model.CommandLineArguments;
 public class Logger {
 
 	static BufferedWriter staticwriter = null;
-	
-	//@SuppressWarnings("static-access")
+
+	/**
+	 * write texttolog to :<br>
+	 * - System.out.println
+	 * - to file
+	 * @param texttoLog
+	 */
 	public static void log(String texttoLog) {
 		
 		// always log to System.out

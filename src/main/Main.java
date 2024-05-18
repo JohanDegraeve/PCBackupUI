@@ -31,7 +31,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
@@ -66,7 +70,10 @@ public class Main extends Application {
 	
     private UIParameters uiparam = UIParameters.getInstance();
     
+    // to process logging information
     private ProcessText processText;
+    
+    private TextArea loggingTextArea = new TextArea();
     
     /**
      * destFolderChangedHolder is used to trigger change of dest folder, dest folder is the folder with all backups in
@@ -78,7 +85,12 @@ public class Main extends Application {
     	
     	Main.primaryStage = primaryStage;
     	
-    	processText = (logtext) -> {utilities.Logger.log(logtext);};
+    	processText = (logtext) -> {
+    		
+    		// w
+    		utilities.Logger.log(logtext);
+    		loggingTextArea.appendText(logtext + "\n");
+    	};
     	
     	// Create a VBox to hold all sections
         root.setPadding(new Insets(10));
@@ -125,10 +137,14 @@ public class Main extends Application {
     						true, false, uiparam.getLogfileFolderTextFieldString(), uiparam.getExcludedFileListTextFieldTextString(), 
     						uiparam.getExcludedPathListTextFieldTextString(), null, null, uiparam.getFolderNameMappingTextFieldTextString(), false, null, null, 
     						false, false, null, processText);
-    	
-    		Backup.backup(commandLineArgumentsForBackup);
-    		
+
+    		openStatusWindow();
+
+    		Thread thread = new Thread(new Backup(commandLineArgumentsForBackup));
+            thread.start();
+                        
     		break;
+    		
     	case RESTORE:
 
     		// create list of parameters for constructor CommandLineArguments
@@ -155,6 +171,8 @@ public class Main extends Application {
 			String searchText = null;
     		
     		CommandLineArguments commandLineArguments = new CommandLineArguments(startSearchDate, endSearchDate, source, destination, restoreto, fullBackup, backup, search, logfilefolder, excludedFiles, excludedPaths, restoreDate, folderToRestore, folderNameMapping, overwrite, writesearchto, searchTextPattern, addpathlengthforallfolders, addpathlengthforfolderswithnewormodifiedcontent, searchText, processText);
+    		
+    		openStatusWindow();
 			
     		Restore.restore(commandLineArguments);
     		
@@ -441,6 +459,26 @@ public class Main extends Application {
     	
     }
     
+    private void openStatusWindow() {
+        Stage statusStage = new Stage();
+        VBox statusRoot = new VBox(10);
+        
+        loggingTextArea.setEditable(false); // Make the text area read-only
+        loggingTextArea.setMinHeight(Region.USE_PREF_SIZE); // Set text area to expand as needed
+        VBox.setVgrow(loggingTextArea, Priority.ALWAYS); 
+        statusRoot.getChildren().add(loggingTextArea);
+        
+        // Set VBox to fill the entire scene and align content to top center
+        statusRoot.setFillWidth(true);
+        statusRoot.setAlignment(Pos.TOP_CENTER);
+
+        Scene statusScene = new Scene(statusRoot, sceneWidth, sceneHeight);
+        statusStage.setScene(statusScene);
+        statusStage.setTitle("Status");
+        statusStage.show();
+
+    }
+
 
 
     public static void main(String[] args) {

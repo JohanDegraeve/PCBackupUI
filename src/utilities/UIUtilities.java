@@ -236,7 +236,7 @@ public class UIUtilities {
 	 * @param directory
 	 * @return If tests succeed, then returns directory as File, otherwise null
 	 */
-	private static File getDirectory(String directory) {
+	public static File getDirectory(String directory) {
 		
 		if (directory == null) {return null;}
 		if (directory.length() == 0) {return null;}

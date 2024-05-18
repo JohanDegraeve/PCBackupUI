@@ -51,7 +51,7 @@ public class Section1 {
 		HBox labelHBox = new HBox();
 		Label mainLabel = new Label("Specifieer de mappen. ");
 		mainLabel.setStyle("-fx-font-weight: bold;");
-		Label additionalInfoLabel = new Label("(Beweeg met de muis over de teksten om meer uitleg te krijgen)");
+		Label additionalInfoLabel = new Label("(Beweeg met de cursor over de teksten om meer uitleg te krijgen)");
 		labelHBox.getChildren().addAll(mainLabel, additionalInfoLabel);
 		section.getChildren().add(labelHBox);
 				

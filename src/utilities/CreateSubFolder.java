@@ -21,9 +21,11 @@ package utilities;
 import java.io.File;
 import java.nio.file.Path;
 
+import model.CommandLineArguments;
+
 public class CreateSubFolder {
 
-	public static Path createSubFolder(String parentFolderPath, String subfolderName) {
+	public static Path createSubFolder(String parentFolderPath, String subfolderName, CommandLineArguments commandLineArguments) {
 
 	    File parentFolder = new File(parentFolderPath);
 	    
@@ -37,7 +39,7 @@ public class CreateSubFolder {
 	    File subfolder = new File(parentFolder, subfolderName);
 
 	    if (!subfolder.mkdir()) {
-	    	Logger.log("Subfolder already exists or creation failed: " + subfolder.getAbsolutePath());
+	    	commandLineArguments.processText.process("Subfolder already exists or creation failed: " + subfolder.getAbsolutePath());
 	    }
 	    
 	    return subfolder.toPath();

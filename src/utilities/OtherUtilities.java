@@ -216,7 +216,7 @@ public class OtherUtilities {
 					} catch (IOException e) {
 						processText.process("Exception occurred while renaming from " + sourcePath.toString() + " to " + targetPath.toString());
 						processText.process(e.toString());
-						System.exit(1);
+						Thread.currentThread().interrupt();
 
 					}
 				}
@@ -266,7 +266,7 @@ public class OtherUtilities {
 		} catch (ParseException e) {
 			processText.process(e.toString());
 			processText.process("");
-			System.exit(1);
+			Thread.currentThread().interrupt();
 		}
 		
 		return new Date(0);
@@ -395,7 +395,7 @@ public class OtherUtilities {
         } catch (Exception e) {
             e.printStackTrace();
             processText.process("Failed to read file "  + listPath);
-           System.exit(1);
+           Thread.currentThread().interrupt();
         }
         
         return returnValue;

@@ -146,7 +146,7 @@ public class FileAndFolderUtilities {
             	commandLineArguments.processText.process("In compareAndUpdate(AFileOrAFolder source, AFileOrAFolder dest), not both File and not both Folder");
             	commandLineArguments.processText.process("   this is a difficult situation. It looks like an item that was previously a file is now a folder with the same name, or vice versa.");
             	commandLineArguments.processText.process("   Backup interrupted");
-            	System.exit(1);
+            	Thread.currentThread().interrupt();
             }
         }
 
@@ -171,7 +171,7 @@ public class FileAndFolderUtilities {
             	e.printStackTrace();
             	processText.process("Exception while converting file " + folderlistPath.toString() + " to json");
                 processText.process(e.toString());
-                System.exit(1);
+                Thread.currentThread().interrupt();
             }
             
             return listOfFilesAndFoldersInPreviousBackupFolder;
@@ -270,7 +270,7 @@ public class FileAndFolderUtilities {
 					e.printStackTrace();
 					commandLineArguments.processText.process("Exception in compareAndUpdateFiles(AFile,AFile) while creating the directory " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders).toString());
 					commandLineArguments.processText.process(e.toString());
-		            System.exit(1);
+		            Thread.currentThread().interrupt();
 				}
                 
                 try {
@@ -285,7 +285,7 @@ public class FileAndFolderUtilities {
 					e.printStackTrace();
 					commandLineArguments.processText.process("Exception in compareAndUpdateFiles(AFile,AFile) while copying a file from " + PathUtilities.concatenatePaths(sourceFolderPath, subfolders).toString() + " to " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders));
 					commandLineArguments.processText.process(e.toString());
-		            System.exit(1);
+		            Thread.currentThread().interrupt();
 				}
                 
             } 
@@ -334,7 +334,7 @@ public class FileAndFolderUtilities {
         					e.printStackTrace();
         					commandLineArguments.processText.process("Exception in compareAndUpdateFiles(AFileOrAFolder, AFileOrAFolder.. while creating the directory " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders).toString());
         					commandLineArguments.processText.process(e.toString());
-        		            System.exit(1);
+        		            Thread.currentThread().interrupt();
         				}
                         
                         try {
@@ -350,7 +350,7 @@ public class FileAndFolderUtilities {
         					e.printStackTrace();
         					commandLineArguments.processText.process("Exception in compareAndUpdateFiles(AFileOrAFolder, AFileOrAFolder.. while copying a file from " + PathUtilities.concatenatePaths(sourceFolderPath, subfolders).toString() + " to " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders));
         					commandLineArguments.processText.process(e.toString());
-        		            System.exit(1);
+        		            Thread.currentThread().interrupt();
         				}
 
 
@@ -365,7 +365,7 @@ public class FileAndFolderUtilities {
 							e.printStackTrace();
 							commandLineArguments.processText.process("Exception in compareAndUpdateFiles(AFileOrAFolder, AFileOrAFolder.. while copying a folder from " + PathUtilities.concatenatePaths(sourceFolderPath, subfolders).toString() + " to " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders));
 							commandLineArguments.processText.process(e.toString());
-        		            System.exit(1);
+        		            Thread.currentThread().interrupt();
 						}
                 		
                 	}

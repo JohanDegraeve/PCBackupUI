@@ -1,12 +1,6 @@
 # personal file 
 
 
--ncompileren
-mvn compile
-- jar maken
-mvn package
-
-
 - zo start de app in ieder geval al op, maar  hier zijn de javafx libraries nog niet in de jar zelf, beetje omslachtig maar het gaat
 vanuit de target directory, dus waar pcbackupui-1.0.0.jar zich bevindt
 java --module-path /Users/johandegraeve/Downloads/javafx-sdk-22/lib --add-modules javafx.controls,javafx.fxml -jar pcbackupui-1.0.0.jar 

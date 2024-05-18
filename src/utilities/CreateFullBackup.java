@@ -49,12 +49,12 @@ public class CreateFullBackup {
 		
 		// check if destination path already exists, otherwise stop, coding error
 		if (!(Files.exists(destinationFolderPath))) {
-			Logger.log("in createFullBackup, folder " + destinationFolderPath.toString() + " does not exist, looks like a coding error");
-			System.exit(1);
+			commandLineArguments.processText.process("in createFullBackup, folder " + destinationFolderPath.toString() + " does not exist, looks like a coding error");
+			Thread.currentThread().interrupt();
 		}
 		
 		// copy files that are in aFileOrAFolderSourceFolder
-		copyFilesAndFoldersFromSourceToDest(listOfFilesAndFoldersInSourceFolder.getFileOrFolderList(), sourceFolderPath, destinationFolderPath, true);
+		copyFilesAndFoldersFromSourceToDest(listOfFilesAndFoldersInSourceFolder.getFileOrFolderList(), sourceFolderPath, destinationFolderPath, true, commandLineArguments);
 		
 		// do the foldername mapping
 		OtherUtilities.doFolderNameMapping(listOfFilesAndFoldersInSourceFolder, commandLineArguments, destinationFolderPath, commandLineArguments.processText);
@@ -65,8 +65,8 @@ public class CreateFullBackup {
     		WriteToFile.writeToFile((new ObjectMapper()).writeValueAsString(listOfFilesAndFoldersInSourceFolder), destinationFolderPath.toString() + File.separator + "folderlist.json");
         	
         } catch (IOException e) {
-        	Logger.log("Failed to write json file folderlist.json to  " + destinationFolderPath.toString());
-			System.exit(1);
+        	commandLineArguments.processText.process("Failed to write json file folderlist.json to  " + destinationFolderPath.toString());
+			Thread.currentThread().interrupt();
         }
 
 	}
@@ -76,7 +76,7 @@ public class CreateFullBackup {
         return Collections.max(backupFolders);
     }
 
-	private static void copyFilesAndFoldersFromSourceToDest(List<AFileOrAFolder> listOfFilesAndFoldersInSourceFolder, Path sourceFolderPath, Path destinationFolderPath, boolean createEmptyFolders) {
+	private static void copyFilesAndFoldersFromSourceToDest(List<AFileOrAFolder> listOfFilesAndFoldersInSourceFolder, Path sourceFolderPath, Path destinationFolderPath, boolean createEmptyFolders, CommandLineArguments commandLineArguments) {
 
 		for (AFileOrAFolder aFileOrAFolder: listOfFilesAndFoldersInSourceFolder) {
 			
@@ -99,9 +99,9 @@ public class CreateFullBackup {
 					
 					e.printStackTrace();
 					
-					Logger.log("Exception occurred while copying from " + sourcePathToCopyFrom.toString() + " to " + destinationPathToCopyTo.toString());
+					commandLineArguments.processText.process("Exception occurred while copying from " + sourcePathToCopyFrom.toString() + " to " + destinationPathToCopyTo.toString());
 					
-					System.exit(1);
+					Thread.currentThread().interrupt();
 					
 				}
 				
@@ -109,18 +109,18 @@ public class CreateFullBackup {
 				
 				if (createEmptyFolders) {
 					// check if destinationPathToCopyTo exists, if not created it
-					createSubFolderIfNotExisting(destinationPathToCopyTo);
+					createSubFolderIfNotExisting(destinationPathToCopyTo, commandLineArguments);
 				}
 				
 				AFolder afolder = (AFolder)aFileOrAFolder;
 				
-				copyFilesAndFoldersFromSourceToDest(afolder.getFileOrFolderList(), sourceFolderPath.resolve(afolder.getName()), destinationFolderPath.resolve(afolder.getName()), createEmptyFolders);
+				copyFilesAndFoldersFromSourceToDest(afolder.getFileOrFolderList(), sourceFolderPath.resolve(afolder.getName()), destinationFolderPath.resolve(afolder.getName()), createEmptyFolders, commandLineArguments);
 				
 			} else {
 				
 				// that's a coding error
-				Logger.log("error in copyFilesAndFoldersFromSourceToDest, a AFileOrAFolder that is not AFile and not AFolder ...");
-				System.exit(1);
+				commandLineArguments.processText.process("error in copyFilesAndFoldersFromSourceToDest, a AFileOrAFolder that is not AFile and not AFolder ...");
+				Thread.currentThread().interrupt();
 			}
 
 			
@@ -128,7 +128,7 @@ public class CreateFullBackup {
 		
 	}
 	
-	private static void createSubFolderIfNotExisting(Path path) {
+	private static void createSubFolderIfNotExisting(Path path, CommandLineArguments commandLineArguments) {
 		
 		// check if destinationPathToCopyTo exists
 		if (!(Files.exists(path, LinkOption.NOFOLLOW_LINKS))) {
@@ -138,7 +138,7 @@ public class CreateFullBackup {
 
 		    if (subfolder.mkdirs()) {
 		    } else {
-		    	Logger.log("Subfolder already exists or creation failed: " + subfolder.getAbsolutePath());
+		    	commandLineArguments.processText.process("Subfolder already exists or creation failed: " + subfolder.getAbsolutePath());
 		    }
 			
 		}

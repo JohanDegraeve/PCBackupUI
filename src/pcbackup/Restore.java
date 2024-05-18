@@ -55,7 +55,7 @@ public class Restore {
 			
 			if (latestBackupFolderName == null) {
                 commandLineArguments.processText.process("No backups are found that were created before or at " + (new SimpleDateFormat(Constants.OUTPUTDATEFORMAT_STRING)).format(commandLineArguments.restoreDate));
-                System.exit(1);
+                Thread.currentThread().interrupt();
 			}
 			
 			commandLineArguments.processText.process("Found backup " + latestBackupFolderName + " created before or at " + (new SimpleDateFormat(Constants.OUTPUTDATEFORMAT_STRING).format(commandLineArguments.restoreDate)));
@@ -75,18 +75,21 @@ public class Restore {
 
 		    	commandLineArguments.processText.process("Restoring folders and files ...");
 				restore(folderToStart, destinationFolderPath, sourceFolderPath, Paths.get(commandLineArguments.subfolderToRestore), olderBackups, commandLineArguments, 1);
-				
 			} else {
 				commandLineArguments.processText.process("First element in folderlist.json is not a folder, looks like a coding error");
-	            System.exit(1);
 			}
 			
-			Logger.log("Restore finished, see " + destinationFolderPath.toString());
-			
+			commandLineArguments.processText.process("Restore finished, see " + destinationFolderPath.toString());
+
+			commandLineArguments.processText.process("");
+            commandLineArguments.processText.process("========================================================");
+            commandLineArguments.processText.process("");
+            Thread.currentThread().interrupt();
+
 		} catch (IOException e) {
 			commandLineArguments.processText.process("Exception in restore");
             commandLineArguments.processText.process(e.toString());
-            System.exit(1);
+            Thread.currentThread().interrupt();
 		}
         
 	}
@@ -139,7 +142,7 @@ public class Restore {
 					e.printStackTrace();
 					commandLineArguments.processText.process("Exception in restore, while creating the directory " + folderToCreate.getFileName().toString());
 		            commandLineArguments.processText.process(e.toString());
-		            System.exit(1);
+		            Thread.currentThread().interrupt();
 				}
     			
     		} else {
@@ -149,11 +152,17 @@ public class Restore {
     			
     			try {
     				
+    				if (!Files.isDirectory(destination)) {// it should not be a directory but let's check anyway
+    					if (!Files.exists(destination.getParent())) { // check if parent directory exists, if not created it
+    						Files.createDirectories(destination.getParent());
+    					}
+    				}
+    				
 					copyFile(sourceToCopy, destination, commandLineArguments);
 					
 				} catch (NoSuchFileException e) {
-					commandLineArguments.processText.process("   could not find the file " + sourceToCopy.toString());
-					commandLineArguments.processText.process("      Will try to find it in older bacups");
+					commandLineArguments.processText.process("   NoSuchFileException occurred while trying to copy " + sourceToCopy.toString() + " to " + destination.toString()) ;
+					commandLineArguments.processText.process("      Will try to find the source in older backups, but there might be another error also");
 					String olderBackup = tryToFindInOlderBackups((AFile)sourceItem, subfolder, olderBackups, sourceBackupRootFolder);
 					if (olderBackup == null) {
 						commandLineArguments.processText.process("      Did not find the missing file in previous backups");
@@ -167,9 +176,9 @@ public class Restore {
 							commandLineArguments.processText.process("The file " + sourceToCopy.toString() + " already exists in the destination folder");
 							commandLineArguments.processText.process("If you want to restore with overwrite, add the optional argument --overwrite=true");
 							commandLineArguments.processText.process("Restore interrupted");
-				            System.exit(1);
+				            Thread.currentThread().interrupt();
 						} catch (IOException e1) {
-							commandLineArguments.processText.process("      but copy failed. Exception occurred : ");
+							commandLineArguments.processText.process("      copy failed again. Exception occurred : ");
 							commandLineArguments.processText.process(e1.toString());
 						}
 					}
@@ -177,11 +186,11 @@ public class Restore {
 					commandLineArguments.processText.process("The file " + sourceToCopy.toString() + " already exists in the destination folder");
 					commandLineArguments.processText.process("If you want to restore with overwrite, add the optional argument --overwrite=true");
 					commandLineArguments.processText.process("Restore interrupted");
-		            System.exit(1);
+		            Thread.currentThread().interrupt();
 				} catch (IOException e) {
 					commandLineArguments.processText.process("Exception in restore, while copying the file " + sourceToCopy.toString() + " to " + destination.toString());
 		            commandLineArguments.processText.process(e.toString());
-		            System.exit(1);
+		            Thread.currentThread().interrupt();
 				}
     		}
     		
@@ -252,13 +261,13 @@ public class Restore {
         	
         	if (folderFound == null) {
         		processText.process("You specified " + subfolder + " as subfoldertorestore, but it does not exist in backup.");
-                System.exit(1);
+                Thread.currentThread().interrupt();
         	}
         	
         	// folderFound must be a directory, if not, it's a file, and user made some mistake
         	if (folderFound instanceof AFile) {
         		processText.process("You specified " + subfolder + " as subfoldertorestore, but this seems to be a file, not a folder");
-                System.exit(1);
+                Thread.currentThread().interrupt();
         	}
 
         	deeperAFileOrAFolder = (AFolder)folderFound;

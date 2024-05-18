@@ -41,9 +41,11 @@ import utilities.ListBackupsInFolder;
 import utilities.OtherUtilities;
 import utilities.WriteToFile;
 
-public class Backup {
+public class Backup implements Runnable {
 
-	public static void backup(CommandLineArguments commandLineArguments) {
+	private static CommandLineArguments commandLineArguments;
+	
+	private static void backup(CommandLineArguments commandLineArguments) {
 		
 		/**
 		 * where to find the source files
@@ -66,11 +68,11 @@ public class Backup {
 			e.printStackTrace();
 			commandLineArguments.processText.process("Exception in main, while getting list of backups");
 			commandLineArguments.processText.process(e.toString());
-            System.exit(1);
+            Thread.currentThread().interrupt();
 		}
     	if (mostRecentBackupPath == null && !commandLineArguments.fullBackup) {
     		commandLineArguments.processText.process("You're asking an incremental backup but there's no previous backup. Start with a full backup or check the destination folder."); 
-    		System.exit(1);
+    		Thread.currentThread().interrupt();
     	} else if (mostRecentBackupPath != null && !commandLineArguments.fullBackup) {
     		commandLineArguments.processText.process("Latest backup = " + mostRecentBackupPath.toString() + ". Only the new or modified files and folders since this latest backup will be copied.");
     	}
@@ -94,7 +96,7 @@ public class Backup {
         /**
          * where to write the backup, this includes the backupfoldername, like '2023-12-06 18;24;41 (Full)' or '2023-12-28 17;07;13 (Incremental)'
          */
-        Path destinationFolderPathSubFolder = CreateSubFolder.createSubFolder(commandLineArguments.destination, backupfoldername);
+        Path destinationFolderPathSubFolder = CreateSubFolder.createSubFolder(commandLineArguments.destination, backupfoldername, commandLineArguments);
         
         commandLineArguments.processText.process("New backup folder created: " + backupfoldername);
         commandLineArguments.processText.process("Reading all files and folders in the source and building the folder structure");// in other words create an instance of AFolder
@@ -152,7 +154,7 @@ public class Backup {
             e.printStackTrace();
             commandLineArguments.processText.process("Exception in main, while creating list of folders");
             commandLineArguments. processText.process(e.toString());
-            System.exit(1);
+            Thread.currentThread().interrupt();
         }
         
         //if option is F, then create full backup
@@ -160,6 +162,11 @@ public class Backup {
         	commandLineArguments.processText.process("Starting full backup");
             CreateFullBackup.createFullBackup(listOfFilesAndFoldersInSourceFolder, sourceFolderPath, destinationFolderPathSubFolder, commandLineArguments);
             commandLineArguments.processText.process("Backup finished");
+            commandLineArguments.processText.process("");
+            commandLineArguments.processText.process("========================================================");
+            commandLineArguments.processText.process("");
+            Thread.currentThread().interrupt();
+           
         } else {
         	
         	commandLineArguments.processText.process("Parsing the json file from previous backup " + mostRecentBackupPath.resolve("folderlist.json").toString()); 
@@ -171,8 +178,8 @@ public class Backup {
             
             // we know for sure that both listOfFilesAndFoldersInSourceFolder and listOfFilesAndFoldersInPreviousBackupFolder are instance of AFolder
             // let's check anyway
-            if (!(listOfFilesAndFoldersInSourceFolder instanceof AFolder)) {commandLineArguments.processText.process("listOfFilesAndFoldersInSourceFolder is not an instance of AFolder");System.exit(1);} 
-            if (!(listOfFilesAndFoldersInPreviousBackupFolder instanceof AFolder)) {commandLineArguments.processText.process("listOfFilesAndFoldersInPreviousBackupFolder is not an instance of AFolder");System.exit(1);}
+            if (!(listOfFilesAndFoldersInSourceFolder instanceof AFolder)) {commandLineArguments.processText.process("listOfFilesAndFoldersInSourceFolder is not an instance of AFolder");Thread.currentThread().interrupt();} 
+            if (!(listOfFilesAndFoldersInPreviousBackupFolder instanceof AFolder)) {commandLineArguments.processText.process("listOfFilesAndFoldersInPreviousBackupFolder is not an instance of AFolder");Thread.currentThread().interrupt();}
             // set the name of the first folder to "", because this may be the original main folder name which we don't need
             listOfFilesAndFoldersInSourceFolder.setName("");
             listOfFilesAndFoldersInPreviousBackupFolder.setName("");
@@ -191,7 +198,7 @@ public class Backup {
             	
             } catch (IOException e) {
             	commandLineArguments.processText.process("Failed to write json file folderlist.json to  " + destinationFolderPath.toString());
-    			System.exit(1);
+    			Thread.currentThread().interrupt();
             }
     		
     		// store folderlist-withfullpaths.json. This json file has the same contents, but the 'name' is the full path of a file or folder. Makes it easier to find it in the backup folder.
@@ -206,15 +213,28 @@ public class Backup {
             	
             } catch (IOException e) {
             	commandLineArguments.processText.process("Failed to write json file folderlist-withfullpaths.json to  " + destinationFolderPath.toString());
-    			System.exit(1);
+    			Thread.currentThread().interrupt();
             }
     		
     		commandLineArguments.processText.process("Backup finished");
-
-
+            commandLineArguments.processText.process("");
+            commandLineArguments.processText.process("========================================================");
+            commandLineArguments.processText.process("");
+            
+            Thread.currentThread().interrupt();
+            
         }
         
 
+	}
+
+	public Backup(CommandLineArguments commandLineArguments) {
+		Backup.commandLineArguments = commandLineArguments;
+	}
+	
+	@Override
+	public void run() {
+		Backup.backup(commandLineArguments);
 	}
 	
 }
