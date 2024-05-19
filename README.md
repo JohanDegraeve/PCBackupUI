@@ -55,9 +55,11 @@ Export as jar runnable to PCBackupUI.jar
 
 # Run in Eclipse
 
-Strange but following needs to be in VM arguments of the run configuration ...
+Strange but I first need to build the jar, store in somewhere (in my case it's in the Downloads folder) and add following in VM arguments of the run configuration ...
 
 --module-path /Users/johandegraeve/Downloads/javafx-sdk-22/lib --add-modules javafx.controls,javafx.fxml -jar /Users/johandegraeve/Downloads/PCBackupUI.jar
+
+Then I can run and debug.
 
 # Run on Windows or Mac OSX
 
