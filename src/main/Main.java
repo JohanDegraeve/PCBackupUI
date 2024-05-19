@@ -31,7 +31,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -39,7 +38,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
-
 import model.CommandLineArguments;
 import model.UIParameters;
 import pcbackup.Backup;
@@ -80,7 +78,8 @@ public class Main extends Application {
      */
     private FolderChangedHolder destFolderChangedHolder = new FolderChangedHolder();
     
-    @Override
+    @SuppressWarnings("exports")
+	@Override
     public void start(Stage primaryStage) {
     	
     	Main.primaryStage = primaryStage;
@@ -346,6 +345,10 @@ public class Main extends Application {
     	verifySubmitButtonStatus();
     }
     
+    /**
+     * backupfolder is used for restore, this function is called when that is changed
+     * @param backup
+     */
     private void handleSelectedBackupFolder(String backup) {
         uiparam.setBackupFolderName(backup);
         verifySubmitButtonStatus();

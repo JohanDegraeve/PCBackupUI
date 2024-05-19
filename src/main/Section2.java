@@ -16,6 +16,7 @@ public class Section2 {
 	public static String restoreOptionsString = "Mappen herstellen";
 	public static String searchOptionstrString = "Mappen en/of bestanden zoeken";
 
+	@SuppressWarnings("exports")
 	public static VBox createSection2(Stage primaryStage, ActionHandler handleAction) {
 		
 		VBox vBox = new VBox();
@@ -24,7 +25,7 @@ public class Section2 {
 		HBox labelHBox = new HBox();
 		Label mainLabel = new Label("Wat wil je doen? ");
 		mainLabel.setStyle("-fx-font-weight: bold;");
-		Label additionalInfoLabel = new Label("(Beweeg met de cursor over de teksten om meer uitleg te krijgen.)");
+		Label additionalInfoLabel = new Label("(Beweeg met de cursor over de teksten om meer uitleg te krijgen)");
 		labelHBox.getChildren().addAll(mainLabel, additionalInfoLabel);
 		
 		// checkbox texts

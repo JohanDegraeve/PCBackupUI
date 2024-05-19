@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Date;
@@ -411,6 +412,61 @@ public class FileAndFolderUtilities {
             	}
             	
             }
+        }
+        
+        /**
+         * 
+         * @param backupFolder example '2024-01-12 16;46;55 (Full)'
+         * @param folder example XDrive/Werking/subfolder
+         * @param commandLineArguments
+         * @return true if folderlist.json in backup folder contains XDrive/Werking/subfolder
+         */
+        public static boolean folderExistsInBackup(String backupFolder, String folder, String backupDestination, ProcessText processText) {
+        	
+        	Path pathWithJsonFile = Paths.get(backupDestination).resolve(backupFolder).resolve("folderlist.json");
+			
+        	AFileOrAFolder listOfFilesAndFoldersInBackupFolder = FileAndFolderUtilities.fromFolderlistDotJsonToAFileOrAFolder(pathWithJsonFile, processText);
+			
+        	if (!(listOfFilesAndFoldersInBackupFolder instanceof AFolder)) {
+        		// this would mean the backupFolder is not a folder which looks like a coding error, return false in that case
+        		return false;
+        	}
+        	
+        	// now check if listOfFilesAndFoldersInBackupFolder contains XDrive/Werking/subfolder
+        	
+        	// first split folder by seperator
+        	Path[] subfolders = PathUtilities.splitPath(Paths.get(folder));
+        	
+        	int subfoldersCounter = 0;
+        	
+        	boolean foundFolderInBackupFolder = true;
+        	
+        	while (subfoldersCounter < subfolders.length) {
+        		// if subfolder is an empty string, then actually no subfolder is specified
+        		// in this case, the loop exist immediately
+        		if (subfolders[subfoldersCounter].toString().length() == 0) {
+        			break;
+        		}
+        		
+        		AFileOrAFolder folderFound = FileAndFolderUtilities.findMatchingItem(new AFolder(subfolders[subfoldersCounter].toString(), ""), ((AFolder)listOfFilesAndFoldersInBackupFolder).getFileOrFolderList());
+        		
+        		if (folderFound == null) {
+        			// element not found
+        			return false;
+        		}
+        		
+        		if (!(folderFound instanceof AFolder)) {
+            		// this would mean we found a matching item, but it's not a folder, which is also an abnormal case
+            		return false;
+            	}
+        		
+        		listOfFilesAndFoldersInBackupFolder = folderFound;
+        		subfoldersCounter++;
+            	
+        	}
+        	
+        	return foundFolderInBackupFolder;
+        	
         }
 
 }

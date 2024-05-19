@@ -25,6 +25,7 @@ public class SectionBackupParameters {
 	private static HBox folderNameMappingListHBoxWithLabelHBox;
 	private static Label folderNameMappingListWarningLabel;
 
+	@SuppressWarnings("exports")
 	public static VBox createSectionBackupParameters(Stage primaryStage, TextFieldChanged excludedFileListChanged, TextFieldChanged excludedPathListChanged, TextFieldChanged folderNameMappingListChanged, String initialTextExcludedFile, String initialTextExclucedPath, String initialTextFolderNameMapping) {
 
 		// texts for excluded file list

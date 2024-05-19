@@ -31,7 +31,6 @@ import model.CommandLineArguments;
 import model.Constants;
 import utilities.FileAndFolderUtilities;
 import utilities.ListBackupsInFolder;
-import utilities.Logger;
 import utilities.OtherUtilities;
 import utilities.PathUtilities;
 

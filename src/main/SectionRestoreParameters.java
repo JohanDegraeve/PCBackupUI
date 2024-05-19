@@ -37,6 +37,7 @@ import model.UIParameters;
 import utilities.FileAndFolderUtilities;
 import utilities.ListBackupsInFolder;
 import utilities.OtherUtilities;
+import utilities.PathUtilities;
 import utilities.UIUtilities;
 
 public class SectionRestoreParameters {
@@ -113,6 +114,7 @@ public class SectionRestoreParameters {
      * @param BackupFolderSelectedHandler  
      * @return
      */
+	@SuppressWarnings("exports")
 	public static VBox createSectionRestoreParameters(Stage primaryStage, ProcessText processText, TextFieldChanged restoreToFolderChanged, String initialTextRestoreToFolder, FolderChangedHolder destFolderChangedHolder, BackupFolderSelectedHandler backupFolderSelectedHandler) {
 		
         // texts for excluced path list
@@ -351,21 +353,63 @@ public class SectionRestoreParameters {
 	 * It will open the file folderlist.json in that folder, parse it and then call attachPopUpToSelectFolderToRestoreButton(AFolder)<br>
 	 * <br>
 	 * Only used when backupFolder is changed by the user
-	 * @param selecedBackupFolder
+	 * @param selectedBackupFolder
 	 */
-	private static void attachPopUpToSelectFolderToRestoreButton(String selecedBackupFolder) {
+	private static void attachPopUpToSelectFolderToRestoreButton(String selectedBackupFolder) {
 		
-		if (selecedBackupFolder == null || selecedBackupFolder.length() == 0) {
-			selectFolderToRestoreButton.setText(defaultFolderToRestoreTextString);
+		if (selectedBackupFolder == null || selectedBackupFolder.length() == 0) {
+			selectFolderToRestoreLabel.setText(defaultFolderToRestoreTextString);
 			selectFolderToRestoreButton.setDisable(true);
 			return;
 		}
 		
-		Path backupFolderPath = Paths.get(UIParameters.getInstance().getDestTextFieldTextString()).resolve(selecedBackupFolder);
+		Path jsonFilePath = Paths.get(UIParameters.getInstance().getDestTextFieldTextString()).resolve(selectedBackupFolder).resolve("folderlist.json");
 		
-        AFileOrAFolder listOfFilesAndFoldersInBackupFolder = FileAndFolderUtilities.fromFolderlistDotJsonToAFileOrAFolder
-        		(backupFolderPath.resolve("folderlist.json"), processText);
-        
+		// initially uninitialized, but we'll intialize it with value either with contents of selectedBackupFolder
+		//   or contents of currentlySelectFolderToRestoreAString
+		AFileOrAFolder listOfFilesAndFoldersInBackupFolder = FileAndFolderUtilities.fromFolderlistDotJsonToAFileOrAFolder
+        		(jsonFilePath, processText);
+
+		// see if currentlySelectFolderToRestoreAString exists in the selectedBackupFolder, if yes recalculate parentFolders and set listOfFilesAndFoldersInBackupFolder to corresponding instance of AFolder
+		Boolean folderExistsInBackupBoolean = false;
+		
+		if (currentlySelectFolderToRestoreAString.length() > 0) {
+			folderExistsInBackupBoolean = FileAndFolderUtilities.folderExistsInBackup(selectedBackupFolder, currentlySelectFolderToRestoreAString, UIParameters.getInstance().getDestTextFieldTextString(), processText);
+		}
+    	if (!folderExistsInBackupBoolean) {
+    		currentlySelectFolderToRestoreAString = "";
+    		parentFolders = new ArrayList<>();
+    		UIParameters.getInstance().setFolderToRestore(currentlySelectFolderToRestoreAString);
+    		selectFolderToRestoreLabel.setText(defaultFolderToRestoreTextString);
+    	} else {
+    		
+    		// the subfolder to restore still exists, but let's recreate parentFolders
+    		parentFolders = new ArrayList<>();
+    		
+        	// split folder by seperator
+        	Path[] subfolders = PathUtilities.splitPath(Paths.get(currentlySelectFolderToRestoreAString));
+        	
+        	int subfoldersCounter = 0;
+        	
+        	while (subfoldersCounter < subfolders.length) {
+        		// if subfolder is an empty string, then actually no subfolder is specified
+        		// in this case, parentFolders can stay an empty array list
+        		if (subfolders[subfoldersCounter].toString().length() == 0) {
+        			break;
+        		}
+        		
+        		AFileOrAFolder folderFound = FileAndFolderUtilities.findMatchingItem(new AFolder(subfolders[subfoldersCounter].toString(), ""), ((AFolder)listOfFilesAndFoldersInBackupFolder).getFileOrFolderList());
+
+        		parentFolders.add((AFolder) folderFound);
+        		
+        		listOfFilesAndFoldersInBackupFolder = folderFound;
+        		subfoldersCounter++;
+            	
+        	}
+        	
+    	}
+		
+
         if(!(listOfFilesAndFoldersInBackupFolder instanceof AFolder)) {
         	processText.process("Blijkbaar is listOfFilesAndFoldersInBackupFolder geen folder");
         } else {
@@ -376,7 +420,7 @@ public class SectionRestoreParameters {
 	
 	private static void attachPopUpToSelectFolderToRestoreButton(AFolder aFolder) {
 		
-		// if aFolder is null or if there are no files and/or folders in aFolder then return - excep tif parentFolder is not null
+		// if aFolder is null or if there are no files and/or folders in aFolder then return - except if parentFolder is not null
 		//    if parentFolder, then even if there's no files, we allow the user to go a level up
 		if (aFolder == null || (aFolder.getFileOrFolderList().size() == 0 && parentFolders.size() == 0)) {
 			selectFolderToRestoreLabel.setText(defaultFolderToRestoreTextString);
@@ -385,7 +429,7 @@ public class SectionRestoreParameters {
 		}
 		
 		// create a list of all folders in aFolder
-		// we maintain a second list of ints, which are indexes of each folder in  allFoldersInAFolder
+		// we maintain a second list of ints, which are indexes of each folder in allFoldersInAFolder
 		// this list will be sorted together with allFoldersInAFolder, so that we know where to find a folder with 
 		//   a specific name in the original aFolder
 		List<String> allFoldersInAFolder = new ArrayList<>();
@@ -502,19 +546,8 @@ public class SectionRestoreParameters {
 		
 		if (amountOfFoldersInAFolder > 0) {
 			selectFolderToRestoreButton.setDisable(false);
-			/*if (!allFoldersInAFolder.contains(currentlySelectFolderToRestoreAString.getText())) {
-				selectedBackupLabel.setText(defaultBackupFolderTextString);
-				if (backupFolderSelectedHandler != null) {
-	            	backupFolderSelectedHandler.handleSelectedBackupFolder(defaultBackupFolderTextString);
-	            }
-			}*/
-			
 		} else {
 			selectFolderToRestoreButton.setDisable(true);
-			/*selectedBackupLabel.setText(defaultBackupFolderTextString);
-			if (backupFolderSelectedHandler != null) {
-            	backupFolderSelectedHandler.handleSelectedBackupFolder(defaultBackupFolderTextString);
-            }*/
 		}
 		
         String infoSelectedFolderInfoLabelsString = "Huidige geselecteerde map (klik 'Ok' als je deze map wil herstellen):\n"
