@@ -551,6 +551,7 @@ public class SectionRestoreParameters {
 		}
 		
         String infoSelectedFolderInfoLabelsString = "Huidige geselecteerde map (klik 'Ok' als je deze map wil herstellen):\n"
+        		+ "\n"
         		+ (currentlySelectFolderToRestoreAString.length() > 0? currentlySelectFolderToRestoreAString:defaultFolderToRestoreTextString); 
         Label infoSelectedFolderInfoLabel = new Label();
         infoSelectedFolderInfoLabel.setText(infoSelectedFolderInfoLabelsString);
