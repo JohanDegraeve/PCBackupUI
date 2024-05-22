@@ -27,6 +27,7 @@ import Interfaces.FolderChangedHolder;
 import Interfaces.ProcessText;
 import Interfaces.TextFieldChanged;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -88,7 +89,12 @@ public class Main extends Application {
     		
     		// w
     		utilities.Logger.log(logtext);
-    		loggingTextArea.appendText(logtext + "\n");
+    		
+	        Platform.runLater(() -> {
+	        	loggingTextArea.appendText(logtext + "\n");
+	        });
+    	 
+    		
     	};
     	
     	// Create a VBox to hold all sections
