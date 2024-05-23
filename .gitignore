@@ -28,3 +28,8 @@ commit.txt
 
 # own files
 pcbackup-parameters kopie.txt
+PCBackupUI.jar
+
+# add these folders
+!javafx-sdk-22.0.1/bin/
+!javafx-sdk-22.0.1/lib/
