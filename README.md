@@ -65,13 +65,18 @@ Then I can run and debug.
 
 install java JRE
 
-In terminal or command window, here assuming javafx sdk libraries are in /Users/johandegraeve/Downloads/javafx-sdk-22/lib and PCBackupUI.jar is in the current folder
+Additional files are needed for JavaFX, 
+- for Windows: they are here in this repository: https://github.com/JohanDegraeve/PCBackupUI/tree/main/javafx-sdk-22.0.1
+- for Mac: they are here https://gluonhq.com/products/javafx/ in the lib folder
 
-For Mac OSX, dylib files are needed
+Download and note the folder (probably Downloads folder)
 
-For windows ...
+Add the jars that were downloaded here https://gluonhq.com/products/javafx/, to the lib folder in javafx-sdk-22.0.1
 
-java --module-path /Users/johandegraeve/Downloads/javafx-sdk-22/lib --add-modules javafx.controls,javafx.fxml -jar PCBackupUI.jar
+In terminal or command window, here assuming javafx sdk libraries are in /Users/johandegraeve/Downloads/javafx-sdk-22.0.1/lib and PCBackupUI.jar is in the current folder
+
+
+java --module-path /Users/johandegraeve/Downloads/javafx-sdk-22.0.1/lib --add-modules javafx.controls,javafx.fxml -jar PCBackupUI.jar
 
 
 
