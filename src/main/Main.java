@@ -47,6 +47,15 @@ import utilities.OtherUtilities;
 
 public class Main extends Application {
 
+	private String VERSION_STRING = "1.0.0";
+	
+	/**
+	 * info written in logfile at start up
+	 */
+	private String STARTUP_INFO = "PCBackupUI versie - " + VERSION_STRING + " - Een applicatie voor het maken van back-ups.\n" +
+			"Copyright © 2024 - Johan Degraeve - Alle rechten voorbehouden.\n" +
+			"Licentie: GNU GPL 3.0. Code beschikbaar op GitHub: https://github.com/JohanDegraeve/PCBackupUI\n";
+	
 	// screen parameters
     private int sceneWidth = 800;
     private int sceneHeight = 400;
@@ -96,6 +105,8 @@ public class Main extends Application {
     	 
     		
     	};
+    	
+    	processText.process(STARTUP_INFO);
     	
     	// Create a VBox to hold all sections
         root.setPadding(new Insets(10));
