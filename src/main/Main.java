@@ -36,8 +36,11 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.CommandLineArguments;
 import model.UIParameters;
@@ -73,6 +76,7 @@ public class Main extends Application {
     // Attributes for Section with submit button
     private VBox submitButtonVBox;
     private Button submitButton;
+    private Button helpButton;
     
     private static Stage primaryStage;
 	
@@ -132,6 +136,8 @@ public class Main extends Application {
         // Create a scene with the VBox and set it on the primary stage
         Scene scene = new Scene(root, sceneWidth, sceneHeight);
         primaryStage.setScene(scene);
+        
+        primaryStage.setTitle("PCBackupUI - versie " + VERSION_STRING);
 
         // Show the primary stage
         primaryStage.show();
@@ -297,21 +303,55 @@ public class Main extends Application {
 
     private void initializeSubmitButtonVBox(boolean enabled) {
     	
-        // Add the submit button
+        // create the submit button
         submitButton = new Button("Start");
         submitButton.setDisable(!enabled);
         submitButton.setOnAction(e -> startPCBackup());
+        //submitButton.setAlignment(Pos.BOTTOM_RIGHT);
         
-        // Create an HBox to hold the button
-        HBox submitButtonHBox = new HBox(submitButton);
-        submitButtonHBox.setAlignment(Pos.BOTTOM_RIGHT); // Align the button to the right
+        // create the helpbutton
+        helpButton = new Button("Info");
+        helpButton.setOnAction(e -> showCopyrightInfo());
+
+        // Maak een Region om de ruimte tussen de knoppen te vullen
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
         
+        // Create an HBox to hold the buttons and the spacer
+        HBox submitButtonHBox = new HBox(10);
+        submitButtonHBox.setPadding(new Insets(10)); // Marge aan beide zijden
+        submitButtonHBox.getChildren().addAll(helpButton, spacer, submitButton);
+
         // Create the submitButtonVBox to hold the HBox and add padding
         submitButtonVBox = new VBox();
         submitButtonVBox.setSpacing(spacingBetweenSections);
         submitButtonVBox.getChildren().add(createDivider());
-        submitButtonVBox.getChildren().add(submitButtonHBox);
+        submitButtonVBox.getChildren().addAll(submitButtonHBox);
 
+    }
+    
+    private void showCopyrightInfo() {
+    	
+        // Nieuwe Stage voor de pop-up
+        Stage popupStage = new Stage();
+        
+        // Zorg dat de pop-up de hoofdapplicatie blokkeert
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Info");
+        
+        // Voeg inhoud toe aan de pop-up
+        StackPane popupContent = new StackPane();
+        Text copyrightText = new Text(STARTUP_INFO);
+        popupContent.getChildren().add(copyrightText);
+        
+        // Maak een Scene voor de pop-up
+        Scene popupScene = new Scene(popupContent, sceneWidth, sceneHeight);
+        
+        // Stel de Scene in op de pop-up Stage
+        popupStage.setScene(popupScene);
+        
+        // Toon de pop-up
+        popupStage.showAndWait();
     }
     
     private void sourceTextFieldChanged(String text) {
