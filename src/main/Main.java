@@ -19,6 +19,7 @@
 package main;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -32,11 +33,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
@@ -47,6 +48,7 @@ import model.UIParameters;
 import pcbackup.Backup;
 import pcbackup.Restore;
 import utilities.OtherUtilities;
+import utilities.PathUtilities;
 
 public class Main extends Application {
 
@@ -58,6 +60,34 @@ public class Main extends Application {
 	private String STARTUP_INFO = "PCBackupUI versie - " + VERSION_STRING + " - Een applicatie voor het maken van back-ups.\n" +
 			"Copyright © 2024 - Johan Degraeve - Alle rechten voorbehouden.\n" +
 			"Licentie: GNU GPL 3.0. Code beschikbaar op GitHub: https://github.com/JohanDegraeve/PCBackupUI\n";
+	
+	private String restoreWarningTextStringTemplate = "Je hebt gekozen om mappen en/of bestanden te herstellen met als doelmap \n"
+			+ "{doelmap}\n"
+			+ "Deze map is echter niet leeg.\n"
+			+ "\n"
+			+ "Als je nu een herstel doet riskeer je inconsistentie. \n"
+			+ "Mogelijke scenarios waarbij je inconsistentie creëert:\n"
+			+ "\n"
+			+ "- Je hebt tussen het herstelpunt (= datum en tijd van de gekozen backup) en nu een submap (= map binnen de doelmap) een andere naam gegeven.\n"
+			+ "Na het herstel zul je de twee submappen vinden in de doelmap (naast mogelijks nog andere submappen), één keer met de oude naam, één keer met de nieuwe naam. \n"
+			+ "De map met de oude naam bevat de bestanden zoals ze waren op het herstelpunt, de map met de nieuwe naam bevat de huidige versie.\n"
+			+ "\n"
+			+ "- Je hebt tussen het herstelpunt en nu een bestand een andere naam gegeven.\n"
+			+ "Na het herstel zul je de twee bestanden vinden, één keer met de oude naam, één keer met de nieuwe naam. \n"
+			+ "Het bestand met de oude naam is het bestand op het moment van het  herstelpunt, het bestand met de nieuwe naam is de huidige versie.\n"
+			+ "\n"
+			+ "- Mogelijks heb je een bestand of een submap verplaatst naar een submap binnen de doelmap.\n"
+			+ "Na het herstel zul je weer de oude map en de huidige map terugvinden, de eerste op de originele plaats, de tweede op de huidige plaats.\n"
+			+ "\n"
+			+ "- Hou er ook rekening mee dat bestanden overschreven worden. Dus bestanden die nu bestaan in de doelmap (of submappen van de doelmap) en die reeds een versie hadden"
+			+ "op het herstelpunt, op dezelfde locatie (dezelfde submap) zullen de huidige versie overschrijven.\n"
+			+ "\n"
+			+ "Denk dus goed na en \n"
+			+ "- verander map waar de herstelde mappen moeten komen: Klik op Annuleer, en kies dan bij 'Selecteer folder waar de herstelde mappen moeten komen' een andere map.\n"
+			+ "of\n"
+			+ "- maak de doelmap leeg vooraleer verder te gaan (de map is {doelmap}) en klik daarna op 'Start Herstel'\n"
+			+ "of\n"
+			+ "- doe gewoon verder (klik op 'Start Herstel') en hou rekening met mogelijk inconsistenties na het herstel.";
 	
 	// screen parameters
     private int sceneWidth = 800;
@@ -175,33 +205,130 @@ public class Main extends Application {
     		Date endSearchDate = null;
     		String source = uiparam.getSourceTextFieldTextString();
     		String destination = uiparam.getDestTextFieldTextString();
-			String restoreto = uiparam.getRestoreToFolderName();
-			boolean fullBackup = false;
-			boolean backup = false;
-			boolean search = false;
-			String logfilefolder = uiparam.getLogfileFolderTextFieldString();
-			String excludedFiles = uiparam.getExcludedFileListTextFieldTextString();
-			String excludedPaths = uiparam.getExcludedPathListTextFieldTextString();
-			Date restoreDate = uiparam.getBackupFolderName().equalsIgnoreCase(SectionRestoreParameters.defaultBackupFolderTextString) ? new Date():OtherUtilities.getBackupDate(uiparam.getBackupFolderName(), processText);
-			String folderToRestore = uiparam.getFolderToRestore();
-			String folderNameMapping = uiparam.getFolderNameMappingTextFieldTextString();
-			boolean overwrite = true;
-			String writesearchto = null;
-			Pattern searchTextPattern = null;
-			boolean addpathlengthforallfolders = false;
-			boolean addpathlengthforfolderswithnewormodifiedcontent = false;
-			String searchText = null;
+    		String restoreto = uiparam.getRestoreToFolderName();
+    		boolean fullBackup = false;
+    		boolean backup = false;
+    		boolean search = false;
+    		String logfilefolder = uiparam.getLogfileFolderTextFieldString();
+    		String excludedFiles = uiparam.getExcludedFileListTextFieldTextString();
+    		String excludedPaths = uiparam.getExcludedPathListTextFieldTextString();
+    		Date restoreDate = uiparam.getBackupFolderName().equalsIgnoreCase(SectionRestoreParameters.defaultBackupFolderTextString) ? new Date():OtherUtilities.getBackupDate(uiparam.getBackupFolderName(), processText);
+    		String folderToRestore = uiparam.getFolderToRestore();
+    		String folderNameMapping = uiparam.getFolderNameMappingTextFieldTextString();
+    		boolean overwrite = true;
+    		String writesearchto = null;
+    		Pattern searchTextPattern = null;
+    		boolean addpathlengthforallfolders = false;
+    		boolean addpathlengthforfolderswithnewormodifiedcontent = false;
+    		String searchText = null;
     		
-    		CommandLineArguments commandLineArguments = new CommandLineArguments(startSearchDate, endSearchDate, source, destination, restoreto, fullBackup, backup, search, logfilefolder, excludedFiles, excludedPaths, restoreDate, folderToRestore, folderNameMapping, overwrite, writesearchto, searchTextPattern, addpathlengthforallfolders, addpathlengthforfolderswithnewormodifiedcontent, searchText, processText);
-    		
-    		openStatusWindow();
+    		CommandLineArguments commandLineArgumentsForRestore = new CommandLineArguments(startSearchDate, endSearchDate, source, destination, restoreto, fullBackup, backup, search, logfilefolder, excludedFiles, excludedPaths, restoreDate, folderToRestore, folderNameMapping, overwrite, writesearchto, searchTextPattern, addpathlengthforallfolders, addpathlengthforfolderswithnewormodifiedcontent, searchText, processText);
+
+    		// variable needed in warning checks
+			File directory = new File(Paths.get(uiparam.getRestoreToFolderName()).resolve(PathUtilities.applyFolderNameMappingReversed(uiparam.getFolderToRestore(), commandLineArgumentsForRestore)).toString());
+
+    		// check if restoreto folder is a subfolder of the sourcefolder and if yes 
+    		//   then check if restoreto folder + foldertorestore exists and if it contains files
+    		// if so give warning
+			// if it's not a subfolder of source, then just check if it has files and if yes then other warning must be shown
+			if (directory.exists()) {
+				File[] files = directory.listFiles();
+				if (files.length > 0) {	
+					
+					Boolean listHasNotExcludedFiles = false;
+					for (File file: files) {
+						if (!commandLineArgumentsForRestore.excludedFiles.contains(file.getName())) {
+							listHasNotExcludedFiles = true;
+							break;
+						}
+					}
+					
+					if (listHasNotExcludedFiles) {
+						String warningTextString = restoreWarningTextStringTemplate.replaceAll("\\{doelmap\\}", directory.getPath());
+						
+		    				showRestoreWarning(warningTextString, commandLineArgumentsForRestore, processText);
+		    				return;
+					}
+					
+				}
+			}
 			
-    		Restore.restore(commandLineArguments);
+    		
+    		startRestore(commandLineArgumentsForRestore);
     		
     		break;
     	default:
     		break;
     	} 
+    }
+    
+    /**
+     * shows warning that user has selected the source (or a subfolder of the source) as a restoretofolder 
+     */
+    private void showRestoreWarning(String warningTextString, CommandLineArguments commandLineArguments, ProcessText processText) {
+    	
+        // new stage for the popup
+        Stage popupStage = new Stage();
+        
+        // the pop up should block the main application
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Let op!");
+        
+        VBox popupContent = new VBox();
+        popupContent.setSpacing(10);
+        popupContent.setStyle("-fx-padding: 10; -fx-background-color: white; -fx-alignment: center;");
+        popupContent.setMaxWidth(sceneWidth - 20);
+
+     // Maak een ScrollPane en voeg de VBox toe aan de ScrollPane
+        ScrollPane scrollPane = new ScrollPane(popupContent);
+        scrollPane.setFitToWidth(false);
+        scrollPane.setFitToHeight(true);
+        
+        // cancel button
+        Button cancelButton = new Button("Annuleer");
+        cancelButton.setOnAction(e -> { 
+        		processText.process("Restore geannulleerd door gebruiker");
+        		popupStage.close();
+        }
+        );
+        
+        // ok button
+        Button okButton = new Button("Start Herstel");
+        okButton.setOnAction(e -> { 
+        		startRestore(commandLineArguments); 
+        		popupStage.close();
+        	}
+        );
+        
+        // create hbox that will hold the two buttons
+        HBox buttonHBox = new HBox(10);
+        buttonHBox.setPadding(new Insets(10)); // margin on both sides
+        buttonHBox.getChildren().addAll(okButton, cancelButton);
+        
+        Text warningText = new Text(warningTextString);
+        warningText.setWrappingWidth(sceneWidth - 40);
+        popupContent.getChildren().addAll(warningText, buttonHBox);
+        
+        // Maak een Scene voor de pop-up
+        Scene popupScene = new Scene(scrollPane, sceneWidth, sceneHeight);
+        
+        // to make sure that by default the scrollbar is on top
+        popupStage.setOnShown(event -> Platform.runLater(() -> scrollPane.setVvalue(0)));  // Scroll naar boven
+
+        // Stel de Scene in op de pop-up Stage
+        popupStage.setScene(popupScene);
+        
+        // Toon de pop-up
+        popupStage.showAndWait();
+        
+    }
+
+    private void startRestore(CommandLineArguments commandLineArguments) {
+		
+		openStatusWindow();
+		
+		Restore.restore(commandLineArguments);
+		
     }
     
     /**
@@ -238,16 +365,27 @@ public class Main extends Application {
     		// remove any other boxes that might be there, but need to be removed because other option is chosen
     		root.getChildren().remove(sectionBackupParametersBox);
     		
-    		// add sectionBackupParametersBox if it's currently not present
+    		// add sectionRestoreParametersBox if it's currently not present
     		if (!root.getChildren().contains(sectionRestoreParametersBox)) {
+    			
+    			// get current status of submit button, is it enabled or not?
+    			
     			boolean enabled = removeSubmitButtonVBox();
+    			
+    			// if sectionRestoreParametersBox is null, then create it
     			if (sectionRestoreParametersBox == null) {
     	    		TextFieldChanged restoreToFolderChanged = (text) -> restoreToFolderTextFieldChanged(text);
-    	    		String initialTextRestoreToFolder = "";
+    	    		
+    	    		// initially set restoreToFolder equal to source folder
+    	    		String initialTextRestoreToFolder = uiparam.getSourceTextFieldTextString();
+    	    		uiparam.setRestoreToFolderName(initialTextRestoreToFolder);
+    	    		
                     sectionRestoreParametersBox = SectionRestoreParameters.createSectionRestoreParameters(primaryStage, processText, restoreToFolderChanged, initialTextRestoreToFolder, destFolderChangedHolder, (String selectedBackupFolder) -> handleSelectedBackupFolder(selectedBackupFolder));
+                    
                     // set destFolder changed so that list of backup folders can be fetched
                     destFolderChangedHolder.folderChanged.handleNewFolder(uiparam.getDestTextFieldTextString());
         		}
+    			
         		root.getChildren().add(sectionRestoreParametersBox);
         		addSubmitButtonVBox(enabled);
     		}
@@ -319,7 +457,7 @@ public class Main extends Application {
         
         // Create an HBox to hold the buttons and the spacer
         HBox submitButtonHBox = new HBox(10);
-        submitButtonHBox.setPadding(new Insets(10)); // Marge aan beide zijden
+        submitButtonHBox.setPadding(new Insets(10)); // margin on both sides
         submitButtonHBox.getChildren().addAll(helpButton, spacer, submitButton);
 
         // Create the submitButtonVBox to hold the HBox and add padding
@@ -340,9 +478,16 @@ public class Main extends Application {
         popupStage.setTitle("Info");
         
         // Voeg inhoud toe aan de pop-up
-        StackPane popupContent = new StackPane();
+        VBox popupContent = new VBox();
+        popupContent.setSpacing(10);
+        popupContent.setStyle("-fx-padding: 10; -fx-background-color: white; -fx-alignment: center;");
+
+        // 	Maak knoppen voor de pop-up
+        Button closeButton = new Button("Sluiten");
+        closeButton.setOnAction(e -> popupStage.close());
+        
         Text copyrightText = new Text(STARTUP_INFO);
-        popupContent.getChildren().add(copyrightText);
+        popupContent.getChildren().addAll(copyrightText, closeButton);
         
         // Maak een Scene voor de pop-up
         Scene popupScene = new Scene(popupContent, sceneWidth, sceneHeight);
@@ -352,6 +497,7 @@ public class Main extends Application {
         
         // Toon de pop-up
         popupStage.showAndWait();
+        
     }
     
     private void sourceTextFieldChanged(String text) {
@@ -388,16 +534,6 @@ public class Main extends Application {
     private void restoreToFolderTextFieldChanged(String text) {
     	String resultString = verifyIfFolderExists(text, (String textToProcess) -> SectionRestoreParameters.addRestoreToFolderWarning(textToProcess));
     	uiparam.setRestoreToFolderName(resultString);
-    	
-    	// here specific handling different than other folders
-    	// if folder is the same as the source folder, then give green text, info, .. to explain to take care if same folder is used as the source
-    	if (resultString != null && resultString.length() > 0 && uiparam.getSourceTextFieldTextString().length() > 0 && resultString.equalsIgnoreCase(uiparam.getSourceTextFieldTextString())) {
-    		SectionRestoreParameters.addRestoreToFolderInfo("Je hebt de oorspronkelijke map gekozen als doelmap voor herstel.\n"
-    				+ "De oorspronkelijke mappen en bestanden zullen overschreven worden.\n"
-    				+ "Mogelijks zitten er in de oorspronkelijke map, mappen en bestanden die niet in de backup zitten die je geselecteerd hebt.\n"
-    				+ "Deze zullen dus ook na het herstel niet verwijderd zijn.\n"
-    				+ "Hou hier rekening mee, en maak eventueel de oorspronkelijke map (of de submap in die map) leeg vooraleer het herstel te starten.");
-    	}
     	
     	verifySubmitButtonStatus();
     }

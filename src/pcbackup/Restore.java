@@ -78,8 +78,10 @@ public class Restore {
 				commandLineArguments.processText.process("First element in folderlist.json is not a folder, looks like a coding error");
 			}
 			
-			commandLineArguments.processText.process("Restore finished, see " + destinationFolderPath.toString());
+			commandLineArguments.processText.process("");
+			commandLineArguments.processText.process("Restore finished. Restored folders and files:");
 
+			commandLineArguments.processText.process(destinationFolderPath.resolve(commandLineArguments.subfolderToRestore).toString());
 			commandLineArguments.processText.process("");
             commandLineArguments.processText.process("========================================================");
             commandLineArguments.processText.process("");

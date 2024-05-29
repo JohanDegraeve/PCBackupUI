@@ -77,7 +77,7 @@ public class SectionRestoreParameters {
 	
 	private static VBox completeRestoreToFolderVBox;
 	private static HBox restoreToFolderHBoxWithFileText;
-	private static HBox restoreToFolderHBoxWithLabelHBox;
+	private static HBox restoreToFolderHBoxWithWarningLabelHBox;
 	private static Label restoreToFolderWarningLabel;
 	
 	private static VBox completeSelectFolderToRestoreBox;
@@ -242,8 +242,8 @@ public class SectionRestoreParameters {
 		
         // intialize label and hbox that will contain the warning label, but don't add it yet
         restoreToFolderWarningLabel = new Label();
-        restoreToFolderHBoxWithLabelHBox = new HBox();
-        restoreToFolderHBoxWithLabelHBox.getChildren().add(restoreToFolderWarningLabel);
+        restoreToFolderHBoxWithWarningLabelHBox = new HBox();
+        restoreToFolderHBoxWithWarningLabelHBox.getChildren().add(restoreToFolderWarningLabel);
 
 		//////////////////////////////////////////////
 		///////        CREATE FOLDERNAME MAPPING VBOX
@@ -271,14 +271,8 @@ public class SectionRestoreParameters {
 	
     public static void addRestoreToFolderWarning(String text) {
     	restoreToFolderWarningLabel.setStyle("-fx-text-fill: red;");
-    	UIUtilities.addWarningToVBox(completeRestoreToFolderVBox, restoreToFolderHBoxWithLabelHBox, text, restoreToFolderWarningLabel);
+    	UIUtilities.addWarningToVBox(completeRestoreToFolderVBox, restoreToFolderHBoxWithWarningLabelHBox, text, restoreToFolderWarningLabel);
     }
-    
-    public static void addRestoreToFolderInfo(String text) {
-    	restoreToFolderWarningLabel.setStyle("-fx-text-fill: green;");
-    	UIUtilities.addWarningToVBox(completeRestoreToFolderVBox, restoreToFolderHBoxWithLabelHBox, text, restoreToFolderWarningLabel);
-    }
-
 	
 	/**
 	 * function gets all backup subfolders and stores the list in allBackups

@@ -19,7 +19,10 @@
 package utilities;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+
+import model.CommandLineArguments;
 
 public class PathUtilities {
 
@@ -55,5 +58,27 @@ public class PathUtilities {
 
         return subfolders;
     }
+	
+	/**
+	 * for subfolder (eg submap1/submap2  check if the submap1 is a mapped name and apply mapping in reverse order
+	 * @param subfolder
+	 * @param commandLineArguments
+	 * @return
+	 */
+	public static Path applyFolderNameMappingReversed(String subfolder, CommandLineArguments commandLineArguments) {
+		
+    	Path[] paths = PathUtilities.splitPath(Paths.get(subfolder));
+    	Path returnValue = Paths.get("");
+    	for (int i = 0;i < paths.length; i++) {
+    		if (i == 0) {
+    			returnValue = returnValue.resolve(OtherUtilities.getKeyForValue(commandLineArguments.folderNameMapping, paths[i].getFileName().toString()));
+    		} else {
+    			returnValue = returnValue.resolve(paths[i].getFileName().toString());
+    		}
+    	}
+    	
+    	return returnValue;
+    	
+	}
 	
 }
