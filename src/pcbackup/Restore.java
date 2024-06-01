@@ -54,7 +54,7 @@ public class Restore {
 			
 			if (latestBackupFolderName == null) {
                 commandLineArguments.processText.process("No backups are found that were created before or at " + (new SimpleDateFormat(Constants.OUTPUTDATEFORMAT_STRING)).format(commandLineArguments.restoreDate));
-                Thread.currentThread().interrupt();
+                Thread.currentThread().interrupt();return;
 			}
 			
 			commandLineArguments.processText.process("Found backup " + latestBackupFolderName + " created before or at " + (new SimpleDateFormat(Constants.OUTPUTDATEFORMAT_STRING).format(commandLineArguments.restoreDate)));
@@ -85,12 +85,12 @@ public class Restore {
 			commandLineArguments.processText.process("");
             commandLineArguments.processText.process("========================================================");
             commandLineArguments.processText.process("");
-            Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt();return;
 
 		} catch (IOException e) {
 			commandLineArguments.processText.process("Exception in restore");
             commandLineArguments.processText.process(e.toString());
-            Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt();return;
 		}
         
 	}
@@ -143,7 +143,7 @@ public class Restore {
 					e.printStackTrace();
 					commandLineArguments.processText.process("Exception in restore, while creating the directory " + folderToCreate.getFileName().toString());
 		            commandLineArguments.processText.process(e.toString());
-		            Thread.currentThread().interrupt();
+		            Thread.currentThread().interrupt();return;
 				}
     			
     		} else {
@@ -177,7 +177,7 @@ public class Restore {
 							commandLineArguments.processText.process("The file " + sourceToCopy.toString() + " already exists in the destination folder");
 							commandLineArguments.processText.process("If you want to restore with overwrite, add the optional argument --overwrite=true");
 							commandLineArguments.processText.process("Restore interrupted");
-				            Thread.currentThread().interrupt();
+				            Thread.currentThread().interrupt();return;
 						} catch (IOException e1) {
 							commandLineArguments.processText.process("      copy failed again. Exception occurred : ");
 							commandLineArguments.processText.process(e1.toString());
@@ -187,11 +187,11 @@ public class Restore {
 					commandLineArguments.processText.process("The file " + sourceToCopy.toString() + " already exists in the destination folder");
 					commandLineArguments.processText.process("If you want to restore with overwrite, add the optional argument --overwrite=true");
 					commandLineArguments.processText.process("Restore interrupted");
-		            Thread.currentThread().interrupt();
+		            Thread.currentThread().interrupt();return;
 				} catch (IOException e) {
 					commandLineArguments.processText.process("Exception in restore, while copying the file " + sourceToCopy.toString() + " to " + destination.toString());
 		            commandLineArguments.processText.process(e.toString());
-		            Thread.currentThread().interrupt();
+		            Thread.currentThread().interrupt();return;
 				}
     		}
     		
@@ -262,13 +262,13 @@ public class Restore {
         	
         	if (folderFound == null) {
         		processText.process("You specified " + subfolder + " as subfoldertorestore, but it does not exist in backup.");
-                Thread.currentThread().interrupt();
+                Thread.currentThread().interrupt();return null;
         	}
         	
         	// folderFound must be a directory, if not, it's a file, and user made some mistake
         	if (folderFound instanceof AFile) {
         		processText.process("You specified " + subfolder + " as subfoldertorestore, but this seems to be a file, not a folder");
-                Thread.currentThread().interrupt();
+                Thread.currentThread().interrupt();return null;
         	}
 
         	deeperAFileOrAFolder = (AFolder)folderFound;

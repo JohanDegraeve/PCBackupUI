@@ -181,6 +181,7 @@ public class Main extends Application {
     	}
     	
     	switch (uiparam.getCurrentlySelectedAction()) {
+    	
     	case FULLBACKUP:
     	case INCREMENTALBACKUP:
     		

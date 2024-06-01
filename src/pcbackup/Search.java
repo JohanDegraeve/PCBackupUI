@@ -170,7 +170,7 @@ public class Search {
 		} catch (IOException e) {
 			e.printStackTrace();
         	commandLineArguments.processText.process("Failed to write search results to  " + pathToWriteTo.toString());
-			Thread.currentThread().interrupt();
+			Thread.currentThread().interrupt();return;
 		}
 
 	}

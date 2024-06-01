@@ -69,10 +69,12 @@ public class Backup implements Runnable {
 			commandLineArguments.processText.process("Exception in main, while getting list of backups");
 			commandLineArguments.processText.process(e.toString());
             Thread.currentThread().interrupt();
+            return;
 		}
     	if (mostRecentBackupPath == null && !commandLineArguments.fullBackup) {
     		commandLineArguments.processText.process("You're asking an incremental backup but there's no previous backup. Start with a full backup or check the destination folder."); 
     		Thread.currentThread().interrupt();
+    		return;
     	} else if (mostRecentBackupPath != null && !commandLineArguments.fullBackup) {
     		commandLineArguments.processText.process("Latest backup = " + mostRecentBackupPath.toString() + ". Only the new or modified files and folders since this latest backup will be copied.");
     	}
@@ -155,6 +157,7 @@ public class Backup implements Runnable {
             commandLineArguments.processText.process("Exception in main, while creating list of folders");
             commandLineArguments. processText.process(e.toString());
             Thread.currentThread().interrupt();
+            return;
         }
         
         //if option is F, then create full backup
@@ -166,7 +169,7 @@ public class Backup implements Runnable {
             commandLineArguments.processText.process("========================================================");
             commandLineArguments.processText.process("");
             Thread.currentThread().interrupt();
-           
+            return;
         } else {
         	
         	commandLineArguments.processText.process("Parsing the json file from previous backup " + mostRecentBackupPath.resolve("folderlist.json").toString()); 
@@ -178,8 +181,8 @@ public class Backup implements Runnable {
             
             // we know for sure that both listOfFilesAndFoldersInSourceFolder and listOfFilesAndFoldersInPreviousBackupFolder are instance of AFolder
             // let's check anyway
-            if (!(listOfFilesAndFoldersInSourceFolder instanceof AFolder)) {commandLineArguments.processText.process("listOfFilesAndFoldersInSourceFolder is not an instance of AFolder");Thread.currentThread().interrupt();} 
-            if (!(listOfFilesAndFoldersInPreviousBackupFolder instanceof AFolder)) {commandLineArguments.processText.process("listOfFilesAndFoldersInPreviousBackupFolder is not an instance of AFolder");Thread.currentThread().interrupt();}
+            if (!(listOfFilesAndFoldersInSourceFolder instanceof AFolder)) {commandLineArguments.processText.process("listOfFilesAndFoldersInSourceFolder is not an instance of AFolder");Thread.currentThread().interrupt();return;} 
+            if (!(listOfFilesAndFoldersInPreviousBackupFolder instanceof AFolder)) {commandLineArguments.processText.process("listOfFilesAndFoldersInPreviousBackupFolder is not an instance of AFolder");Thread.currentThread().interrupt();return;}
             // set the name of the first folder to "", because this may be the original main folder name which we don't need
             listOfFilesAndFoldersInSourceFolder.setName("");
             listOfFilesAndFoldersInPreviousBackupFolder.setName("");
@@ -198,7 +201,7 @@ public class Backup implements Runnable {
             	
             } catch (IOException e) {
             	commandLineArguments.processText.process("Failed to write json file folderlist.json to  " + destinationFolderPath.toString());
-    			Thread.currentThread().interrupt();
+    			Thread.currentThread().interrupt();return;
             }
     		
     		// store folderlist-withfullpaths.json. This json file has the same contents, but the 'name' is the full path of a file or folder. Makes it easier to find it in the backup folder.
@@ -213,7 +216,7 @@ public class Backup implements Runnable {
             	
             } catch (IOException e) {
             	commandLineArguments.processText.process("Failed to write json file folderlist-withfullpaths.json to  " + destinationFolderPath.toString());
-    			Thread.currentThread().interrupt();
+    			Thread.currentThread().interrupt();return;
             }
     		
     		commandLineArguments.processText.process("Backup finished");
@@ -221,7 +224,7 @@ public class Backup implements Runnable {
             commandLineArguments.processText.process("========================================================");
             commandLineArguments.processText.process("");
             
-            Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt();return;
             
         }
         

@@ -69,7 +69,8 @@ public class ListBackupsInFolder {
     }
 
     /**
-     * get all backupFolders as array of strings, sorted by date, first element is the most recent
+     * get all backupFolders as array of strings, sorted by date, first element is the most recent<br>
+     * Checks also if the folder has a file named folderlist.json, if not the file is not added
      * @param backupFolder source to search in
      * @param beforeBackupWithName search only backupfolders before beforeBackupWithName, we compare backup folder names here, they are chronologically sorted
      * @return
@@ -94,12 +95,16 @@ public class ListBackupsInFolder {
 
 
     private static List<Path> getAllBackupFolders(Path backupFolder) throws IOException {
+    	
         List<Path> backupFolders = new ArrayList<>();
+        
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(backupFolder, entry ->
-                Files.isDirectory(entry) && isValidBackupFolder(entry))) {
+                Files.isDirectory(entry) && isValidBackupFolder(entry) && Files.exists(entry.resolve("folderlist.json")))) {
+        	
             for (Path entry : directoryStream) {
                 backupFolders.add(entry);
             }
+            
         }
         
     	// sort the backupFolder paths as per name of the last folder
@@ -111,6 +116,7 @@ public class ListBackupsInFolder {
     
     private static boolean isValidBackupFolder(Path folder) {
         String folderName = folder.getFileName().toString();
-        return (folderName.contains("Full") || folderName.contains("Incremental"));
+        return folderName.contains("Full") || folderName.contains("Incremental");
     }
+	
 }

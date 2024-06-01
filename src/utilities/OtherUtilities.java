@@ -216,7 +216,7 @@ public class OtherUtilities {
 					} catch (IOException e) {
 						processText.process("Exception occurred while renaming from " + sourcePath.toString() + " to " + targetPath.toString());
 						processText.process(e.toString());
-						Thread.currentThread().interrupt();
+						Thread.currentThread().interrupt();return;
 
 					}
 				}

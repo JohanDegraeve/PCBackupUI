@@ -356,6 +356,7 @@ public class SectionRestoreParameters {
 				System.out.println("Fout bij het uitlezen van backup folders.");
 			}
 			Thread.currentThread().interrupt();
+			return;
 		}
         
 	}
