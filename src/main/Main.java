@@ -115,7 +115,10 @@ public class Main extends Application {
     // to process logging information
     private ProcessText processText;
     
+    // for status logging
     private TextArea loggingTextArea = new TextArea();
+    private Stage statusStage;
+
     
     /**
      * destFolderChangedHolder is used to trigger change of dest folder, dest folder is the folder with all backups in
@@ -657,17 +660,41 @@ public class Main extends Application {
     }
     
     private void openStatusWindow() {
-        Stage statusStage = new Stage();
+    	
+    	if (statusStage != null) {
+    		
+    		// Check if the stage is minimized (iconified)
+            if (statusStage.isIconified()) {
+                // Restore the minimized window
+            	statusStage.setIconified(false);
+            }
+            
+            // bring the status to the front
+    		statusStage.requestFocus();
+    		
+            return;
+            
+        }
+    	
+    	// statusStage is null, create it
+    	
+		statusStage = new Stage();
         VBox statusRoot = new VBox(10);
-        
+	
         loggingTextArea.setEditable(false); // Make the text area read-only
         loggingTextArea.setMinHeight(Region.USE_PREF_SIZE); // Set text area to expand as needed
         VBox.setVgrow(loggingTextArea, Priority.ALWAYS); 
+
         statusRoot.getChildren().add(loggingTextArea);
         
         // Set VBox to fill the entire scene and align content to top center
         statusRoot.setFillWidth(true);
         statusRoot.setAlignment(Pos.TOP_CENTER);
+        
+        statusStage.setOnCloseRequest(event -> {
+        	// if user closes the window, set statusStage to null
+        	statusStage = null;
+        });
 
         Scene statusScene = new Scene(statusRoot, sceneWidth, sceneHeight);
         statusStage.setScene(statusScene);
