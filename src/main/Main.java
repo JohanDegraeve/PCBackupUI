@@ -52,7 +52,7 @@ import utilities.PathUtilities;
 
 public class Main extends Application {
 
-	private String VERSION_STRING = "1.1.1";
+	private String VERSION_STRING = "1.1.2";
 	
 	/**
 	 * info written in logfile at start up
