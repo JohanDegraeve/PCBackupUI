@@ -87,7 +87,15 @@ public class Main extends Application {
 			+ "of\n"
 			+ "- maak de doelmap leeg vooraleer verder te gaan (de map is {doelmap}) en klik daarna op 'Start Herstel'\n"
 			+ "of\n"
-			+ "- doe gewoon verder (klik op 'Start Herstel') en hou rekening met mogelijk inconsistenties na het herstel.";
+			+ "- doe gewoon verder (klik op 'Start Herstel') en hou rekening met mogelijk inconsistenties na het herstel.\n\n";
+	
+	private String additionalRestoreWarningTextString = "NOG EEN BELANGRIJKE TIP:\n"
+			+ "Je gekozen doelmap is ook de map waar de oorspronkelijke bestanden zich bevinden.\n"
+			+ "Dit is Ok. Maar als die map nu ook de plaats is waar je OneDrive (of SharePoint) bestanden gesynchroniseerd worden "
+			+ "en je bent van plan de doelmap eerst leeg te maken vooraleer het herstel te starten, sluit dan eerst even je Onedrive applicatie af.\n"
+			+ " ==> Klik op het OneDrive icon onderaan rechts, klik op het Instellingen tandwiel, en kies 'Onedrive Afsluiten'. "
+			+ "Verwijder daarna pas (eventueel) de bestaande bestanden en mappen, en start daarna pas het herstel. Zodra het herstel is uitgevoerd, kun je OneDrive terug opstarten.";
+
 	
 	// screen parameters
     private int sceneWidth = 800;
@@ -250,8 +258,13 @@ public class Main extends Application {
 					if (listHasNotExcludedFiles) {
 						String warningTextString = restoreWarningTextStringTemplate.replaceAll("\\{doelmap\\}", directory.getPath());
 						
-		    				showRestoreWarning(warningTextString, commandLineArgumentsForRestore, processText);
-		    				return;
+						if (uiparam.getRestoreToFolderName().startsWith(uiparam.getSourceTextFieldTextString())) {
+							warningTextString = warningTextString + additionalRestoreWarningTextString;
+	                    }
+						
+	    				showRestoreWarning(warningTextString, commandLineArgumentsForRestore, processText);
+	    				return;
+		    				
 					}
 					
 				}
