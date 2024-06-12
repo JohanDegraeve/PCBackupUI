@@ -111,6 +111,9 @@ public class Main extends Application {
     // Attributes for Section with additional restore parameters
     private VBox sectionRestoreParametersBox;
 
+    // Attributes for Section with additional search parameters
+    private VBox sectionSearchParametersBox;
+    
     // Attributes for Section with submit button
     private VBox submitButtonVBox;
     private Button submitButton;
@@ -359,6 +362,7 @@ public class Main extends Application {
     	if (action == null) {
     		root.getChildren().remove(sectionBackupParametersBox);
     		root.getChildren().remove(sectionRestoreParametersBox);
+    		root.getChildren().remove(sectionSearchParametersBox);
     		uiparam.setCurrentlySelectedAction(null);
     		verifySubmitButtonStatus();
     		return;
@@ -369,18 +373,21 @@ public class Main extends Application {
     		
     		// remove any other boxes that might be there, but need to be removed because other option is chosen
     		root.getChildren().remove(sectionRestoreParametersBox);
+    		root.getChildren().remove(sectionSearchParametersBox);
     		
     		// add sectionBackupParametersBox if it's currently not present
     		if (!root.getChildren().contains(sectionBackupParametersBox)) {
     			boolean enabled = removeSubmitButtonVBox();
-        		root.getChildren().add(sectionBackupParametersBox);
+        		root.getChildren().add(sectionSearchParametersBox);
         		addSubmitButtonVBox(enabled);
     		}
     		
-    	} else {
+    	} if (action == Action.RESTORE) {
     		
     		// remove any other boxes that might be there, but need to be removed because other option is chosen
     		root.getChildren().remove(sectionBackupParametersBox);
+    		root.getChildren().remove(sectionRestoreParametersBox);
+    		sectionSearchParametersBox = null;
     		
     		// add sectionRestoreParametersBox if it's currently not present
     		if (!root.getChildren().contains(sectionRestoreParametersBox)) {
@@ -401,11 +408,42 @@ public class Main extends Application {
                     
                     // set destFolder changed so that list of backup folders can be fetched
                     destFolderChangedHolder.folderChanged.handleNewFolder(uiparam.getDestTextFieldTextString());
+                    
         		}
     			
         		root.getChildren().add(sectionRestoreParametersBox);
         		addSubmitButtonVBox(enabled);
+        		
     		}
+    		
+    	} else { // search
+    		
+    		// remove any other boxes that might be there, but need to be removed because other option is chosen
+    		root.getChildren().remove(sectionBackupParametersBox);
+    		root.getChildren().remove(sectionRestoreParametersBox);
+    		sectionRestoreParametersBox = null;
+    		
+    		if (!root.getChildren().contains(sectionSearchParametersBox)) {
+    			
+    			boolean enabled = removeSubmitButtonVBox();
+    			
+    			if (sectionSearchParametersBox == null) {
+    				
+    				sectionSearchParametersBox = SectionSearchParameters.createSectionSearchParameters(primaryStage, processText, destFolderChangedHolder);
+    				
+    				// set destFolder changed so that list of backup folders can be fetched
+                    destFolderChangedHolder.folderChanged.handleNewFolder(uiparam.getDestTextFieldTextString());
+                    
+    			}
+    			
+    		}
+    		
+    		/*if (sectionRestoreParametersBox == null) {
+    			
+    		}*/
+    		
+    		root.getChildren().add(sectionSearchParametersBox);
+    		//addSubmitButtonVBox(enabled);
     		
     	}
     	
@@ -666,6 +704,11 @@ public class Main extends Application {
     			break;
     		}
     		
+    	case SEARCH:
+    		
+    		
+    		
+    		break;
     	default:
     		break;
     	}
