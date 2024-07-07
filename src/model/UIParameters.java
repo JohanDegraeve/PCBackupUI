@@ -24,6 +24,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.HashMap;
 
 import Enumerations.Action;
@@ -54,21 +55,33 @@ public class UIParameters {
     private String excludedFileListTextFieldTextKey = "excludedFileListTextFieldTextKey";
     private String excludedPathListTextFieldTextKey = "excludedPathListTextFieldTextKey";
     private String folderNameMappingTextFieldTextKey = "folderNameMappingTextFieldTextKey";
-    
+
+    // additional attributes needed for search
+    private String writeSearchToFolderTextKey = "writeSearchToFolderTextKey";
+
     // restore parameters
-    /*
+    /**
      * to which folder should restore be written
      */
     private String restoreToFolderName = "";
+    
     /**
      * the backup folder to use, this is the folder within the dest folder
      */
     private String backupFolderName = "";
+    
     /**
      * folder to restore
      */
     private String folderToRestore = "";
     
+    // search parameters
+    private String searchText1 = "";
+	private String searchText2 = "";
+    private String searchText3 = "";
+    private Date startSearchDate = null;
+	private Date endSearchDate = null;
+	
 	public Action getCurrentlySelectedAction() {
     	return Action.stringToEnum(keyValueMap.get(currentlySelectedActionKey));
 	}
@@ -158,10 +171,59 @@ public class UIParameters {
 		this.folderToRestore = folderToRestore;
 	}
 
+    public String getSearchText1() {
+		return searchText1;
+	}
+
+	public void setSearchText1(String searchText1) {
+		this.searchText1 = searchText1;
+	}
+
+	public String getSearchText2() {
+		return searchText2;
+	}
+
+	public void setSearchText2(String searchText2) {
+		this.searchText2 = searchText2;
+	}
+
+	public String getSearchText3() {
+		return searchText3;
+	}
+
+	public void setSearchText3(String searchText3) {
+		this.searchText3 = searchText3;
+	}
+
 	// Create a HashMap to store key-value pairs
     private static HashMap<String, String> keyValueMap = new HashMap<>();
 
+
+	public Date getEndSearchDate() {
+		return endSearchDate;
+	}
+
+	public void setEndSearchDate(Date endSearchDate) {
+		this.endSearchDate = endSearchDate;
+	}
+
+	public Date getStartSearchDate() {
+		return startSearchDate;
+	}
+
+	public void setStartSearchDate(Date startSearchDate) {
+		this.startSearchDate = startSearchDate;
+	}
 	
+	public String getWriteSearchToFolderTextString() {
+		return keyValueMap.get(writeSearchToFolderTextKey);
+	}
+
+	public void setWriteSearchToFolderTextString(String writeSearchToFolderTextString) {
+		storeInKeyValueMap(writeSearchToFolderTextKey, writeSearchToFolderTextString);
+	}
+
+
 	// private constructor to avoid creation
 	private UIParameters() {
 		

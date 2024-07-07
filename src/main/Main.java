@@ -99,7 +99,7 @@ public class Main extends Application {
 	
 	// screen parameters
     private int sceneWidth = 800;
-    private int sceneHeight = 400;
+    private int sceneHeight = 500;
     private int spacingBetweenSections = 10;
 
 	// Attributes for root VBox
@@ -277,7 +277,33 @@ public class Main extends Application {
     		startRestore(commandLineArgumentsForRestore);
     		
     		break;
-    	default:
+    	case SEARCH:
+    		// create list of parameters for constructor CommandLineArguments
+    		// just for clarity because the number of arguments is so long
+    		startSearchDate = uiparam.getStartSearchDate();
+    		endSearchDate = uiparam.getEndSearchDate();
+    		source = uiparam.getSourceTextFieldTextString();
+    		destination = uiparam.getDestTextFieldTextString();
+    		restoreto = uiparam.getRestoreToFolderName();
+    		 fullBackup = false;
+    		 backup = false;
+    		 search = true;
+    		 logfilefolder = uiparam.getLogfileFolderTextFieldString();
+    		 excludedFiles = null;
+    		 excludedPaths = null;
+    		 restoreDate = null;
+    		 folderToRestore = null;
+    		 folderNameMapping = null;
+    		 overwrite = true;
+    		 writesearchto = uiparam.getWriteSearchToFolderTextString();
+    		 searchTextPattern = null;
+    		 addpathlengthforallfolders = false;
+    		 addpathlengthforfolderswithnewormodifiedcontent = false;
+    		 searchText = null;// not used actually
+    		
+    		 commandLineArgumentsForRestore = new CommandLineArguments(startSearchDate, endSearchDate, source, destination, restoreto, fullBackup, backup, search, logfilefolder, excludedFiles, excludedPaths, restoreDate, folderToRestore, folderNameMapping, overwrite, writesearchto, searchTextPattern, addpathlengthforallfolders, addpathlengthforfolderswithnewormodifiedcontent, searchText, processText);
+
+
     		break;
     	} 
     }
@@ -378,15 +404,15 @@ public class Main extends Application {
     		// add sectionBackupParametersBox if it's currently not present
     		if (!root.getChildren().contains(sectionBackupParametersBox)) {
     			boolean enabled = removeSubmitButtonVBox();
-        		root.getChildren().add(sectionSearchParametersBox);
+        		root.getChildren().add(sectionBackupParametersBox);
         		addSubmitButtonVBox(enabled);
     		}
     		
-    	} if (action == Action.RESTORE) {
+    	} else if (action == Action.RESTORE) {
     		
     		// remove any other boxes that might be there, but need to be removed because other option is chosen
     		root.getChildren().remove(sectionBackupParametersBox);
-    		root.getChildren().remove(sectionRestoreParametersBox);
+    		root.getChildren().remove(sectionSearchParametersBox);
     		sectionSearchParametersBox = null;
     		
     		// add sectionRestoreParametersBox if it's currently not present
@@ -429,21 +455,19 @@ public class Main extends Application {
     			
     			if (sectionSearchParametersBox == null) {
     				
-    				sectionSearchParametersBox = SectionSearchParameters.createSectionSearchParameters(primaryStage, processText, destFolderChangedHolder);
+    				sectionSearchParametersBox = SectionSearchParameters.createSectionSearchParameters(primaryStage, (text) -> writeSearchToFolderTextFieldChanged(text), processText, destFolderChangedHolder, (String newSearchText) -> verifySubmitButtonStatus(), uiparam.getWriteSearchToFolderTextString());
     				
     				// set destFolder changed so that list of backup folders can be fetched
                     destFolderChangedHolder.folderChanged.handleNewFolder(uiparam.getDestTextFieldTextString());
                     
     			}
     			
+    			root.getChildren().add(sectionSearchParametersBox);
+        		addSubmitButtonVBox(enabled);
+        		
     		}
     		
-    		/*if (sectionRestoreParametersBox == null) {
-    			
-    		}*/
     		
-    		root.getChildren().add(sectionSearchParametersBox);
-    		//addSubmitButtonVBox(enabled);
     		
     	}
     	
@@ -593,6 +617,11 @@ public class Main extends Application {
     	verifySubmitButtonStatus();
     }
     
+    private void writeSearchToFolderTextFieldChanged(String text) {
+    	uiparam.setWriteSearchToFolderTextString(verifyIfFolderExists(text, (String textToProcess) -> SectionSearchParameters.addSearchToFolderWarning(textToProcess)));
+    	verifySubmitButtonStatus();
+    }
+
     /**
      * backupfolder is used for restore, this function is called when that is changed
      * @param backup
@@ -705,7 +734,17 @@ public class Main extends Application {
     		}
     		
     	case SEARCH:
-    		
+    		if (uiparam.getDestTextFieldTextString() != null 
+    				&& uiparam.getSearchText1().length() > 0 
+    				&& uiparam.getStartSearchDate() != null 
+    				&& uiparam.getEndSearchDate() != null
+    				&& uiparam.getWriteSearchToFolderTextString() != null
+    				&& uiparam.getWriteSearchToFolderTextString().length() > 0
+    				) {
+    			submitButton.setDisable(false);
+    		} else {
+    			submitButton.setDisable(true);
+    		}
     		
     		
     		break;
