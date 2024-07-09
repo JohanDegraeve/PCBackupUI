@@ -119,12 +119,23 @@ public class CommandLineArguments {
      * folder to store search results
      */
     public String writesearchto = null;
-   
+
     /**
-     * regex pattern to use in search
+     * searchText1 should not be null
      */
-	public Pattern searchTextPattern = null;
-	
+    public String searchText1 = null;
+    
+    /**
+     * searchText2
+     */
+    public String searchText2 = null;
+    
+    /**
+     * searchText3
+     */
+    public String searchText3 = null;
+    
+    
 	/**
 	 * for testing only
 	 */
@@ -147,9 +158,8 @@ public class CommandLineArguments {
 	public CommandLineArguments(Date startSearchDate, Date endSearchDate, String source, String destination,
 			String restoreto, boolean fullBackup, boolean backup, boolean search, String logfilefolder,
 			String excludedFiles, String excludedPaths, Date restoreDate, String subfolderToRestore,
-			String folderNameMapping, boolean overwrite, String writesearchto,
-			Pattern searchTextPattern, boolean addpathlengthforallfolders,
-			boolean addpathlengthforfolderswithnewormodifiedcontent, String searchText, ProcessText processText) {
+			String folderNameMapping, boolean overwrite, String writesearchto, boolean addpathlengthforallfolders,
+			boolean addpathlengthforfolderswithnewormodifiedcontent, String searchText1, String searchText2, String searchText3, ProcessText processText) {
 		super();
 		this.startSearchDate = startSearchDate;
 		this.endSearchDate = endSearchDate;
@@ -166,10 +176,12 @@ public class CommandLineArguments {
 		this.folderNameMapping = OtherUtilities.readKeyValuePairFromFile(folderNameMapping, processText);
 		this.overwrite = overwrite;
 		this.writesearchto = writesearchto;
-		this.searchTextPattern = searchTextPattern;
 		this.addpathlengthforallfolders = addpathlengthforallfolders;
 		this.addpathlengthforfolderswithnewormodifiedcontent = addpathlengthforfolderswithnewormodifiedcontent;
 		this.processText = processText;
+		this.searchText1 = searchText1;
+		this.searchText2 = searchText2;
+		this.searchText3 = searchText3;
 		
 		configureLogFile(logfilefolder, processText);
 		

@@ -325,6 +325,11 @@ public class SectionSearchParameters {
 			}
 			Thread.currentThread().interrupt();
 			return;
+		} catch (NullPointerException np) {// in case newFolder is null
+			
+			minimumStartSearchDate = null;
+			maximumStartSearchDate = null;
+			
 		}
         
 

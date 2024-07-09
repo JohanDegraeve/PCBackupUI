@@ -177,6 +177,9 @@ public class UIParameters {
 
 	public void setSearchText1(String searchText1) {
 		this.searchText1 = searchText1;
+		if (this.searchText1 == null) {
+			this.searchText1 = "";
+		}
 	}
 
 	public String getSearchText2() {
@@ -185,6 +188,9 @@ public class UIParameters {
 
 	public void setSearchText2(String searchText2) {
 		this.searchText2 = searchText2;
+		if (this.searchText2 == null) {
+			this.searchText2 = "";
+		}
 	}
 
 	public String getSearchText3() {
@@ -193,6 +199,9 @@ public class UIParameters {
 
 	public void setSearchText3(String searchText3) {
 		this.searchText3 = searchText3;
+		if (this.searchText3 == null) {
+			this.searchText3 = "";
+		}
 	}
 
 	// Create a HashMap to store key-value pairs

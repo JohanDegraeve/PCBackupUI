@@ -40,8 +40,9 @@ import utilities.ListBackupsInFolder;
 import utilities.OtherUtilities;
 import utilities.WriteToFile;
 
-public class Search {
+public class Search implements Runnable {
 
+	private static CommandLineArguments commandLineArguments;
 
 	public static void search(CommandLineArguments commandLineArguments) {
 	
@@ -78,7 +79,7 @@ public class Search {
 			commandLineArguments.processText.process("Parsing " + pathWithJsonFile.toString());
 			AFileOrAFolder listOfFilesAndFoldersInBackup = FileAndFolderUtilities.fromFolderlistDotJsonToAFileOrAFolder(pathWithJsonFile, commandLineArguments.processText);
 			
-			iterateThroughFolderOrFile(listOfFilesAndFoldersInBackup, commandLineArguments.searchTextPattern, backupFolderName, Paths.get(""), results);
+			iterateThroughFolderOrFile(listOfFilesAndFoldersInBackup, commandLineArguments.searchText1, commandLineArguments.searchText2, commandLineArguments.searchText3, backupFolderName, Paths.get(""), results);
 			
 		}
 
@@ -193,15 +194,27 @@ public class Search {
 	 *   &nbsp&nbsp&nbsp - => if it's a file last modified itmestamp of the file = 2024 02 12 21:35:40<br>
 	 * <br>
 	 * @param aFileOrAFolder instance of AFileOrAFolder to search in. This should always match the contents of sourceFolderPath/backupfoldername/subfolder, meaning the caller must make sure this is a correct match
-	 * @param searchTextPattern to search, regex is used
+	 * @param searchText1 mandatory
+	 * @param searchText2 optional, if present then search for searchText1 and 2
+	 * @param searchText3 optional, if present then search for searchText1 and 2 and 3
 	 * @param subfolder is subfolder within a backup where the actual aFileOrAFolder is stored, this value is used to create the key value. This is a full path example submap2/submap21/submap211
 	 * @param results instance of Map<String, String> which contains the results after calling the function
 	 */
-	private static void iterateThroughFolderOrFile(AFileOrAFolder aFileOrAFolder, Pattern searchTextPattern, String backupfoldername, Path subfolder, Map<String, String> results) {
+	private static void iterateThroughFolderOrFile(AFileOrAFolder aFileOrAFolder, String searchText1, String searchText2, String searchText3, String backupfoldername, Path subfolder, Map<String, String> results) {
 		
-		Matcher matcher = searchTextPattern.matcher(aFileOrAFolder.getName());
+		boolean searchTest1Matches = true;
+		boolean searchTest2Matches = true;
+		boolean searchTest3Matches = true;
 		
-		if (matcher.find()) {
+		searchTest1Matches = Pattern.compile(Pattern.quote(searchText1), Pattern.CASE_INSENSITIVE).matcher(aFileOrAFolder.getName()).find();
+		if (searchText2 != null && searchText2.length() > 0) {
+			searchTest2Matches = Pattern.compile(Pattern.quote(searchText2), Pattern.CASE_INSENSITIVE).matcher(aFileOrAFolder.getName()).find();
+			if (searchText3 != null && searchText3.length() > 0) {
+				searchTest3Matches = Pattern.compile(Pattern.quote(searchText3), Pattern.CASE_INSENSITIVE).matcher(aFileOrAFolder.getName()).find();
+			}
+		}
+		
+		if (searchTest1Matches && searchTest2Matches && searchTest3Matches) {
 			
 			// path without backup folder name
 			Path pathWhereItemWasFound = subfolder;
@@ -242,11 +255,11 @@ public class Search {
 				
 				if (aFileOrAFolder1 instanceof AFile) {
 
-					iterateThroughFolderOrFile(aFileOrAFolder1, searchTextPattern, backupfoldername, subfolder, results);
+					iterateThroughFolderOrFile(aFileOrAFolder1, searchText1, searchText2, searchText3, backupfoldername, subfolder, results);
 
 				} else {
 
-					iterateThroughFolderOrFile(aFileOrAFolder1, searchTextPattern, backupfoldername, subfolder.resolve(aFileOrAFolder1.getName()), results);
+					iterateThroughFolderOrFile(aFileOrAFolder1, searchText1, searchText2, searchText3, backupfoldername, subfolder.resolve(aFileOrAFolder1.getName()), results);
 
 				}
 				
@@ -282,4 +295,13 @@ public class Search {
 		
 	}
 	
+	public Search(CommandLineArguments commandLineArguments) {
+		Search.commandLineArguments = commandLineArguments;
+	}
+	
+	@Override
+	public void run() {
+		Search.search(commandLineArguments);
+	}
+
 }

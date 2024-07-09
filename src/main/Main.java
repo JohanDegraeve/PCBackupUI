@@ -47,6 +47,7 @@ import model.CommandLineArguments;
 import model.UIParameters;
 import pcbackup.Backup;
 import pcbackup.Restore;
+import pcbackup.Search;
 import utilities.OtherUtilities;
 import utilities.PathUtilities;
 
@@ -202,8 +203,8 @@ public class Main extends Application {
     		CommandLineArguments commandLineArgumentsForBackup = new CommandLineArguments(
     				null, null, uiparam.getSourceTextFieldTextString(), uiparam.getDestTextFieldTextString(), null, uiparam.getCurrentlySelectedAction() == Action.FULLBACKUP ? true:false, 
     						true, false, uiparam.getLogfileFolderTextFieldString(), uiparam.getExcludedFileListTextFieldTextString(), 
-    						uiparam.getExcludedPathListTextFieldTextString(), null, null, uiparam.getFolderNameMappingTextFieldTextString(), false, null, null, 
-    						false, false, null, processText);
+    						uiparam.getExcludedPathListTextFieldTextString(), null, null, uiparam.getFolderNameMappingTextFieldTextString(), false, null, 
+    						false, false, null, null, null, processText);
 
     		openStatusWindow();
 
@@ -232,13 +233,14 @@ public class Main extends Application {
     		String folderNameMapping = uiparam.getFolderNameMappingTextFieldTextString();
     		boolean overwrite = true;
     		String writesearchto = null;
-    		Pattern searchTextPattern = null;
     		boolean addpathlengthforallfolders = false;
     		boolean addpathlengthforfolderswithnewormodifiedcontent = false;
-    		String searchText = null;
+    		String searchText1 = uiparam.getSearchText1();
+    		String searchText2 = uiparam.getSearchText2();
+    		String searchText3 = uiparam.getSearchText3();
     		
-    		CommandLineArguments commandLineArgumentsForRestore = new CommandLineArguments(startSearchDate, endSearchDate, source, destination, restoreto, fullBackup, backup, search, logfilefolder, excludedFiles, excludedPaths, restoreDate, folderToRestore, folderNameMapping, overwrite, writesearchto, searchTextPattern, addpathlengthforallfolders, addpathlengthforfolderswithnewormodifiedcontent, searchText, processText);
-
+    		CommandLineArguments commandLineArgumentsForRestore = new CommandLineArguments(startSearchDate, endSearchDate, source, destination, restoreto, fullBackup, backup, search, logfilefolder, excludedFiles, excludedPaths, restoreDate, folderToRestore, folderNameMapping, overwrite, writesearchto, addpathlengthforallfolders, addpathlengthforfolderswithnewormodifiedcontent, searchText1, searchText2, searchText3, processText);
+    		
     		// variable needed in warning checks
 			File directory = new File(Paths.get(uiparam.getRestoreToFolderName()).resolve(PathUtilities.applyFolderNameMappingReversed(uiparam.getFolderToRestore(), commandLineArgumentsForRestore)).toString());
 
@@ -277,32 +279,39 @@ public class Main extends Application {
     		startRestore(commandLineArgumentsForRestore);
     		
     		break;
+    		
     	case SEARCH:
     		// create list of parameters for constructor CommandLineArguments
     		// just for clarity because the number of arguments is so long
     		startSearchDate = uiparam.getStartSearchDate();
-    		endSearchDate = uiparam.getEndSearchDate();
+    		
+    		// add one day
+    		endSearchDate = new Date(uiparam.getEndSearchDate().getTime() + 24 * 3600 * 1000);
+    		
     		source = uiparam.getSourceTextFieldTextString();
     		destination = uiparam.getDestTextFieldTextString();
     		restoreto = uiparam.getRestoreToFolderName();
-    		 fullBackup = false;
-    		 backup = false;
-    		 search = true;
-    		 logfilefolder = uiparam.getLogfileFolderTextFieldString();
-    		 excludedFiles = null;
-    		 excludedPaths = null;
-    		 restoreDate = null;
-    		 folderToRestore = null;
-    		 folderNameMapping = null;
-    		 overwrite = true;
-    		 writesearchto = uiparam.getWriteSearchToFolderTextString();
-    		 searchTextPattern = null;
-    		 addpathlengthforallfolders = false;
-    		 addpathlengthforfolderswithnewormodifiedcontent = false;
-    		 searchText = null;// not used actually
+    		fullBackup = false;
+    		backup = false;
+    		search = true;
+    		logfilefolder = uiparam.getLogfileFolderTextFieldString();
+    		excludedFiles = null;
+    		excludedPaths = null;
+    		restoreDate = null;
+    		folderToRestore = null;
+    		folderNameMapping = null;
+    		overwrite = true;
+    		writesearchto = uiparam.getWriteSearchToFolderTextString();
+    		addpathlengthforallfolders = false;
+    		addpathlengthforfolderswithnewormodifiedcontent = false;
+    		String searchText11 = uiparam.getSearchText1();
+    		String searchText21 = uiparam.getSearchText2();
+    		String searchText31 = uiparam.getSearchText3();
     		
-    		 commandLineArgumentsForRestore = new CommandLineArguments(startSearchDate, endSearchDate, source, destination, restoreto, fullBackup, backup, search, logfilefolder, excludedFiles, excludedPaths, restoreDate, folderToRestore, folderNameMapping, overwrite, writesearchto, searchTextPattern, addpathlengthforallfolders, addpathlengthforfolderswithnewormodifiedcontent, searchText, processText);
+    		CommandLineArguments commandLineArgumentsForSearch = new CommandLineArguments(startSearchDate, endSearchDate, source, destination, restoreto, fullBackup, backup, search, logfilefolder, excludedFiles, excludedPaths, restoreDate, folderToRestore, folderNameMapping, overwrite, writesearchto, addpathlengthforallfolders, addpathlengthforfolderswithnewormodifiedcontent, searchText11, searchText21, searchText31, processText);
 
+    		Thread thread2 = new Thread(new Search(commandLineArgumentsForSearch));
+            thread2.start();
 
     		break;
     	} 
@@ -735,6 +744,7 @@ public class Main extends Application {
     		
     	case SEARCH:
     		if (uiparam.getDestTextFieldTextString() != null 
+    				&& uiparam.getDestTextFieldTextString().length() > 0
     				&& uiparam.getSearchText1().length() > 0 
     				&& uiparam.getStartSearchDate() != null 
     				&& uiparam.getEndSearchDate() != null
