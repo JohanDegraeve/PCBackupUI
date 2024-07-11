@@ -173,6 +173,12 @@ public class Search implements Runnable {
         	commandLineArguments.processText.process("Failed to write search results to  " + pathToWriteTo.toString());
 			Thread.currentThread().interrupt();return;
 		}
+		
+		commandLineArguments.processText.process("Search finished");
+        commandLineArguments.processText.process("");
+        commandLineArguments.processText.process("========================================================");
+        commandLineArguments.processText.process("");
+
 
 	}
 	

@@ -21,7 +21,6 @@ package main;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Date;
-import java.util.regex.Pattern;
 
 import Enumerations.Action;
 import Interfaces.FolderChangedHolder;
@@ -53,7 +52,7 @@ import utilities.PathUtilities;
 
 public class Main extends Application {
 
-	private String VERSION_STRING = "1.1.2";
+	private String VERSION_STRING = "1.2.0";
 	
 	/**
 	 * info written in logfile at start up
@@ -275,6 +274,7 @@ public class Main extends Application {
 				}
 			}
 			
+			openStatusWindow();
     		
     		startRestore(commandLineArgumentsForRestore);
     		
@@ -310,6 +310,8 @@ public class Main extends Application {
     		
     		CommandLineArguments commandLineArgumentsForSearch = new CommandLineArguments(startSearchDate, endSearchDate, source, destination, restoreto, fullBackup, backup, search, logfilefolder, excludedFiles, excludedPaths, restoreDate, folderToRestore, folderNameMapping, overwrite, writesearchto, addpathlengthforallfolders, addpathlengthforfolderswithnewormodifiedcontent, searchText11, searchText21, searchText31, processText);
 
+    		openStatusWindow();
+    		
     		Thread thread2 = new Thread(new Search(commandLineArgumentsForSearch));
             thread2.start();
 
@@ -741,7 +743,7 @@ public class Main extends Application {
     			submitButton.setDisable(true);
     			break;
     		}
-    		
+    		break;
     	case SEARCH:
     		if (uiparam.getDestTextFieldTextString() != null 
     				&& uiparam.getDestTextFieldTextString().length() > 0
