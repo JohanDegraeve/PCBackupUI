@@ -27,6 +27,10 @@ Also allows to search in backups.
 - Browse through the list of bacups, sorted by date and time and select the backupfolder
 - Then browse through the folderstructure and select the folder to restore. You can only select folders, not individual files. The files are listed but not individually selectable.
 - Define the path where to restore to
+
+# Search
+Search allows to find 1, 2 or 3 strings (texts) in the file or folder names. A csv file is generated (',' is used as delimiter) with the search results.
+You can specify the start and search date of the backups to search in. It will give the latest version of a file that contains the search texts.
    
 # Usage
 
