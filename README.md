@@ -1,15 +1,16 @@
 # PCBackupUI
 Java app to Backup and Restore, full and incremental.
 
-Also allows to search in backups (UI still to be done)
+Also allows to search in backups.
 
 # Backup
 - Full-backup copies all source files and source folders to another place/disk and creates the file folderlist.json
   - The app creates a subfolder in the destination, example "2024-01-19 00;03;00 (Full)" which indicates the date and time the backup was taken
-- for each backup (full or incremental) creates a json file in the root folder of the backup named folderlist.json, (example : https://github.com/JohanDegraeve/PCBackup/blob/main/folderlist.json)
+- for each backup (full or incremental), a json file is created in the root folder of the backup named folderlist.json, (example : https://github.com/JohanDegraeve/PCBackup/blob/main/folderlist.json)
   - The provided JSON file represents a hierarchical structure of folders and files, serving as a backup configuration. At the top level, the "type" field indicates that it is a folder or a file, denoted by "afolder" or "afile". Each instance has a "name" and "pathToBackup" field, representing the name of the folder and the backup path, respectively. The "fileOrFolderList" field contains an array of objects, representing either files and/or nested folders.
   - Each file object includes "name," "pathToBackup," and "ts" (timestamp) fields. The "name" field signifies the file's name, "pathToBackup" indicates the backup path, and "ts" represents the timestamp of the file.
   - "pathToBackup" is just a subfoldername, example "2024-01-19 00;26;57 (Incremental)" and tells us where, in which previous full or incremental bakcup, the latest version of the file is stored.
+  - there's another json file creaeted, "folderlist-withfullpaths.json". This is a the similar to "folderlist.json", but the timestamps are in human readable format and it includes the full path of a file. A handy tool to search in json files is "Dadroit json viewer". 
 - Incremental Backup
   - creates a new folder where the incremental backup is stored, example "2024-01-19 00;26;57 (Incremental)"
   - Each time an incremental backup is taken, then first the file folderlist.json from the previous backup (either full or incremental) is copied and parsed.
@@ -26,6 +27,10 @@ Also allows to search in backups (UI still to be done)
 - Browse through the list of bacups, sorted by date and time and select the backupfolder
 - Then browse through the folderstructure and select the folder to restore. You can only select folders, not individual files. The files are listed but not individually selectable.
 - Define the path where to restore to
+
+# Search
+Search allows to find 1, 2 or 3 strings (texts) in the file or folder names. A csv file is generated (',' is used as delimiter) with the search results.
+You can specify the start and search date of the backups to search in. It will give the latest version of a file that contains the search texts.
    
 # Usage
 
