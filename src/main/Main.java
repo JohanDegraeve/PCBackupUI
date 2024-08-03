@@ -38,10 +38,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -349,6 +351,10 @@ public class Main extends Application {
     	} 
     }
     
+    private void startCleanUp(List<String> backupFoldersToDelete) {
+    	
+    }
+    
     private void showListOfBackupsToDelete(List<String> backupFoldersToDelete) {
     	
     	// // new stage for the popup
@@ -361,7 +367,31 @@ public class Main extends Application {
         ObservableList<String> backupFoldersToDeleteAsObservableList = FXCollections.observableArrayList(backupFoldersToDelete);
         ListView<String> listView = new ListView<>(backupFoldersToDeleteAsObservableList);
         
-        VBox popupContent = new VBox(listView, UIUtilities.createCancelButtonContainer(listWithFoldersToDeletePopup, listWithFoldersToDeletePopupWidth, "Annuleer"));
+        // create the label with the explanation
+        Label explanationLabel = new Label("koekoek");
+        // Create a Pane to contain the label
+        Pane labelContainerPane = new Pane(explanationLabel);
+        labelContainerPane.setMinWidth(listWithFoldersToDeletePopupWidth); // Match the width of the ListView
+        labelContainerPane.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
+        
+        // create the Ok button
+        Button okButton = new Button("Ok");
+        okButton.setOnAction(e -> startCleanUp(backupFoldersToDelete));
+        
+        // Create a Pane to contain the ok button
+        Pane okButtonContainerPane = new Pane(okButton);
+        okButtonContainerPane.setMinWidth(listWithFoldersToDeletePopupWidth); // Match the width of the ListView
+        okButtonContainerPane.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
+
+        // Set padding around the label
+        okButtonContainerPane.setPadding(new Insets(5));
+        
+        // Set the position of the cancel button within the container
+        okButton.layoutXProperty().bind(okButtonContainerPane.widthProperty().subtract(okButton.widthProperty()).divide(2));
+        okButton.layoutYProperty().bind(okButtonContainerPane.heightProperty().subtract(okButton.heightProperty()).divide(2));
+
+        
+        VBox popupContent = new VBox(labelContainerPane, listView, UIUtilities.createCancelButtonContainer(listWithFoldersToDeletePopup, listWithFoldersToDeletePopupWidth, "Annuleer"), okButtonContainerPane);
         popupContent.setSpacing(10); // Set spacing between nodes
         
         listWithFoldersToDeletePopup.getContent().addAll(popupContent);
