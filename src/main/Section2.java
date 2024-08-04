@@ -66,7 +66,9 @@ public class Section2 {
         UIUtilities.addToolTip(searchOption, "Zoek naar bestanden en mappen die een specifieke tekst in de naam van de map of bestand hebben.");
         
         CheckBox cleanupOptionBox = new CheckBox(cleanBackupString);
-        UIUtilities.addToolTip(cleanupOptionBox, "Voor backups ouder dan een jaar is het voldoende om slechts één backup per jaar bij te houden.\nDeze optie doet een cleanup\nJe krijgt een lijst van backup folders die zullen verwijderd worden als je deze optie kiest");
+        UIUtilities.addToolTip(cleanupOptionBox, "Voor backups ouder dan een jaar is het voldoende om slechts één backup per maand bij te houden.\nDeze optie doet een cleanup\nJe krijgt een lijst van backup folders die zullen verwijderd worden als je deze optie kiest.\n"
+        		+ "Bestanden en folders in te verwijderen backup folders worden, indien nodig, gekopieerd naar de eerstvolgende backup folder die niet verwijderd wordt.\n\n"
+        		+ "\"Indien nodig\" betekent: indien de eerstvolgende backup folder die niet verwijderd wordt nog verwijst naar die bestanden of folders.");
         
         // Add event handlers to the CheckBoxes
         fullBackupOption.setOnAction(e -> handleCheckBox(fullBackupOption, handleAction, incrementalBackupOption, restoreOption, searchOption, cleanupOptionBox));

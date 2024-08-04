@@ -343,8 +343,13 @@ public class SectionRestoreParameters {
 			}
 
 			// Create a layout for the popup content, add cancel button
-	        VBox popupContent = new VBox(listView, UIUtilities.createCancelButtonContainer(selectBackupPopup, selectBackupPopupWidth, "Annuleer"));
+			
+			Label topInfoLabel = new Label("Dubbelklik een backupfolder om te selecteren");
+			
+	        VBox popupContent = new VBox(topInfoLabel, listView, UIUtilities.createCancelButtonContainer(selectBackupPopup, selectBackupPopupWidth, "Annuleer"));
 	        popupContent.setSpacing(10); // Set spacing between nodes
+	        
+	        UIUtilities.addBackGroundToVBox(popupContent);
 	        
 	        selectBackupPopup.getContent().addAll(popupContent);
         
@@ -440,6 +445,8 @@ public class SectionRestoreParameters {
 			selectFolderToRestoreLabel.setDisable(true);
 			return;
 		}
+		
+		Label topInFoLabel = new Label("Dubbelklik een folder om te selecteren. Je kunt enkel folders selecteren. De volledige inhoud (subfolders en bestanden) zullen hersteld worden");
 		
 		// create a list of all folders in aFolder
 		// we maintain a second list of ints, which are indexes of each folder in allFoldersInAFolder
@@ -572,17 +579,18 @@ public class SectionRestoreParameters {
         // Create a Pane to contain the cancel button
         Pane infoLabelContainer = new Pane(infoSelectedFolderInfoLabel);
         infoLabelContainer.setMinWidth(selectFolterToRestorePopupWidth); 
-        infoLabelContainer.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
-
+        infoLabelContainer.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
+        
         // Set padding around the label
         infoSelectedFolderInfoLabel.setPadding(new Insets(10));
-        //infoSelectedFolderInfoLabel.setLayoutY(padding);
 
         // Create a layout for the popup content
-        VBox popupContent = new VBox(listView, infoLabelContainer, UIUtilities.createCancelButtonContainer(selectFolderToRestorePopup, selectFolterToRestorePopupWidth, "Ok"));
+        VBox popupContent = new VBox(topInFoLabel, listView, infoLabelContainer, UIUtilities.createCancelButtonContainer(selectFolderToRestorePopup, selectFolterToRestorePopupWidth, "Ok"));
 
         popupContent.setSpacing(5);
         popupContent.setPrefWidth(selectFolterToRestorePopupWidth);
+        
+        UIUtilities.addBackGroundToVBox(popupContent);
         
         selectFolderToRestorePopup.getContent().clear();
         selectFolderToRestorePopup.getContent().addAll(popupContent);

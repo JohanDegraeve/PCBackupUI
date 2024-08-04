@@ -30,11 +30,15 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
@@ -43,6 +47,18 @@ import javafx.util.Duration;
 
 public class UIUtilities {
 
+	/**
+	 * 
+	 * @param vBox
+	 */
+	public static void addBackGroundToVBox(VBox vBox) {
+		
+        BackgroundFill backgroundFill = new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, new Insets(-10));
+        Background background = new Background(backgroundFill);
+        vBox.setBackground(background);
+		
+	}
+	
 	public static void addToolTip(Node node, String toolTipTextString) {
         Tooltip tooltip = new Tooltip(toolTipTextString);
         tooltip.setShowDuration(new Duration(60000));
@@ -216,7 +232,7 @@ public class UIUtilities {
         // Create a Pane to contain the cancel button
         Pane cancelButtonContainer = new Pane(cancelButton);
         cancelButtonContainer.setMinWidth(minWidth); // Match the width of the ListView
-        cancelButtonContainer.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
+        cancelButtonContainer.setStyle(("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;"));
 
         // Set padding around the label
         cancelButtonContainer.setPadding(new Insets(5));

@@ -42,11 +42,15 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
@@ -368,20 +372,23 @@ public class Main extends Application {
         ListView<String> listView = new ListView<>(backupFoldersToDeleteAsObservableList);
         
         // create the label with the explanation
-        Label explanationLabel = new Label("koekoek");
+        Label explanationLabel = new Label("Dit is de lijst van backup folders die zullen verwijderd worden.\n\n"
+        		+ "Bestanden en folders in te verwijderen backup folders worden, indien nodig, gekopieerd naar de eerstvolgende backup folder die niet verwijderd wordt.\n\n"
+        		+ "\"Indien nodig\" betekent: indien de eerstvolgende backup folder die niet verwijderd wordt nog verwijst naar die bestanden of folders.");
+
         // Create a Pane to contain the label
         Pane labelContainerPane = new Pane(explanationLabel);
         labelContainerPane.setMinWidth(listWithFoldersToDeletePopupWidth); // Match the width of the ListView
-        labelContainerPane.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
-        
+        labelContainerPane.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
+
         // create the Ok button
-        Button okButton = new Button("Ok");
+        Button okButton = new Button("Start verwijdering.");
         okButton.setOnAction(e -> startCleanUp(backupFoldersToDelete));
         
         // Create a Pane to contain the ok button
         Pane okButtonContainerPane = new Pane(okButton);
         okButtonContainerPane.setMinWidth(listWithFoldersToDeletePopupWidth); // Match the width of the ListView
-        okButtonContainerPane.setStyle("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;");
+        okButtonContainerPane.setStyle(("-fx-background-color: white; -fx-border-color: #0077CC; -fx-border-width: 2px;"));
 
         // Set padding around the label
         okButtonContainerPane.setPadding(new Insets(5));
@@ -393,6 +400,8 @@ public class Main extends Application {
         
         VBox popupContent = new VBox(labelContainerPane, listView, UIUtilities.createCancelButtonContainer(listWithFoldersToDeletePopup, listWithFoldersToDeletePopupWidth, "Annuleer"), okButtonContainerPane);
         popupContent.setSpacing(10); // Set spacing between nodes
+        
+        UIUtilities.addBackGroundToVBox(popupContent);
         
         listWithFoldersToDeletePopup.getContent().addAll(popupContent);
         
@@ -926,6 +935,7 @@ public class Main extends Application {
     	// Function ListBackupsInFolder.getAllBackupFoldersAsStrings get all backup foldernames before a specific date
     	//     the data in that function is formatted as a backup foldername
     	//     so we get the date of year ago, formated as a backup foldername
+    	//String aYearAgoAsString = (new SimpleDateFormat(Constants.BACKUPFOLDERDATEFORMAT_STRING)).format(new Date(new Date().getTime() - 365L * 24L * 3600L * 1000L));
     	String aYearAgoAsString = (new SimpleDateFormat(Constants.BACKUPFOLDERDATEFORMAT_STRING)).format(new Date(new Date().getTime() - 3L * 30L * 24L * 3600L * 1000L));
 
     	try {
