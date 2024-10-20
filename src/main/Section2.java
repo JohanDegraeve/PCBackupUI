@@ -33,7 +33,7 @@ public class Section2 {
 	public static String incrementalBackupOptionString = "Een incrementele backup nemen";
 	public static String restoreOptionsString = "Mappen herstellen";
 	public static String searchOptionstrString = "Mappen en/of bestanden zoeken";
-	public static String cleanBackupString = "Backups Verwijderen";
+	//public static String cleanBackupString = "Backups Verwijderen";
 
 	@SuppressWarnings("exports")
 	public static VBox createSection2(Stage primaryStage, ActionHandler handleAction) {
@@ -65,20 +65,21 @@ public class Section2 {
         CheckBox searchOption = new CheckBox(searchOptionstrString);
         UIUtilities.addToolTip(searchOption, "Zoek naar bestanden en mappen die een specifieke tekst in de naam van de map of bestand hebben.");
         
-        CheckBox cleanupOptionBox = new CheckBox(cleanBackupString);
+        /*CheckBox cleanupOptionBox = new CheckBox(cleanBackupString);
         UIUtilities.addToolTip(cleanupOptionBox, "Voor backups ouder dan een jaar is het voldoende om slechts één backup per maand bij te houden.\nDeze optie doet een cleanup\nJe krijgt een lijst van backup folders die zullen verwijderd worden als je deze optie kiest.\n"
         		+ "Bestanden en folders in te verwijderen backup folders worden, indien nodig, gekopieerd naar de eerstvolgende backup folder die niet verwijderd wordt.\n\n"
         		+ "\"Indien nodig\" betekent: indien de eerstvolgende backup folder die niet verwijderd wordt nog verwijst naar die bestanden of folders.");
+        */
         
         // Add event handlers to the CheckBoxes
-        fullBackupOption.setOnAction(e -> handleCheckBox(fullBackupOption, handleAction, incrementalBackupOption, restoreOption, searchOption, cleanupOptionBox));
-        incrementalBackupOption.setOnAction(e -> handleCheckBox(incrementalBackupOption, handleAction, fullBackupOption, restoreOption, searchOption, cleanupOptionBox));
-        restoreOption.setOnAction(e -> handleCheckBox(restoreOption, handleAction, fullBackupOption, incrementalBackupOption, searchOption, cleanupOptionBox));
-        searchOption.setOnAction(e -> handleCheckBox(searchOption, handleAction, restoreOption, fullBackupOption, incrementalBackupOption, cleanupOptionBox));
-        cleanupOptionBox.setOnAction(e -> handleCheckBox(cleanupOptionBox, handleAction, searchOption, restoreOption, fullBackupOption, incrementalBackupOption));
+        fullBackupOption.setOnAction(e -> handleCheckBox(fullBackupOption, handleAction, incrementalBackupOption, restoreOption, searchOption/* , cleanupOptionBox */));
+        incrementalBackupOption.setOnAction(e -> handleCheckBox(incrementalBackupOption, handleAction, fullBackupOption, restoreOption, searchOption/* ,  cleanupOptionBox */));
+        restoreOption.setOnAction(e -> handleCheckBox(restoreOption, handleAction, fullBackupOption, incrementalBackupOption, searchOption/* ,  cleanupOptionBox */));
+        searchOption.setOnAction(e -> handleCheckBox(searchOption, handleAction, restoreOption, fullBackupOption, incrementalBackupOption /* , cleanupOptionBox*/));
+        //cleanupOptionBox.setOnAction(e -> handleCheckBox(cleanupOptionBox, handleAction, searchOption, restoreOption, fullBackupOption, incrementalBackupOption));
         
         // Add CheckBoxes to the HBox
-        hBox.getChildren().addAll(fullBackupOption, incrementalBackupOption, restoreOption, searchOption, cleanupOptionBox);
+        hBox.getChildren().addAll(fullBackupOption, incrementalBackupOption, restoreOption, searchOption /* , cleanupOptionBox*/);
 
         vBox.getChildren().addAll(labelHBox, hBox);
         
@@ -108,9 +109,9 @@ public class Section2 {
 			handleAction.handleAction(Action.SEARCH);
 		} else if (clickedCheckBox.getText() == restoreOptionsString) {
 			handleAction.handleAction(Action.RESTORE);
-		} else if (clickedCheckBox.getText() == cleanBackupString) {
+		} /* else if (clickedCheckBox.getText() == cleanBackupString) {
 			handleAction.handleAction(Action.CLEANBACKUP);
-		}
+		} */
 		
 	}
 	
