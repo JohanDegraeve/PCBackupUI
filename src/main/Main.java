@@ -19,11 +19,10 @@
 package main;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import Enumerations.Action;
@@ -42,27 +41,22 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import model.CommandLineArguments;
-import model.Constants;
 import model.UIParameters;
 import pcbackup.Backup;
 import pcbackup.Restore;
 import pcbackup.Search;
-import utilities.ListBackupsInFolder;
+import utilities.CleanBackup;
 import utilities.OtherUtilities;
 import utilities.PathUtilities;
 import utilities.UIUtilities;
@@ -141,7 +135,7 @@ public class Main extends Application {
     private UIParameters uiparam = UIParameters.getInstance();
     
     // to process logging information
-    private ProcessText processText;
+    private static ProcessText processText;
     
     // for status logging
     private TextArea loggingTextArea = new TextArea();
@@ -153,7 +147,11 @@ public class Main extends Application {
     // width of popup 
     private static final int listWithFoldersToDeletePopupWidth = 200;
     
+    // used in functions that manage cleanup
 	private static List<String> listOfBackupsTodelete = new ArrayList<>();
+	
+	// used in functions that manage cleanup
+	private static List<String> allBackupFoldersOlderThanAYearThatWillNotBeDeleted = new ArrayList<>();
 	
 
     /**
@@ -355,11 +353,11 @@ public class Main extends Application {
     	} 
     }
     
-    private void startCleanUp(List<String> backupFoldersToDelete) {
-    	
+    private static void startCleanUp(List<String> backupFoldersToDelete) {
+    	CleanBackup.cleanBackupFolders(processText, backupFoldersToDelete, allBackupFoldersOlderThanAYearThatWillNotBeDeleted, UIParameters.getInstance().getDestTextFieldTextString());
     }
     
-    private void showListOfBackupsToDelete(List<String> backupFoldersToDelete) {
+    private static void showListOfBackupsToDelete(List<String> backupFoldersToDelete) {
     	
     	// // new stage for the popup
         Stage popupStage = new Stage();
@@ -370,6 +368,11 @@ public class Main extends Application {
         
         ObservableList<String> backupFoldersToDeleteAsObservableList = FXCollections.observableArrayList(backupFoldersToDelete);
         ListView<String> listView = new ListView<>(backupFoldersToDeleteAsObservableList);
+        
+        // Disable selection
+        listView.setSelectionModel(null);
+        
+        listView.setFocusTraversable(false);
         
         // create the label with the explanation
         Label explanationLabel = new Label("Dit is de lijst van backup folders die zullen verwijderd worden.\n\n"
@@ -426,7 +429,7 @@ public class Main extends Application {
         popupContent.setStyle("-fx-padding: 10; -fx-background-color: white; -fx-alignment: center;");
         popupContent.setMaxWidth(sceneWidth - 20);
 
-     // Maak een ScrollPane en voeg de VBox toe aan de ScrollPane
+        // Maak een ScrollPane en voeg de VBox toe aan de ScrollPane
         ScrollPane scrollPane = new ScrollPane(popupContent);
         scrollPane.setFitToWidth(false);
         scrollPane.setFitToHeight(true);
@@ -582,17 +585,16 @@ public class Main extends Application {
     		// first get the list of backups to delete, when finished enable the start button
     		submitButton.setDisable(true);
     		
-    		listOfBackupsTodelete = getListOfBackupsToDelete(processText);
+    		listOfBackupsTodelete = new ArrayList<>();
     		
-    		// iterate through the list and keep only folders that are at least 30 days between each other
-    		// keep the first
-    		if (listOfBackupsTodelete.size() > 0) {
-    			
-    			String firstBackupString = listOfBackupsTodelete.getFirst();
-    			System.out.println("firstbackup = " + firstBackupString);
-    			
-    			
-    		}
+    		allBackupFoldersOlderThanAYearThatWillNotBeDeleted = new ArrayList<>();
+    		
+    		CleanBackup.getListOfBackupsToDelete(processText, listOfBackupsTodelete, allBackupFoldersOlderThanAYearThatWillNotBeDeleted);
+    		
+    		Iterator<String> iterator = allBackupFoldersOlderThanAYearThatWillNotBeDeleted.iterator();
+        	while (iterator.hasNext()) {
+        	   System.out.println(iterator.next()); 
+        	}
     		
     		// we have the list, now set submitButton disable to false
     		submitButton.setDisable(false);
@@ -925,53 +927,6 @@ public class Main extends Application {
         statusStage.setTitle("Status");
         statusStage.show();
 
-    }
-
-    private static List<String> getListOfBackupsToDelete(ProcessText processText) {
-    	
-    	List<String> returnvalue = new ArrayList<>();
-    	
-    	// goal is to clean backups older than a year. 
-    	// Function ListBackupsInFolder.getAllBackupFoldersAsStrings get all backup foldernames before a specific date
-    	//     the data in that function is formatted as a backup foldername
-    	//     so we get the date of year ago, formated as a backup foldername
-    	//String aYearAgoAsString = (new SimpleDateFormat(Constants.BACKUPFOLDERDATEFORMAT_STRING)).format(new Date(new Date().getTime() - 365L * 24L * 3600L * 1000L));
-    	String aYearAgoAsString = (new SimpleDateFormat(Constants.BACKUPFOLDERDATEFORMAT_STRING)).format(new Date(new Date().getTime() - 3L * 30L * 24L * 3600L * 1000L));
-
-    	try {
-    		
-    		List<String> allBackupFoldersOlderThanAYearList = ListBackupsInFolder.getAllBackupFoldersAsStrings(Paths.get(UIParameters.getInstance().getDestTextFieldTextString()), aYearAgoAsString);
-    		
-    		if (allBackupFoldersOlderThanAYearList.size() == 0) {return returnvalue;}
-    		
-    		// currentBackupFolderString is the backup folder that will not be deleted, and to which we compare subsequent folders
-    		// initially it 's the first folder, after that it will be the next folder more than 30 days older
-    		// we store the date off that folder
-    		Date dateOfCurrentBackupFolderAsDate = OtherUtilities.getBackupDate(allBackupFoldersOlderThanAYearList.getFirst(), processText);
-    		
-    		for (String string : allBackupFoldersOlderThanAYearList.subList(1, allBackupFoldersOlderThanAYearList.size())) {
-    			
-				Date dateOfTheBackupDate = OtherUtilities.getBackupDate(string, processText);
-				
-				long differenceInMilliseconds = dateOfCurrentBackupFolderAsDate.getTime() - dateOfTheBackupDate.getTime();
-				
-				if (differenceInMilliseconds / (1000 * 60 * 60 * 24) < 30) {
-					returnvalue.add(string);
-				} else {
-					dateOfCurrentBackupFolderAsDate = dateOfTheBackupDate;
-				}
-				
-			}
-    	
-    	} catch (IOException e) {
-			processText.process("Exception in getListOfBackupsToDelete");
-            processText.process(e.toString());
-            Thread.currentThread().interrupt();
-            return returnvalue;
-		}
-    	
-    	return returnvalue;
-    	
     }
 
     public static void main(String[] args) {

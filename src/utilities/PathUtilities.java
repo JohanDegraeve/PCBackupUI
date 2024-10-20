@@ -18,8 +18,11 @@
  */
 package utilities;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import model.CommandLineArguments;
@@ -81,4 +84,20 @@ public class PathUtilities {
     	
 	}
 	
+    public static void copyFile(Path source, Path dest, CommandLineArguments commandLineArguments) throws IOException {
+    	
+    	boolean overwrite = false;
+    	if (commandLineArguments != null) {
+    		overwrite = commandLineArguments.overwrite;
+    	}
+    	
+    	if (overwrite) {
+    		Files.copy(source, dest, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+    	} else {
+    		Files.copy(source, dest, StandardCopyOption.COPY_ATTRIBUTES);
+    	}
+    	
+    }
+    
+
 }

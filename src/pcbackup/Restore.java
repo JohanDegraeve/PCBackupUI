@@ -159,7 +159,7 @@ public class Restore {
     					}
     				}
     				
-					copyFile(sourceToCopy, destination, commandLineArguments);
+    				PathUtilities.copyFile(sourceToCopy, destination, commandLineArguments);
 					
 				} catch (NoSuchFileException e) {
 					commandLineArguments.processText.process("   NoSuchFileException occurred while trying to copy " + sourceToCopy.toString() + " to " + destination.toString()) ;
@@ -171,7 +171,7 @@ public class Restore {
 						commandLineArguments.processText.process("      Found the missing file in backup \"" + olderBackup + "\"");
 						try {
 							sourceToCopy = sourceBackupRootFolder.resolve(olderBackup).resolve(subfolder).resolve(sourceItem.getName());
-							copyFile(sourceToCopy, destination, commandLineArguments);
+							PathUtilities.copyFile(sourceToCopy, destination, commandLineArguments);
 							commandLineArguments.processText.process("      and successfully copied to restore folder");
 						} catch (FileAlreadyExistsException e2) {
 							commandLineArguments.processText.process("The file " + sourceToCopy.toString() + " already exists in the destination folder");
@@ -196,15 +196,6 @@ public class Restore {
     		}
     		
     	}
-    }
-    
-    private static void copyFile(Path source, Path dest, CommandLineArguments commandLineArguments) throws IOException {
-    	if (commandLineArguments.overwrite) {
-    		Files.copy(source, dest, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-    	} else {
-    		Files.copy(source, dest, StandardCopyOption.COPY_ATTRIBUTES);
-    	}
-    	
     }
     
     /**
