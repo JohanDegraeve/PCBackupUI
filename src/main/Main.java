@@ -60,6 +60,7 @@ import model.CommandLineArguments;
 import model.Constants;
 import model.UIParameters;
 import pcbackup.Backup;
+import pcbackup.CountDuplicates;
 import pcbackup.Restore;
 import pcbackup.Search;
 import utilities.ListBackupsInFolder;
@@ -351,6 +352,12 @@ public class Main extends Application {
     		showListOfBackupsToDelete(listOfBackupsTodelete);
     		
     		break;
+    		
+    	case COUNTDUPLICATES:
+    		
+    		Thread thread3 = new Thread(new CountDuplicates());
+    		thread3.start();
+    		break;
 
     	} 
     }
@@ -570,8 +577,8 @@ public class Main extends Application {
     		
     		
     		
-    	} else { // CLEANBACKUP
-    		
+    	} else { // CLEANBACKUP or COUNTDUPLICATES
+
     		root.getChildren().remove(sectionBackupParametersBox);
     		root.getChildren().remove(sectionRestoreParametersBox);
     		root.getChildren().remove(sectionSearchParametersBox);
@@ -579,24 +586,33 @@ public class Main extends Application {
     		sectionSearchParametersBox = null;
     		sectionRestoreParametersBox = null;
     		
-    		// first get the list of backups to delete, when finished enable the start button
-    		submitButton.setDisable(true);
-    		
-    		listOfBackupsTodelete = getListOfBackupsToDelete(processText);
-    		
-    		// iterate through the list and keep only folders that are at least 30 days between each other
-    		// keep the first
-    		if (listOfBackupsTodelete.size() > 0) {
+    		// CLEANBACKUP or COUNTDUPLICATES ?
+    		if (action == Action.CLEANBACKUP) {
     			
-    			String firstBackupString = listOfBackupsTodelete.getFirst();
-    			System.out.println("firstbackup = " + firstBackupString);
+        		// first get the list of backups to delete, when finished enable the start button
+        		submitButton.setDisable(true);
+        		
+        		listOfBackupsTodelete = getListOfBackupsToDelete(processText);
+        		
+        		// iterate through the list and keep only folders that are at least 30 days between each other
+        		// keep the first
+        		if (listOfBackupsTodelete.size() > 0) {
+        			
+        			String firstBackupString = listOfBackupsTodelete.getFirst();
+        			System.out.println("firstbackup = " + firstBackupString);
+        			
+        			
+        		}
+        		
+        		// we have the list, now set submitButton disable to false
+        		submitButton.setDisable(false);
+
+    		} else if (action == Action.COUNTDUPLICATES){
     			
+    			submitButton.setDisable(false);
     			
     		}
     		
-    		// we have the list, now set submitButton disable to false
-    		submitButton.setDisable(false);
-
     	}
     	
     	verifySubmitButtonStatus();

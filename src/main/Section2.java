@@ -34,6 +34,7 @@ public class Section2 {
 	public static String restoreOptionsString = "Mappen herstellen";
 	public static String searchOptionstrString = "Mappen en/of bestanden zoeken";
 	//public static String cleanBackupString = "Backups Verwijderen";
+	public static String countDuplicateString = "Tel duplicates";
 
 	@SuppressWarnings("exports")
 	public static VBox createSection2(Stage primaryStage, ActionHandler handleAction) {
@@ -71,15 +72,19 @@ public class Section2 {
         		+ "\"Indien nodig\" betekent: indien de eerstvolgende backup folder die niet verwijderd wordt nog verwijst naar die bestanden of folders.");
         */
         
+        CheckBox countDuplicatesOption = new CheckBox(countDuplicateString);
+        UIUtilities.addToolTip(countDuplicatesOption, "Ga door alle bestanden en tel duplicates. Voor sporadisch of éénmalig gebruik. Doet geen foutcontrole.");
+ 
         // Add event handlers to the CheckBoxes
-        fullBackupOption.setOnAction(e -> handleCheckBox(fullBackupOption, handleAction, incrementalBackupOption, restoreOption, searchOption/* , cleanupOptionBox */));
-        incrementalBackupOption.setOnAction(e -> handleCheckBox(incrementalBackupOption, handleAction, fullBackupOption, restoreOption, searchOption/* ,  cleanupOptionBox */));
-        restoreOption.setOnAction(e -> handleCheckBox(restoreOption, handleAction, fullBackupOption, incrementalBackupOption, searchOption/* ,  cleanupOptionBox */));
-        searchOption.setOnAction(e -> handleCheckBox(searchOption, handleAction, restoreOption, fullBackupOption, incrementalBackupOption /* , cleanupOptionBox*/));
-        //cleanupOptionBox.setOnAction(e -> handleCheckBox(cleanupOptionBox, handleAction, searchOption, restoreOption, fullBackupOption, incrementalBackupOption));
+        fullBackupOption.setOnAction(e -> handleCheckBox(fullBackupOption, handleAction, incrementalBackupOption, restoreOption, searchOption, countDuplicatesOption/* , cleanupOptionBox */));
+        incrementalBackupOption.setOnAction(e -> handleCheckBox(incrementalBackupOption, handleAction, fullBackupOption, restoreOption, searchOption, countDuplicatesOption/* ,  cleanupOptionBox */));
+        restoreOption.setOnAction(e -> handleCheckBox(restoreOption, handleAction, fullBackupOption, incrementalBackupOption, searchOption, countDuplicatesOption/* ,  cleanupOptionBox */));
+        searchOption.setOnAction(e -> handleCheckBox(searchOption, handleAction, restoreOption, fullBackupOption, incrementalBackupOption, countDuplicatesOption /* , cleanupOptionBox*/));
+        countDuplicatesOption.setOnAction(e -> handleCheckBox(countDuplicatesOption, handleAction, restoreOption, fullBackupOption, incrementalBackupOption, searchOption /* , cleanupOptionBox*/));
+        //cleanupOptionBox.setOnAction(e -> handleCheckBox(cleanupOptionBox, handleAction, searchOption, restoreOption, fullBackupOption, incrementalBackupO ption));
         
         // Add CheckBoxes to the HBox
-        hBox.getChildren().addAll(fullBackupOption, incrementalBackupOption, restoreOption, searchOption /* , cleanupOptionBox*/);
+        hBox.getChildren().addAll(fullBackupOption, incrementalBackupOption, restoreOption, searchOption, countDuplicatesOption /* , cleanupOptionBox*/);
 
         vBox.getChildren().addAll(labelHBox, hBox);
         
@@ -109,6 +114,8 @@ public class Section2 {
 			handleAction.handleAction(Action.SEARCH);
 		} else if (clickedCheckBox.getText() == restoreOptionsString) {
 			handleAction.handleAction(Action.RESTORE);
+		} else if (clickedCheckBox.getText() == countDuplicateString) {
+			handleAction.handleAction(Action.COUNTDUPLICATES);
 		} /* else if (clickedCheckBox.getText() == cleanBackupString) {
 			handleAction.handleAction(Action.CLEANBACKUP);
 		} */
