@@ -348,14 +348,17 @@ public class Main extends Application {
     		
     	case CLEANBACKUP:
     		
-    		    		
+    		CommandLineArguments.configureLogFile(uiparam.getLogfileFolderTextFieldString(), processText);
+    		openStatusWindow();    		
     		showListOfBackupsToDelete(listOfBackupsTodelete);
     		
     		break;
     		
     	case COUNTDUPLICATES:
     		
-    		Thread thread3 = new Thread(new CountDuplicates());
+    		CommandLineArguments.configureLogFile(uiparam.getLogfileFolderTextFieldString(), processText);
+    		openStatusWindow();
+    		Thread thread3 = new Thread(new CountDuplicates(processText));
     		thread3.start();
     		break;
 
@@ -433,7 +436,7 @@ public class Main extends Application {
         popupContent.setStyle("-fx-padding: 10; -fx-background-color: white; -fx-alignment: center;");
         popupContent.setMaxWidth(sceneWidth - 20);
 
-     // Maak een ScrollPane en voeg de VBox toe aan de ScrollPane
+        // Maak een ScrollPane en voeg de VBox toe aan de ScrollPane
         ScrollPane scrollPane = new ScrollPane(popupContent);
         scrollPane.setFitToWidth(false);
         scrollPane.setFitToHeight(true);

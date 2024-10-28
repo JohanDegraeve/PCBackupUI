@@ -22,24 +22,36 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+import Interfaces.ProcessText;
 import model.AFile;
 import model.AFileOrAFolder;
 import model.AFolder;
-import model.Constants;
 import model.UIParameters;
 import utilities.FileAndFolderUtilities;
 import utilities.ListBackupsInFolder;
 
 public class CountDuplicates implements Runnable {
 
+	ProcessText processText = null;
+	
+	public CountDuplicates(ProcessText processText) {
+		this.processText = processText;
+	}
+	
 	private Hashtable<String, Integer> occurrences = new Hashtable<>();
 	
-	SimpleDateFormat dateFormat = new SimpleDateFormat(Constants.BACKUPFOLDERDATEFORMAT_STRING);
+	/**
+	 * 
+	 */
+	private ArrayList<ArrayList<String>> fullLists = new ArrayList<>();
+	
+	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	private void countDuplicates() {
 		
@@ -58,17 +70,41 @@ public class CountDuplicates implements Runnable {
 			AFileOrAFolder listOfFilesAndFoldersInLastBackup = FileAndFolderUtilities.fromFolderlistDotJsonToAFileOrAFolder(pathWithJsonFile, null);
 			
 			findFirstFilename((AFolder)listOfFilesAndFoldersInLastBackup, (AFolder)listOfFilesAndFoldersInLastBackup, 0, "");
-			
-			
-			
+						
 			for (String key : occurrences.keySet()) {
 				
 				String[] keySplitted = key.split("\\|\\|\\|");
 				
 				String fileTimeStamp = dateFormat.format(new Date(Long.parseLong(keySplitted[1])));
 				
-	            System.out.println(keySplitted[0] + ";" + fileTimeStamp + ";" + occurrences.get(key));
+				if (processText != null) {
+					processText.process(keySplitted[0] + ";" + fileTimeStamp + ";" + occurrences.get(key));
+				}
+	            //System.out.println(keySplitted[0] + ";" + fileTimeStamp + ";" + occurrences.get(key));
+	            
 	        }
+			
+			processText.process("=================================================");
+			
+			for (ArrayList<String> fullList: fullLists) {
+				
+				for (String entry: fullList) {
+					
+					if (processText != null) {
+						
+						String[] keySplitted = entry.split("\\|\\|\\|");
+						
+						String fileTimeStamp = dateFormat.format(new Date(Long.parseLong(keySplitted[1])));
+						
+						processText.process(fileTimeStamp + ";" + keySplitted[0]);
+							
+					}
+
+		            //System.out.println(entry);
+					
+				}
+				
+			}
 			
 			System.out.println("STOP");
 			
@@ -108,7 +144,9 @@ public class CountDuplicates implements Runnable {
 					
 					// find duplicates
 					//System.out.println("calling findDuplicates for "  + path + "\\" +  nextAsAFile.getName() + ", with skip = " + counter);
-					findDuplicates(nextAsAFile.getName(), nextAsAFile.getts(), originalListOfFilesAndFolders.getFileOrFolderList().iterator(), counter, 0, "");
+					ArrayList<String> newFullList = new ArrayList<>();
+					findDuplicates(nextAsAFile.getName(), nextAsAFile.getts(), originalListOfFilesAndFolders.getFileOrFolderList().iterator(), counter, 0, "", newFullList);
+					fullLists.add(newFullList);
 					
 				}
 				
@@ -127,7 +165,7 @@ public class CountDuplicates implements Runnable {
 		
 	}
 	
-	private int findDuplicates(String fileName, long timestamp, Iterator<AFileOrAFolder> iterator, int skip, int counter, String path) {
+	private int findDuplicates(String fileName, long timestamp, Iterator<AFileOrAFolder> iterator, int skip, int counter, String path, ArrayList<String> fullList) {
 		
 		int newCounter = counter;
 		
@@ -160,10 +198,14 @@ public class CountDuplicates implements Runnable {
 						occurrences.put(createKey(fileName, timestamp), 2);
 						// System.out.println("new amount =  " + occurrences.get(createKey(fileName, timestamp)));
 						
+						// it's the first reoccurrence of a filename, here we create a full list array
+						fullList.add(createKey(path + "\\" + fileName, timestamp));
+						
 					} else {
 						
 						occurrences.put(createKey(fileName, timestamp), occurrences.get(createKey(fileName, timestamp)) + 1);
 						// System.out.println("new amount =  " + occurrences.get(createKey(fileName, timestamp)));
+						fullList.add(createKey(path + "\\" + fileName, timestamp));
 						
 					}
 					
@@ -175,7 +217,7 @@ public class CountDuplicates implements Runnable {
 				if (next instanceof AFolder) {
 					// go through the folder with findDuplicates
 					// System.out.println("calling findDuplicates for " + path + "\\" + next.getName() + ", with counter = " + newCounter);
-					newCounter =  findDuplicates(fileName, timestamp, ((AFolder)next).getFileOrFolderList().iterator(), skip, newCounter, path + "\\" + next.getName());
+					newCounter =  findDuplicates(fileName, timestamp, ((AFolder)next).getFileOrFolderList().iterator(), skip, newCounter, path + "\\" + next.getName(), fullList);
 				}
 				
 			}
