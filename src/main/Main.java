@@ -70,7 +70,7 @@ import utilities.UIUtilities;
 
 public class Main extends Application {
 
-	private String VERSION_STRING = "1.2.0";
+	private String VERSION_STRING = "1.3.0";
 	
 	/**
 	 * info written in logfile at start up
