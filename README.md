@@ -49,7 +49,7 @@ To build in Eclipse, following jar libraries are required (latest versions)
 
 Java FX is downloaded here (use the correct operating system and architecture and download the SDK): https://gluonhq.com/products/javafx/
 
-Extract the zip and copy all jars to a lib folder
+Extract the zip and copy all jars to a lib folder - make sure also the subfolders bin and legal are there (next to lib)
 
 Add all jars (10 in total) in the (to create after cloning the project) lib folder
 
