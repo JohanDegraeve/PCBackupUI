@@ -18,6 +18,7 @@
  */
 package pcbackup;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import Interfaces.ProcessText;
+import javafx.util.converter.ByteStringConverter;
 import model.AFile;
 import model.AFileOrAFolder;
 import model.AFolder;
@@ -44,7 +46,7 @@ public class CountDuplicates implements Runnable {
 		this.processText = processText;
 	}
 	
-	private Hashtable<String, Integer> occurrences = new Hashtable<>();
+	private Hashtable<String, String> occurrences = new Hashtable<>();
 	
 	/**
 	 * 
@@ -77,8 +79,12 @@ public class CountDuplicates implements Runnable {
 				
 				String fileTimeStamp = dateFormat.format(new Date(Long.parseLong(keySplitted[1])));
 				
+				String[] test = occurrences.get(key).split("|");
+				
+				int amount = occurrences.get(key).split("\\|").length;
+				
 				if (processText != null) {
-					processText.process(keySplitted[0] + ";" + fileTimeStamp + ";" + occurrences.get(key));
+					processText.process(keySplitted[0] + ";" + fileTimeStamp + ";" + amount + ";" + occurrences.get(key));
 				}
 	            //System.out.println(keySplitted[0] + ";" + fileTimeStamp + ";" + occurrences.get(key));
 	            
@@ -143,9 +149,9 @@ public class CountDuplicates implements Runnable {
 					// we need to have a new iterator pointing to iterator.next() but without using iterator
 					
 					// find duplicates
-					//System.out.println("calling findDuplicates for "  + path + "\\" +  nextAsAFile.getName() + ", with skip = " + counter);
+					//System.out.println("calling findDuplicates for "  + path + File.separator +  nextAsAFile.getName() + ", with skip = " + counter);
 					ArrayList<String> newFullList = new ArrayList<>();
-					findDuplicates(nextAsAFile.getName(), nextAsAFile.getts(), originalListOfFilesAndFolders.getFileOrFolderList().iterator(), counter, 0, "", newFullList);
+					findDuplicates(nextAsAFile.getName(), path, nextAsAFile.getts(), originalListOfFilesAndFolders.getFileOrFolderList().iterator(), counter, 0, "", newFullList);
 					fullLists.add(newFullList);
 					
 				}
@@ -155,7 +161,7 @@ public class CountDuplicates implements Runnable {
 				AFolder nextAsAFolder = (AFolder)next;
 				
 				
-				counter = findFirstFilename(nextAsAFolder, originalListOfFilesAndFolders, counter, path + "\\" + nextAsAFolder.getName());
+				counter = findFirstFilename(nextAsAFolder, originalListOfFilesAndFolders, counter, path + File.separator + nextAsAFolder.getName());
 				
 			}
 			
@@ -165,7 +171,19 @@ public class CountDuplicates implements Runnable {
 		
 	}
 	
-	private int findDuplicates(String fileName, long timestamp, Iterator<AFileOrAFolder> iterator, int skip, int counter, String path, ArrayList<String> fullList) {
+	/**
+	 * 
+	 * @param fileName
+	 * @param fileNamePath path where first file is found, always the same value
+	 * @param timestamp
+	 * @param iterator
+	 * @param skip
+	 * @param counter
+	 * @param path contains full path of currently folder where we're searching, gets longer andlonger
+	 * @param fullList
+	 * @return
+	 */
+	private int findDuplicates(String fileName, String fileNamePath, long timestamp, Iterator<AFileOrAFolder> iterator, int skip, int counter, String path, ArrayList<String> fullList) {
 		
 		int newCounter = counter;
 		
@@ -178,7 +196,7 @@ public class CountDuplicates implements Runnable {
 			
 			AFileOrAFolder next = iterator.next();
 			
-			// System.out.println("next = " + path + "\\" + next.getName());
+			// System.out.println("next = " + path + File.separator + next.getName());
 			
 			if (next instanceof AFile && newCounter > skip) {
 				
@@ -195,17 +213,17 @@ public class CountDuplicates implements Runnable {
 					// found a duplicate
 					if (!occurrences.containsKey(createKey(fileName, timestamp))) {
 						 
-						occurrences.put(createKey(fileName, timestamp), 2);
+						occurrences.put(createKey(fileName, timestamp), fileNamePath + File.separator + fileName + "|" +  path + File.separator + fileName);
 						// System.out.println("new amount =  " + occurrences.get(createKey(fileName, timestamp)));
 						
 						// it's the first reoccurrence of a filename, here we create a full list array
-						fullList.add(createKey(path + "\\" + fileName, timestamp));
+						fullList.add(createKey(path + File.separator + fileName, timestamp));
 						
 					} else {
 						
-						occurrences.put(createKey(fileName, timestamp), occurrences.get(createKey(fileName, timestamp)) + 1);
+						occurrences.put(createKey(fileName, timestamp), occurrences.get(createKey(fileName, timestamp)) + "|" + path + File.separator + fileName);
 						// System.out.println("new amount =  " + occurrences.get(createKey(fileName, timestamp)));
-						fullList.add(createKey(path + "\\" + fileName, timestamp));
+						fullList.add(createKey(path + File.separator + fileName, timestamp));
 						
 					}
 					
@@ -216,8 +234,8 @@ public class CountDuplicates implements Runnable {
 				
 				if (next instanceof AFolder) {
 					// go through the folder with findDuplicates
-					// System.out.println("calling findDuplicates for " + path + "\\" + next.getName() + ", with counter = " + newCounter);
-					newCounter =  findDuplicates(fileName, timestamp, ((AFolder)next).getFileOrFolderList().iterator(), skip, newCounter, path + "\\" + next.getName(), fullList);
+					// System.out.println("calling findDuplicates for " + path + File.separator + next.getName() + ", with counter = " + newCounter);
+					newCounter =  findDuplicates(fileName, fileNamePath, timestamp, ((AFolder)next).getFileOrFolderList().iterator(), skip, newCounter, path + File.separator + next.getName(), fullList);
 				}
 				
 			}
