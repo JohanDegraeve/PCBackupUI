@@ -88,7 +88,7 @@ public class FileAndFolderUtilities {
                 		// check if folder is in excludedPaths
                 		for (String excludedPath : excludedpathlist) {
                 			
-                			if (path.toString().trim().equals(excludedPath.trim())) {
+                			if (path.getFileName().toString().trim().equals(excludedPath.trim())) {
                 				processText.process("      Excluding folder '" + excludedPath + "' because " + excludedPath + " is in the file excludedpathlist");
                 				continue directoryLoop;
                 			}
