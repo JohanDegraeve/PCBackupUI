@@ -18,7 +18,11 @@
  */
 package pcbackup;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -84,13 +88,13 @@ public class Search implements Runnable {
 		}
 
 		// seperator to use in csv files
-		String seperator = ",";
+		String seperator = "|";
 		
 		// string where search results will be written to and finally written to output file
 		String textToWrite = "";
 
 		// first add "sep=," this tells Excel that , is the seperator. ";" can't be the seperator because ";" is already used in the backup folder names
-		textToWrite += "sep=,\n";
+		//textToWrite += "sep=" + seperator + "\n";
 
 		// we have the results, create text to write to file
 		textToWrite += "name of matching item" + seperator + "type" + seperator + "last modified" + seperator + "backupfolder where file was found for the last time" + seperator + "path to backup folder where latest version is stored" + seperator + "folder name within backup\n";
@@ -165,14 +169,29 @@ public class Search implements Runnable {
 		// get path filename to write to
 		Path pathToWriteTo = Paths.get(commandLineArguments.writesearchto).resolve(createSearchResultFilename(Paths.get(commandLineArguments.writesearchto)));
 		
-		try {
-			WriteToFile.writeToFile(textToWrite, pathToWriteTo.toString());
+		//try {
+			try (FileOutputStream fos = new FileOutputStream(pathToWriteTo.toString());
+		             Writer writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+
+		            // Eerst de BOM schrijven
+		            fos.write(0xEF);
+		            fos.write(0xBB);
+		            fos.write(0xBF);
+
+		            // Nu je CSV-gegevens
+		            writer.write(textToWrite);
+
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		        }
+			//WriteToFile.writeToFile(textToWrite, pathToWriteTo.toString());
 			commandLineArguments.processText.process("Search results written to " + pathToWriteTo.toString());
-		} catch (IOException e) {
+		/*} catch (IOException e) {
+			
 			e.printStackTrace();
         	commandLineArguments.processText.process("Failed to write search results to  " + pathToWriteTo.toString());
 			Thread.currentThread().interrupt();return;
-		}
+		}*/
 		
 		commandLineArguments.processText.process("Search finished");
         commandLineArguments.processText.process("");
