@@ -39,6 +39,7 @@ import model.AFileOrAFolder;
 import model.AFolder;
 import model.CommandLineArguments;
 import model.Constants;
+import model.UIParameters;
 import utilities.FileAndFolderUtilities;
 import utilities.ListBackupsInFolder;
 import utilities.OtherUtilities;
@@ -47,6 +48,7 @@ import utilities.WriteToFile;
 public class Search implements Runnable {
 
 	private static CommandLineArguments commandLineArguments;
+	private static UIParameters uiparam = UIParameters.getInstance();
 
 	public static void search(CommandLineArguments commandLineArguments) {
 	
@@ -97,7 +99,7 @@ public class Search implements Runnable {
 		//textToWrite += "sep=" + seperator + "\n";
 
 		// we have the results, create text to write to file
-		textToWrite += "name of matching item" + seperator + "type" + seperator + "last modified" + seperator + "backupfolder where file was found for the last time" + seperator + "path to backup folder where latest version is stored" + seperator + "folder name within backup\n";
+		textToWrite += "name of matching item" + seperator + "type" + seperator + "last modified" + seperator + "backupfolder where file was found for the last time" + seperator + "path to backup folder where latest version is stored" + seperator + "folder name within backup" + seperator + "link naar verkenner\n";
 		for (Map.Entry<String, String> entry : results.entrySet()) {
             
 			// first determine if it's a file or a folder by checking and removing the last part of the key
@@ -152,13 +154,23 @@ public class Search implements Runnable {
 			
 			// SIXTH COLUMN - folder name within backup
 			// now add the full path, if it's a file, then just the folder, not the filename
+			String foldernameString = "";
 			if (itsafile) {
 				if (subFolderWithItem.getParent() != null) {
+					foldernameString = subFolderWithItem.getParent().toString();
 					textToWrite += subFolderWithItem.getParent().toString();
 				} // else we write nothing because that would mean it's a file in the root folder, getparent is null, so we just don't write anything
 			} else {
+				foldernameString = subFolderWithItem.toString();
 				textToWrite += subFolderWithItem.toString();
 			}
+			
+			textToWrite += seperator;
+			//uiparam.getSourceTextFieldTextString();
+			//textToWrite += "=\"=HYPERLINK(\\\"" + uiparam.getSourceTextFieldTextString() + "\\\";\\\"" + foldernameString + "\")\"";
+
+			textToWrite += "=HYPERLINK(\"" + uiparam.getSourceTextFieldTextString() + "\\" + foldernameString + "\";\"" + foldernameString + "\")";
+			// link naar folder in verkenner
 			
 			
 			// add a newline
