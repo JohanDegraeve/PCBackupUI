@@ -21,6 +21,7 @@ package utilities;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -56,7 +57,7 @@ public class FileAndFolderUtilities {
      * @param addpathlength for testing only
      * @throws IOException
      */
-    public static AFileOrAFolder createAFileOrAFolder(Path folderOrStringPath, String backupFolderName, List<String> excludefilelist, List<String> excludedpathlist, boolean addpathlength, ProcessText processText) throws IOException {
+    public static AFileOrAFolder createAFileOrAFolder(Path folderOrStringPath, String backupFolderName, List<String> excludefilelist, List<String> excludedpathlist, boolean addpathlength, ProcessText processText, CommandLineArguments commandLineArguments) throws IOException {
 
     	String fileOrFolderNameWithoutFullPath = folderOrStringPath.getFileName().toString();
 
@@ -96,7 +97,7 @@ public class FileAndFolderUtilities {
                 		
                 	}
                 	
-                	returnValue.addFileOrFolder(createAFileOrAFolder(path, backupFolderName, excludefilelist, excludedpathlist, addpathlength, processText));
+                	returnValue.addFileOrFolder(createAFileOrAFolder(path, backupFolderName, excludefilelist, excludedpathlist, addpathlength, processText, commandLineArguments));
                 		
                 }
                 
@@ -109,8 +110,14 @@ public class FileAndFolderUtilities {
             return returnValue;
             
     	} else {
+    		long lastModifiedTimeStamp = 0L;
+    		try {
+    			lastModifiedTimeStamp = Files.getLastModifiedTime(folderOrStringPath).toMillis();
+    		} catch (FileSystemException e) {
+    			commandLineArguments.processText.process("Error , could not read timestamp of " + fileOrFolderNameWithoutFullPath + ". Setting timestamp to 1 millisecond");
+			}
     		
-    		return new AFile(fileOrFolderNameWithoutFullPath, Files.getLastModifiedTime(folderOrStringPath).toMillis(), backupFolderName); 
+    		return new AFile(fileOrFolderNameWithoutFullPath, lastModifiedTimeStamp, backupFolderName); 
 
     	}
     
@@ -258,6 +265,9 @@ public class FileAndFolderUtilities {
             	}
             	
                 // Update destFile with the new timestamp
+            	if (sourceFile.getts() == 0L) {
+            		commandLineArguments.processText.process("Error found file with timestamp 0:  " + sourceFile.getName());
+            	}
                 destFile.setts(sourceFile.getts());
                 commandLineArguments.processText.process("   Copying updated file " + OtherUtilities.concatenateStrings(OtherUtilities.addString(subfolders, sourceFile.getName())) + additionalLogTextString);
                 
@@ -271,7 +281,7 @@ public class FileAndFolderUtilities {
 					e.printStackTrace();
 					commandLineArguments.processText.process("Exception in compareAndUpdateFiles(AFile,AFile) while creating the directory " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders).toString());
 					commandLineArguments.processText.process(e.toString());
-		            Thread.currentThread().interrupt();return;
+		            //Thread.currentThread().interrupt();return;
 				}
                 
                 try {
@@ -286,7 +296,7 @@ public class FileAndFolderUtilities {
 					e.printStackTrace();
 					commandLineArguments.processText.process("Exception in compareAndUpdateFiles(AFile,AFile) while copying a file from " + PathUtilities.concatenatePaths(sourceFolderPath, subfolders).toString() + " to " + PathUtilities.concatenatePaths(destBackupFolderPath, subfolders));
 					commandLineArguments.processText.process(e.toString());
-		            Thread.currentThread().interrupt();return;
+		            //Thread.currentThread().interrupt();return;
 				}
                 
             } 

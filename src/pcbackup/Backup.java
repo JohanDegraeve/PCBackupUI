@@ -133,6 +133,18 @@ public class Backup implements Runnable {
                 		}
                 	} else {
                 		// check if folder is in excludedPaths
+                	
+                		/*String pathString = path.getFileName().toString();
+                		if (!pathString.contains("XDrive - Werking")) {
+                			continue;
+                		}
+                		if (pathString.contains("XDrive - Werking_2021-2025")) {
+                			continue;
+                		}
+                		if (pathString.contains("XDrive Archieven - Documents")) {
+                			continue;
+                		}*/
+                		
                 		for (String excludedPath : commandLineArguments.excludedPaths) {
                 			if (path.getFileName().toString().trim().equals(excludedPath.trim())) {
                 				commandLineArguments.processText.process("      Excluding folder '" + excludedPath + "' because " + excludedPath + " is in the file excludedpathlist");
@@ -146,7 +158,7 @@ public class Backup implements Runnable {
                 		commandLineArguments.processText.process("   Reading files in folder \"" + path.getFileName().toString() + "\"");
                 	}
                 	
-                	listOfFilesAndFoldersInSourceFolder.getFileOrFolderList().add(FileAndFolderUtilities.createAFileOrAFolder(path, backupfoldername, commandLineArguments.excludedFiles, commandLineArguments.excludedPaths, commandLineArguments.addpathlengthforallfolders, commandLineArguments.processText));
+                	listOfFilesAndFoldersInSourceFolder.getFileOrFolderList().add(FileAndFolderUtilities.createAFileOrAFolder(path, backupfoldername, commandLineArguments.excludedFiles, commandLineArguments.excludedPaths, commandLineArguments.addpathlengthforallfolders, commandLineArguments.processText, commandLineArguments));
                 	
                 }
                 

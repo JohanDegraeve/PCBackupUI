@@ -60,7 +60,7 @@ public class AFile extends AFileOrAFolder {
 	 * @param ts the lastmodifedTimeStamp to set
 	 */
 	public void setts(long ts) {
-		if (ts == 0L) {throw new IllegalArgumentException("ts cannot be null");}
+		//if (ts == 0L) {throw new IllegalArgumentException("ts cannot be null");}
 		this.ts = ts;
 	}
 
