@@ -104,22 +104,30 @@ If you want to create a standalone JAR file:
 3. Choose export destination
 4. Click Finish
 
-# Run on Windows or Mac OSX
+# Run Standalone JAR on Windows or macOS
 
-install java JRE
+If you have exported the application as a runnable JAR file, you can run it from the command line.
 
-Additional files are needed for JavaFX, 
-- for Windows: they are here in this repository: https://github.com/JohanDegraeve/PCBackupUI/tree/main/javafx-sdk-22.0.1
-- for Mac: they are here https://gluonhq.com/products/javafx/ in the lib folder
+## Prerequisites
+1. Install Java JRE 21 or higher
+2. Download JavaFX SDK for your operating system from: https://gluonhq.com/products/javafx/
+3. Extract the JavaFX SDK to a location on your system
 
-Download and note the folder (probably Downloads folder)
+## Running the JAR
 
-Add the jars that were downloaded here https://gluonhq.com/products/javafx/, to the lib folder in javafx-sdk-22.0.1
+In terminal or command window, assuming:
+- JavaFX SDK is in `/Users/johandegraeve/Downloads/javafx-sdk-25.0.2/lib` (adjust path as needed)
+- PCBackupUI.jar is in the current folder
 
-In terminal or command window, here assuming javafx sdk libraries are in /Users/johandegraeve/Downloads/javafx-sdk-22.0.1/lib and PCBackupUI.jar is in the current folder
+**macOS/Linux:**
+```bash
+java --module-path /Users/johandegraeve/Downloads/javafx-sdk-25.0.2/lib --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base -jar PCBackupUI.jar
+```
 
-
-java --module-path /Users/johandegraeve/Downloads/javafx-sdk-22.0.1/lib --add-modules javafx.controls,javafx.fxml -jar PCBackupUI.jar
+**Windows:**
+```cmd
+java --module-path "C:\javafx-sdk-25.0.2\lib" --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base -jar PCBackupUI.jar
+```
 
 
 
