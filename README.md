@@ -40,31 +40,69 @@ usage should be clear when opening the UI
 
 For the moment only in Dutch
 
-# Compile
+# Setup in Eclipse
 
-To build in Eclipse, following jar libraries are required (latest versions)
-- Jackson Annotations: https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations
-- Jackson databind: https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
-- Jackson core: https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
+## Required Libraries
 
-Java FX is downloaded here (use the correct operating system and architecture and download the SDK): https://gluonhq.com/products/javafx/
+### Jackson Libraries (version 2.17.0 or higher)
+Download the following JAR files from Maven Central:
+- Jackson Annotations: https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.17.0/jackson-annotations-2.17.0.jar
+- Jackson Databind: https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.17.0/jackson-databind-2.17.0.jar
+- Jackson Core: https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-core/2.17.0/jackson-core-2.17.0.jar
 
-Extract the zip and copy all jars to a lib folder - make sure also the subfolders bin and legal are there (next to lib)
+### JavaFX SDK (version 22 or higher)
+Download JavaFX SDK for your operating system from: https://gluonhq.com/products/javafx/
 
-Add all jars (10 in total) in the (to create after cloning the project) lib folder
+**Important:** Download the correct version for your OS:
+- Windows: Download the Windows SDK
+- macOS: Download the macOS SDK
+- Linux: Download the Linux SDK
 
-Configure the build path and add all jars to "Modulepath", it should look like this
-![image 2](https://github.com/JohanDegraeve/PCBackupUI/assets/13840461/d7d5e15d-ff7a-47b9-9783-b39bb1094741)
+Extract the JavaFX SDK to a location on your system (e.g., `C:\javafx-sdk-25.0.2` on Windows).
 
-Export as jar runnable to PCBackupUI.jar
+## Eclipse Configuration
 
-# Run in Eclipse
+### 1. Add Libraries to Build Path
+1. Right-click on your project → Properties → Java Build Path → Libraries tab
+2. Click "Add External JARs..."
+3. Add the three Jackson JAR files
+4. Add all JavaFX JAR files from the `lib` folder of your JavaFX SDK installation
+5. **Important:** Make sure all JARs are added to the **Classpath**, NOT the Modulepath
+6. Click Apply and Close
 
-Strange but I first need to build the jar, store in somewhere (in my case it's in the Downloads folder) and add following in VM arguments of the run configuration ...
+### 2. Configure JDK
+1. Window → Preferences → Java → Installed JREs
+2. Make sure you have JDK 21 or higher installed and selected
+3. For your project: Right-click → Properties → Java Build Path → Libraries
+4. Edit the JRE System Library to use JDK 21 or higher
 
---module-path /Users/johandegraeve/Downloads/javafx-sdk-22/lib --add-modules javafx.controls,javafx.fxml -jar /Users/johandegraeve/Downloads/PCBackupUI.jar
+### 3. Configure Run Configuration
+1. Right-click on your project → Run As → Run Configurations...
+2. Select your Main class (main.Main)
+3. Go to the **Arguments** tab
+4. In **VM arguments**, add (adjust the path to your JavaFX SDK location):
 
-Then I can run and debug.
+**Windows:**
+```
+--module-path "C:\javafx-sdk-25.0.2\lib" --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base --enable-native-access=javafx.graphics
+```
+
+**macOS/Linux:**
+```
+--module-path "/path/to/javafx-sdk-25.0.2/lib" --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base --enable-native-access=javafx.graphics
+```
+
+5. Click Apply → Run
+
+The application should now start directly from Eclipse without needing to build a JAR first.
+
+## Export as Runnable JAR (Optional)
+
+If you want to create a standalone JAR file:
+1. File → Export → Java → Runnable JAR file
+2. Select your launch configuration
+3. Choose export destination
+4. Click Finish
 
 # Run on Windows or Mac OSX
 
